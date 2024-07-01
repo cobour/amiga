@@ -1,7 +1,6 @@
   section    HydronCode , code
 
   include    "src/globals.i"
-  include    "src/system/custom.i"
 
 ; DONE  all black at beginning
 ; DONE  allblack-copperlist in alloc'd chip mem
@@ -64,7 +63,7 @@ main:
   bsr        disk_begin_io
   tst.l      d0
   bne.s      .error
-  move.l     chip_mem_ptr(pc),a3                 ; TODO: inside framebuffer
+  move.l     chip_mem_ptr(pc),a3                      ; TODO: inside framebuffer
   bsr        disk_read_file_list
   tst.l      d0
   bne.s      .error
@@ -119,11 +118,11 @@ other_mem_ptr:
 ; Includes
 ;
   include    "files_index.i"
-  include    "src/system/exec.asm"
-  include    "src/system/datafiles.asm"
-  include    "src/system/disk.asm"
-  include    "src/system/gfx.asm"
-  include    "src/system/irq.asm"
+  include    "../common/src/system/exec.asm"
+  include    "../common/src/system/datafiles.asm"
+  include    "../common/src/system/disk.asm"
+  include    "../common/src/system/gfx.asm"
+  include    "../common/src/system/irq.asm"
   include    "src/ingame.asm"
-  include    "src/3rdparty/inflate.asm"
-  include    "src/3rdparty/ptplayer.asm"
+  include    "../common/src/3rdparty/inflate.asm"
+  include    "../common/src/3rdparty/ptplayer.asm"

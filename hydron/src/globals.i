@@ -1,8 +1,8 @@
                             ifnd       GLOBALS_I
 GLOBALS_I         equ 1
                             include    "files_index.i"
-                            include    "src/system/custom.i"
-                            include    "src/system/disk.i"
+                            include    "../common/src/system/custom.i"
+                            include    "../common/src/system/disk.i"
 
 ; Set base pointers
 ; sets a4-a6
@@ -34,4 +34,4 @@ c_cm_sizeof:                rs.b       0
 c_om_disk:                  rs.b       disk_sizeof
 c_om_sizeof:                rs.b       0
 
-                            endif                               ; ifnd GLOBALS_I
+                            endif                                         ; ifnd GLOBALS_I
