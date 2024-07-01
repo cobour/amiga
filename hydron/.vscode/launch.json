@@ -1,0 +1,51 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "amiga-assembly",
+            "request": "launch",
+            "name": "Run DEBUG",
+            "stopOnEntry": false,
+            "trace": false,
+            "program": "${workspaceFolder}/uae/dh0/Hydron",
+            "remoteProgram": "SYS:Hydron",
+            "emulatorType": "fs-uae",
+            "emulatorArgs": [
+                "--chip_memory=1024", // 1024 because AmigaDOS is in mem
+                "--slow_memory=1024", // 1024 because AmigaDOS is in mem
+                //"--kickstart_file=path/to/kick.rom",
+                "--hard_drive_0=${workspaceFolder}/uae/dh0",
+                "--floppy_drive_1=${workspaceFolder}/dist/Hydron.adf",
+                "--automatic_input_grab=0",
+                "--joystick_port_1=keyboard",
+                "--amiga_model=A500",
+                "--automatic_input_grab=0",
+                "--video_sync=0",
+                "--fullscreen=0"
+            ],
+            "preLaunchTask": "Build DEBUG"
+        },
+        {
+            "type": "amiga-assembly",
+            "request": "launch",
+            "name": "Run RELEASE",
+            "program": "",
+            "noDebug": true,
+            "emulatorType": "fs-uae",
+            "emulatorArgs": [
+                "--chip_memory=512",
+                "--slow_memory=512",
+                "--floppy_drive_0=${workspaceFolder}/dist/Hydron.adf",
+                "--joystick_port_1=keyboard",
+                "--amiga_model=A500",
+                "--automatic_input_grab=0",
+                "--video_sync=0",
+                "--fullscreen=0"
+            ],
+            "preLaunchTask": "Create ADF"
+        }
+    ]
+}

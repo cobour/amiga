@@ -1,0 +1,47 @@
+# source, temp and target folders are relative to folder of this config file
+sourceFolder: ./
+tempFolder: ./converted
+targetFolder: ../uae/dh0
+# index filenames are relative to folder of this config file
+indexFilename: ../files_index.i
+asmIndexFilename: ../asm_files_index.i
+# filenames of source files are relative to sourceFolder
+targetFiles:
+  - filename: C000
+    memoryType: OTHER
+    doZip: false
+    codeFile: true
+    sources:
+      - filename: ../hydron.asm
+        id: HYDR
+
+  - filename: F000
+    memoryType: CHIP
+    sources:
+      - filename: gfx/test_ehb_256x256.iff
+        id: TSTB
+        withMask: false
+      - filename: music/revenge_of_earth.mod
+        id: MS01
+      - filename: sfx/enter.wav
+        id: SFX1
+        volume: 64
+        priority: 64
+
+  - filename: F001
+    memoryType: OTHER
+    relatedFile: F000
+    sources:
+      - filename: tiled/level_1.tmx
+        id: LVLO
+        reversedVertically: true
+      - filename: gfx/background_tiles.iff
+        id: LVLT
+        withMask: false
+        flattenedTileFormat: 16x16
+        flattenedReducedTileCount: 64
+      - filename: gfx/background_tiles.iff
+        id: COLS
+        colorsOnly: true
+      - filename: music/revenge_of_earth.mod
+        id: MP01

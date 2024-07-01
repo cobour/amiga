@@ -1,0 +1,47 @@
+{
+    "Map/SizeTest": {
+        "height": 4300,
+        "width": 2
+    },
+    "activeFile": "level_1.tmx",
+    "expandedProjectPaths": [
+        "."
+    ],
+    "fileStates": {
+        "background_tiles_tileset.tsx": {
+            "dynamicWrapping": true,
+            "scaleInDock": 2,
+            "scaleInEditor": 1
+        },
+        "level_1.tmx": {
+            "scale": 3,
+            "selectedLayer": 0,
+            "viewCenter": {
+                "x": 120.33333333333331,
+                "y": 817.6666666666666
+            }
+        }
+    },
+    "last.externalTilesetPath": "/Users/frank/Development/projects/hydron/data/tiled",
+    "last.imagePath": "/Users/frank/Development/projects/hydron/data/gfx",
+    "map.height": 48,
+    "map.lastUsedFormat": "tmx",
+    "map.renderOrder": "0",
+    "map.tileHeight": 16,
+    "map.tileWidth": 16,
+    "map.width": 16,
+    "openFiles": [
+        "background_tiles_tileset.tsx",
+        "level_1.tmx"
+    ],
+    "project": "Hydron.tiled-project",
+    "recentFiles": [
+        "background_tiles_tileset.tsx",
+        "level_1.tmx"
+    ],
+    "tileset.lastUsedFormat": "tsx",
+    "tileset.tileSize": {
+        "height": 16,
+        "width": 16
+    }
+}

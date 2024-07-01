@@ -1,0 +1,9 @@
+*.bin
+*.raw
+*.ods#
+*.gz
+files_index.i
+asm_files_index.i
+*.dat
+.DS_Store
+**/.DS_Store
