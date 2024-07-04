@@ -1,0 +1,72 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "Build DEBUG",
+			"type": "amigaassembly",
+			"vasm": {
+				"enabled": true,
+				"command": "${config:amiga-assembly.binDir}/vasmm68k_mot",
+				"args": [
+					"-m68000",
+					"-Fhunk",
+					"-linedebug",
+					"-DDEBUG"
+				]
+			},
+			"vlink": {
+				"enabled": true,
+				"command": "${config:amiga-assembly.binDir}/vlink",
+				"includes": "*.{s,S,asm,ASM}",
+				"excludes": "",
+				"createStartupSequence": true,
+				"createExeFileParentDir": true,
+				"exefilename": "../uae/dh0/A100",
+				"entrypoint": "a100.asm",
+				"args": [
+					"-bamigahunk",
+					"-Bstatic"
+				]
+			},
+			"problemMatcher": [],
+			"group": {
+				"kind": "build",
+				"isDefault": true
+			},
+			"dependsOn": [
+				"Create ADF"
+			]
+		},
+		{
+			"label": "Create ADF",
+			"type": "amigaassembly",
+			"adfgenerator": {
+				"ADFToolsParentDir": "${config:amiga-assembly.binDir}",
+				"bootBlockSourceFile": "src/system/bootblock.asm",
+				"sourceRootDir": "uae/dh0",
+				"outputADFFile": "./dist/A100.adf",
+				"includes": "**/*.dat",
+				"excludes": "**/.*",
+				"adfCreateOptions": [
+					"--label=A100"
+				]
+			},
+			"problemMatcher": [],
+			"dependsOn": [
+				"Run data-tool"
+			]
+		},
+		{
+			"label": "Run data-tool",
+			"type": "shell",
+			"command": "../gradlew run --args='config.file=../../../a100/data/data_files_config.yml vasm=/Users/frank/.vscode/extensions/prb28.amiga-assembly-1.8.10/resources/bin/darwin/vasmm68k_mot'",
+			"windows": {
+				"command": "..\\gradlew.bat run --args='config.file=..\\..\\..\\a100\\data\\data_files_config.yml vasm=C:\\Users\\frank\\.vscode\\extensions\\prb28.amiga-assembly-1.8.10\\resources\\bin\\win32\\vasmm68k_mot.exe'",
+			},
+			"options": {
+				"cwd": "../common/data_tool/app/"
+			},
+			"problemMatcher": []
+		}
+	]
+}
