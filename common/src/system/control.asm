@@ -1,11 +1,12 @@
-
-  ifnd       GFX_ASM
-GFX_ASM       equ 1
+  ifnd       CONTROL_ASM
+CONTROL_ASM   equ 1
 
   include    "../common/src/system/custom.i"
 
+; vectors
 Level3Handler equ $6c
 
+; graphics.library
 CurrentView   equ $22
 CurrentCopper equ $26
 LoadView      equ -$de
@@ -40,44 +41,44 @@ LoadView      equ -$de
   endm
 
 ; Saves system state for later restoring
-gfx_save_orig_system_state:
+ctrl_save_orig_system_state:
   movem.l    d0-d7/a0-a6,-(sp)
 
   move.l     ExecBase,a6
-  lea        gfx_name(pc),a1
+  lea        graphics_name(pc),a1
   moveq.l    #0,d0
   jsr        OpenLibrary(a6)
-  lea.l      gfx_base(pc),a0
+  lea.l      graphics_base(pc),a0
   move.l     d0,(a0)
 
   lea.l      CustomBase,a6
 
   move.w     DMACONR(a6),d0
   or.w       #$8000,d0
-  lea.l      gfx_cur_dmacon(pc),a0
+  lea.l      ctrl_cur_dmacon(pc),a0
   move.w     d0,(a0)
 
   move.w     INTENAR(a6),d0
   or.w       #$8000,d0
-  lea.l      gfx_cur_intena(pc),a0
+  lea.l      ctrl_cur_intena(pc),a0
   move.w     d0,(a0)
 
   move.w     INTREQR(a6),d0
   or.w       #$8000,d0
-  lea.l      gfx_cur_intreq(pc),a0
+  lea.l      ctrl_cur_intreq(pc),a0
   move.w     d0,(a0)
 
   WAITVB2
 
-  move.l     gfx_base(pc),a6
+  move.l     graphics_base(pc),a6
 
-  lea.l      gfx_cur_view(pc),a0
+  lea.l      ctrl_cur_view(pc),a0
   move.l     CurrentView(a6),(a0)
 
-  lea.l      gfx_cur_copper(pc),a0
+  lea.l      ctrl_cur_copper(pc),a0
   move.l     CurrentCopper(a6),(a0)
 
-  lea.l      gfx_cur_lvl3hdl(pc),a0
+  lea.l      ctrl_cur_lvl3hdl(pc),a0
   move.l     Level3Handler,(a0)
 
   sub.l      a1,a1
@@ -87,20 +88,20 @@ gfx_save_orig_system_state:
   rts
 
 ; Restores screen at end of program
-gfx_restore_screen:
+ctrl_restore_screen:
   movem.l    d0-d7/a0-a6,-(sp)
   lea.l      CustomBase,a6
-  move.l     gfx_cur_copper(pc),COP1LC(a6)
+  move.l     ctrl_cur_copper(pc),COP1LC(a6)
 
-  move.l     gfx_base(pc),a6
-  move.l     gfx_cur_view(pc),a1
+  move.l     graphics_base(pc),a6
+  move.l     ctrl_cur_view(pc),a1
   jsr        LoadView(a6)
 
   lea.l      CustomBase,a6
   WAITVB2
 
   move.l     ExecBase,a6
-  move.l     gfx_base(pc),a1
+  move.l     graphics_base(pc),a1
   jsr        CloseLibrary(a6)
 
   movem.l    (sp)+,d0-d7/a0-a6
@@ -109,7 +110,7 @@ gfx_restore_screen:
 ; Sets black screen
 ; in:
 ;   a0 - Pointer to 12 bytes of chip mem to store the copperlist
-gfx_set_black_screen:
+ctrl_set_black_screen:
   movem.l    a1/a6,-(sp)
   move.l     a0,a1
   move.w     #BPLCON0,(a1)+
@@ -124,29 +125,82 @@ gfx_set_black_screen:
   movem.l    (sp)+,a1/a6
   rts
 
-gfx_name:
+; Takes full control of system
+ctrl_take_system:
+  movem.l    d0-d7/a0-a6,-(sp)
+  lea.l      CustomBase,a6
+
+  WAITVB2
+
+; set our dma and irq settings
+  move.w     #%1000010111100000,DMACON(a6)
+  move.w     #%0000000000011111,DMACON(a6)
+  move.w     #%0111111111111111,INTENA(a6)
+
+  WAITVB2
+
+  sub.l      a0,a0
+  moveq.l    #1,d0
+  bsr        _mt_install_cia
+
+  movem.l    (sp)+,d0-d7/a0-a6
+  rts
+
+; Gives control back to system
+ctrl_free_system:
+  movem.l    d0-d7/a0-a6,-(sp)
+  lea.l      CustomBase,a6
+  bsr        _mt_remove_cia
+
+  move.w     #$7fff,DMACON(a6)
+  move.w     ctrl_cur_dmacon(pc),DMACON(a6)
+  move.w     #$7fff,INTENA(a6)
+  move.l     ctrl_cur_lvl3hdl(pc),Level3Handler
+  move.w     ctrl_cur_intena(pc),INTENA(a6)
+  move.w     #$7fff,INTREQ(a6)
+  move.w     ctrl_cur_intreq(pc),INTREQ(a6)
+
+  movem.l    (sp)+,d0-d7/a0-a6
+  rts
+
+; Sets level 3 IRQ handler
+; in:
+;   a0 - points to handler code
+ctrl_set_handler:
+  move.l     a6,-(sp)
+  lea.l      CustomBase,a6
+
+  move.w     #%0111111111111111,INTENA(a6)         ; disable ALL IRQ's
+  move.l     a0,Level3Handler
+  move.w     #%1110000000010000,INTENA(a6)         ; Copper-IRQ (for our code) and External-IRQ (for ptplayer) only
+
+  move.l     (sp)+,a6
+  rts
+
+graphics_name:
   dc.b       "graphics.library",0
   even
 
-gfx_base:
+graphics_base:
   dc.l       0
 
-gfx_cur_view:
+ctrl_cur_view:
   dc.l       0
 
-gfx_cur_copper:
+ctrl_cur_copper:
   dc.l       0
 
-gfx_cur_dmacon:
+ctrl_cur_dmacon:
   dc.w       0
 
-gfx_cur_intena:
+ctrl_cur_intena:
   dc.w       0
 
-gfx_cur_intreq:
+ctrl_cur_intreq:
   dc.w       0
 
-gfx_cur_lvl3hdl:
+ctrl_cur_lvl3hdl:
   dc.l       0
 
-  endif                                       ; ifnd GFX_ASM
+  endif                                            ; ifnd CONTROL_ASM
+ 

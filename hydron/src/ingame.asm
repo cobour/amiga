@@ -25,9 +25,9 @@ ig_start:
 
   SETPTRS
   bsr        .init_copper_list
-  bsr        irq_take_system
+  bsr        ctrl_take_system
   lea.l      lvl3_irq_handler(pc),a0
-  bsr        irq_set_handler
+  bsr        ctrl_set_handler
   bsr        .set_copper_list
 
   move.l     #"MS01",d0

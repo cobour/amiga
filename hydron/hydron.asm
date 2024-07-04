@@ -80,17 +80,17 @@ main:
   move.l     a4,(a0)
   endif
 
-  bsr        gfx_save_orig_system_state
+  bsr        ctrl_save_orig_system_state
   move.l     chip_mem_ptr(pc),a0
   lea.l      c_cm_all_black_copperlist(a0),a0
-  bsr        gfx_set_black_screen
+  bsr        ctrl_set_black_screen
 
   move.l     other_mem_ptr(pc),a4
   move.l     chip_mem_ptr(pc),a5
   bsr        ig_start
-  bsr        irq_free_system
+  bsr        ctrl_free_system
 
-  bsr        gfx_restore_screen
+  bsr        ctrl_restore_screen
 
   ifd        DEBUG
   move.l     chip_mem_ptr(pc),d5
@@ -121,8 +121,7 @@ other_mem_ptr:
   include    "../common/src/system/exec.asm"
   include    "../common/src/system/datafiles.asm"
   include    "../common/src/system/disk.asm"
-  include    "../common/src/system/gfx.asm"
-  include    "../common/src/system/irq.asm"
+  include    "../common/src/system/control.asm"
   include    "src/ingame.asm"
   include    "../common/src/3rdparty/inflate.asm"
   include    "../common/src/3rdparty/ptplayer.asm"

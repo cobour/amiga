@@ -7,3 +7,4 @@ asm_files_index.i
 *.dat
 .DS_Store
 **/.DS_Store
+*.tiled-session
