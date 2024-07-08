@@ -28,6 +28,7 @@ ig_start:
   bsr        ctrl_take_system
   lea.l      lvl3_irq_handler(pc),a0
   bsr        ctrl_set_handler
+  bsr        keyboard_init
   bsr        .set_copper_list
 
   move.l     #"MS01",d0
@@ -53,6 +54,7 @@ ig_start:
   bne.s      .0
 
   bsr        _mt_end
+  bsr        keyboard_cleanup
 
 .error:
   rts
@@ -176,6 +178,22 @@ ig_start:
 
 lvl3_irq_handler:
   movem.l    d0-d7/a0-a6,-(sp)
+
+  ; read all available key codes
+.1:
+  bsr        keyboard_get_key
+  ; play sample when S is pressed
+  cmp.b      #$21,d0
+  bne.s      .2
+
+  move.l     #"SFX1",d0
+  bsr        datafiles_get_pointer
+  lea.l      df_idx_metadata(a0),a0
+  bsr        _mt_playfx
+
+.2:
+  tst.b      d0
+  bge.s      .1
 
   ; clear Copper-IRQ-Bit
   move.w     #%0000000000010000,INTREQ(a6)
