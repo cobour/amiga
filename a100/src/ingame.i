@@ -3,7 +3,7 @@ INGAME_I           equ 1
                       include    "src/globals.i"
 
 ; Ingame screen definitions
-IgScreenBitPlanes  equ 6
+IgScreenBitPlanes  equ 5
 IgScreenWidth      equ 256
 IgScreenWidthBytes equ (IgScreenWidth/8)
 IgScreenHeight     equ 256
