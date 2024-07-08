@@ -4,6 +4,7 @@ CONTROL_ASM   equ 1
   include    "../common/src/system/custom.i"
 
 ; vectors
+Level2Handler equ $68
 Level3Handler equ $6c
 
 ; graphics.library
@@ -77,6 +78,9 @@ ctrl_save_orig_system_state:
 
   lea.l      ctrl_cur_copper(pc),a0
   move.l     CurrentCopper(a6),(a0)
+
+  lea.l      ctrl_cur_lvl2hdl(pc),a0
+  move.l     Level2Handler,(a0)
 
   lea.l      ctrl_cur_lvl3hdl(pc),a0
   move.l     Level3Handler,(a0)
@@ -152,12 +156,15 @@ ctrl_free_system:
   lea.l      CustomBase,a6
   bsr        _mt_remove_cia
 
-  move.w     #$7fff,DMACON(a6)
+  move.w     #$7fff,d0
+  move.w     d0,DMACON(a6)
+  move.w     d0,INTENA(a6)
+  move.w     d0,INTREQ(a6)
+
   move.w     ctrl_cur_dmacon(pc),DMACON(a6)
-  move.w     #$7fff,INTENA(a6)
+  move.l     ctrl_cur_lvl2hdl(pc),Level2Handler
   move.l     ctrl_cur_lvl3hdl(pc),Level3Handler
   move.w     ctrl_cur_intena(pc),INTENA(a6)
-  move.w     #$7fff,INTREQ(a6)
   move.w     ctrl_cur_intreq(pc),INTREQ(a6)
 
   movem.l    (sp)+,d0-d7/a0-a6
@@ -198,6 +205,9 @@ ctrl_cur_intena:
 
 ctrl_cur_intreq:
   dc.w       0
+
+ctrl_cur_lvl2hdl:
+  dc.l       0
 
 ctrl_cur_lvl3hdl:
   dc.l       0
