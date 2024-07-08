@@ -78,6 +78,7 @@ other_mem_ptr:
   include    "../common/src/system/datafiles.asm"
   include    "../common/src/system/disk.asm"
   include    "../common/src/system/control.asm"
+  include    "../common/src/system/keyboard.asm"
   include    "src/ingame.asm"
   include    "../common/src/3rdparty/inflate.asm"
   include    "../common/src/3rdparty/ptplayer.asm"
