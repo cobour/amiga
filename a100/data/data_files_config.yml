@@ -21,6 +21,10 @@ targetFiles:
       - filename: gfx/ingame_screen.iff
         id: TSTB
         withMask: false
+      - filename: gfx/stones_big.iff
+        id: STNB
+      - filename: gfx/stones_small.iff
+        id: STNS
       - filename: music/revenge_of_earth.mod
         id: MS01
       - filename: sfx/enter.wav
@@ -32,12 +36,6 @@ targetFiles:
     memoryType: OTHER
     relatedFile: F000
     sources:
-      - filename: gfx/stones_big.iff
-        id: STNB
-        flattenedTileFormat: 16x16
-      - filename: gfx/stones_small.iff
-        id: STNS
-        flattenedTileFormat: 8x8
       - filename: gfx/ingame_screen.iff
         id: COLS
         colorsOnly: true

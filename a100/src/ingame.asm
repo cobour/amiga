@@ -7,23 +7,10 @@ INGAME_ASM equ 1
 ; a4 - other mem pointer
 ; a5 - chip mem pointer
 ig_start:
-; load and inflate files, TODO: just dummy data
-
-  move.l     #fn_ingame_other,d1
-  move.l     #fn_ingame_chip,d2
-  move.l     chip_mem_ptr(pc),d5
-  add.l      #ig_cm_blockbuffer,d5                                                  ; TODO: inside framebuffer
-  move.l     chip_mem_ptr(pc),d6
-  add.l      #ig_cm_filebuffer,d6                                                   ; TODO: inside framebuffer
-  move.l     other_mem_ptr(pc),a0
-  add.l      #ig_om_datfile,a0
-  move.l     chip_mem_ptr(pc),a1
-  add.l      #ig_cm_datfile,a1
-  bsr        datafiles_load_and_unzip
-  tst.l      d0
-  bne.s      .error
-
+  ; init stuff
+  bsr        .load_and_inflate_files
   SETPTRS
+  bsr        .init_screen_buffers
   bsr        .init_copper_list
   bsr        ctrl_take_system
   lea.l      lvl3_irq_handler(pc),a0
@@ -31,19 +18,19 @@ ig_start:
   bsr        keyboard_init
   bsr        .set_copper_list
 
+  ; init and start music
   move.l     #"MS01",d0
   bsr        datafiles_get_pointer
   move.l     df_idx_ptr_rawdata(a0),a1
   move.l     #"MP01",d0
   bsr        datafiles_get_pointer
   move.l     df_idx_ptr_rawdata(a0),a0
-
   moveq.l    #0,d0
   bsr        _mt_init
-
   lea.l      _mt_Enable(pc),a0
   move.b     #1,(a0)
 
+  ; play sample initially
   move.l     #"SFX1",d0
   bsr        datafiles_get_pointer
   lea.l      df_idx_metadata(a0),a0
@@ -59,6 +46,39 @@ ig_start:
 .error:
   rts
 
+.load_and_inflate_files:
+  move.l     #fn_ingame_other,d1
+  move.l     #fn_ingame_chip,d2
+  move.l     chip_mem_ptr(pc),d5
+  add.l      #ig_cm_screenbuffer,d5
+  move.l     d5,d6
+  add.l      #512,d6
+  move.l     other_mem_ptr(pc),a0
+  add.l      #ig_om_datfile,a0
+  move.l     chip_mem_ptr(pc),a1
+  add.l      #ig_cm_datfile,a1
+  bsr        datafiles_load_and_unzip
+  tst.l      d0
+  bne.s      .error
+  rts
+
+.init_screen_buffers:
+  ; init pointers for both buffers
+  move.l     #"TSTB",d0
+  bsr        datafiles_get_pointer
+  move.l     df_idx_ptr_rawdata(a0),a0
+  lea.l      ig_cm_screenbuffer(a5),a1
+  move.l     a0,ig_om_frontbuffer(a4)
+  move.l     a1,ig_om_backbuffer(a4)
+
+  ; copy screen-image from buffer in loaded file to empty buffer
+  move.w     #((IgScreenWidthBytes*IgScreenHeight*IgScreenBitPlanes)/2)-1,d7
+.isb_loop:
+  move.w     (a0)+,(a1)+
+  dbf        d7,.isb_loop
+
+  rts
+
 .init_copper_list:
 ; copy to chip mem
   move.l     #(ig_cm_cl_sizeof/4)-1,d7
@@ -70,14 +90,9 @@ ig_start:
   dbf        d7,.icl0  
 
 ; set bitplane pointer
-  move.l     #"TSTB",d0
-  bsr        datafiles_get_pointer
-  move.l     df_idx_ptr_rawdata(a0),a0
-  move.l     a0,d0
-
+  move.l     ig_om_frontbuffer(a4),d0
   move.l     chip_mem_ptr(pc),a0
   add.l      #ig_cm_copperlist+ig_cm_cl_bitplanes,a0
-
   moveq.l    #5,d7
 .icl1
   move.w     d0,6(a0)

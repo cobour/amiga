@@ -26,15 +26,16 @@ ig_cm_cl_sizeof:      rs.b       0
                       rsreset
 ig_cm_common:         rs.b       c_cm_sizeof
 ig_cm_copperlist:     rs.b       ig_cm_cl_sizeof
-ig_cm_blockbuffer:    rs.b       512                ; TODO: inside framebuffer
-ig_cm_filebuffer:     rs.b       100000             ; TODO: inside framebuffer
-ig_cm_datfile:        rs.b       0                  ; variable filesizes, therefore this MUST be the last entry in this struct
+ig_cm_screenbuffer:   rs.b       IgScreenWidthBytes*IgScreenHeight*IgScreenBitPlanes    ; double-buffering with this buffer and screen-gfx loaded with file
+ig_cm_datfile:        rs.b       0                                                      ; variable filesizes, therefore this MUST be the last entry in this struct
 ig_cm_sizeof:         rs.b       0
 
 ; Ingame other mem struct
                       rsreset
 ig_om_common:         rs.b       c_om_sizeof
-ig_om_datfile:        rs.b       0                  ; variable filesizes, therefore this MUST be the last entry in this struct
+ig_om_frontbuffer:    rs.l       1                                                      ; points to currently shown buffer
+ig_om_backbuffer:     rs.l       1                                                      ; points to buffer that is currently drawn to
+ig_om_datfile:        rs.b       0                                                      ; variable filesizes, therefore this MUST be the last entry in this struct
 ig_om_sizeof:         rs.b       0
 
-                      endif                         ; ifnd INGAME_I
+                      endif                                                             ; ifnd INGAME_I
