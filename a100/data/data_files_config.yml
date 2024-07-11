@@ -7,6 +7,8 @@ indexFilename: ../files_index.i
 asmIndexFilename: ../asm_files_index.i
 # filenames of source files are relative to sourceFolder
 targetFiles:
+
+  # main code file
   - filename: C000
     memoryType: OTHER
     doZip: false
@@ -15,11 +17,12 @@ targetFiles:
       - filename: ../a100.asm
         id: A100
 
+  # ingame chip
   - filename: F000
     memoryType: CHIP
     sources:
       - filename: gfx/ingame_screen.iff
-        id: TSTB
+        id: SCRN
         withMask: false
       - filename: gfx/stones_big.iff
         id: STNB
@@ -32,6 +35,7 @@ targetFiles:
         volume: 64
         priority: 64
 
+  # ingame other
   - filename: F001
     memoryType: OTHER
     relatedFile: F000

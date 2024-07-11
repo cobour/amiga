@@ -64,7 +64,7 @@ ig_start:
 
 .init_screen_buffers:
   ; init pointers for both buffers
-  move.l     #"TSTB",d0
+  move.l     #"SCRN",d0
   bsr        datafiles_get_pointer
   move.l     df_idx_ptr_rawdata(a0),a0
   lea.l      ig_cm_screenbuffer(a5),a1
