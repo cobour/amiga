@@ -24,7 +24,7 @@ datafiles_load_and_unzip:
   move.l     d1,d4
   move.l     d6,a2
   move.l     d5,a3
-  move.l     other_mem_ptr(pc),a4
+  move.l     disk_struct_ptr(pc),a4
   bsr        disk_read_file
   tst.l      d0
   bne.s      .error
@@ -38,7 +38,7 @@ datafiles_load_and_unzip:
   move.l     d2,d4
   move.l     d6,a2
   move.l     d5,a3
-  move.l     other_mem_ptr(pc),a4
+  move.l     disk_struct_ptr(pc),a4
   bsr        disk_read_file
   tst.l      d0
   bne.s      .error
@@ -49,7 +49,7 @@ datafiles_load_and_unzip:
   bsr        inflate
 
   ; cleanup
-  move.l     other_mem_ptr(pc),a4
+  move.l     disk_struct_ptr(pc),a4
   bsr        disk_end_io
   tst.l      d0
   bne.s      .error
@@ -164,6 +164,9 @@ datafiles_get_pointer:
   rts
 
 datafiles_index:
+  dc.l       0
+
+disk_struct_ptr:
   dc.l       0
 
   endif                                                            ; ifnd DATAFILES_ASM
