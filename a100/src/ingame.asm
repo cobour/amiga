@@ -30,12 +30,6 @@ ig_start:
   lea.l      _mt_Enable(pc),a0
   move.b     #1,(a0)
 
-  ; play sample initially
-  move.l     #"SFX1",d0
-  bsr        datafiles_get_pointer
-  lea.l      df_idx_metadata(a0),a0
-  bsr        _mt_playfx
-
 .0:
   btst       #6,$bfe001
   bne.s      .0
