@@ -6,7 +6,7 @@ main:
 
   ifd        DEBUG
   ; allocate mem
-  moveq.l    #1,d0
+  moveq.l    #MemScheme,d0
   bsr        exec_alloc_mem
   tst.l      d0
   bne.s      .error

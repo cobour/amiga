@@ -12,6 +12,9 @@ SETPTRS                     macro
                             move.l     other_mem_ptr(pc),a4
                             endm
 
+; Select Memory Scheme
+MemScheme         equ Mem1MB
+
 ; *******************************
 ; list of all filenames
 ; must match these in config-yaml

@@ -19,6 +19,9 @@ KickstartOffsetResetFunc equ -$14
 MEMF_CHIP                equ $2
 MEMF_CLEAR               equ $10000
 
+Mem512K                  equ 0
+Mem1MB                   equ 1
+
 ; Memory sizes
 ; When program is loaded from bootblock and Amiga has 512k chip + 512k chip/slow/fast mem, 
 ; then these sizes are allocatable under KickStart 1.3, 2.0 and 3.1
@@ -33,8 +36,8 @@ ChipMemSize512k          equ 453700             ; 1.3: 476000, 2.0: 454900, 3.1:
 ;   d0 - zero = 512k chip only, non-zero = 512k chip and 512k other
 ; out:
 ;   d0 - zero if successfull, non-zero otherwise
-;   a5 - pointer to chip mem var
-;   a4 - pointer to other mem var or zero
+;   a5 - pointer to chip mem block
+;   a4 - pointer to other mem block or zero
 exec_alloc_mem:
   movem.l    d1-d7/a0-a3/a6,-(sp)
 

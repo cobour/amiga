@@ -15,7 +15,7 @@ RELEASE equ 1
   move.l     d0,(a0)
 
 alloc:
-  moveq.l    #1,d0
+  moveq.l    #MemScheme,d0
   bsr        exec_alloc_mem
   tst.l      d0
   bne.s      error
