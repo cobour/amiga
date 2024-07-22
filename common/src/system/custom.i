@@ -34,6 +34,7 @@ BLTAMOD       equ $64
 BLTDMOD       equ $66
 COP1LC        equ $80
 COP2LC        equ $84
+COPJMP1       equ $88
 DIWSTRT       equ $8e
 DIWSTOP       equ $90
 DDFSTRT       equ $92
