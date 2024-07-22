@@ -104,6 +104,7 @@ ig_start:
   add.l      #ig_cm_copperlist,a0
   lea.l      CustomBase,a6
   move.l     a0,COP1LC(a6)
+  move.w     #$0000,COPJMP1(a6)
   rts
 
 .copper_list:
