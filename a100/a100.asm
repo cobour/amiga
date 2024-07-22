@@ -1,7 +1,7 @@
   section    A100Code , code
 
 ;       mem.i that calcs sizes for chip and other mem => use for exec.asm // WATCH OUT FOR FIXME's
-
+;       do not reset when exiting in RELEASE mode => crashes machine after reboot
 
 
   include    "src/globals.i"
