@@ -97,14 +97,10 @@ main:
   bsr        ctrl_restore_screen
 
   ifd        DEBUG
-  move.l     chip_mem_ptr(pc),d5
-  move.l     other_mem_ptr(pc),d6
   bsr        exec_free_mem
   moveq.l    #0,d0
   rts
 .error
-  move.l     chip_mem_ptr(pc),d5
-  move.l     other_mem_ptr(pc),d6
   bsr        exec_free_mem
   moveq.l    #1,d0
   rts
@@ -112,11 +108,6 @@ main:
   ifd        RELEASE
   bsr        exec_reboot
   endif
-
-chip_mem_ptr:
-  dc.l       0
-other_mem_ptr:
-  dc.l       0
 
 ;
 ; Includes

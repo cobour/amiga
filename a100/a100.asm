@@ -1,5 +1,9 @@
   section    A100Code , code
 
+;       mem.i that calcs sizes for chip and other mem => use for exec.asm // WATCH OUT FOR FIXME's
+
+
+
   include    "src/globals.i"
 
 main:
@@ -7,6 +11,8 @@ main:
   ifd        DEBUG
   ; allocate mem
   moveq.l    #MemScheme,d0
+  move.l     #200000,d1                               ; FIXME: value from mem.i
+  move.l     #200000,d2                               ; FIXME: value from mem.i
   bsr        exec_alloc_mem
   tst.l      d0
   bne.s      .error
@@ -53,14 +59,10 @@ main:
   bsr        ctrl_restore_screen
 
   ifd        DEBUG
-  move.l     chip_mem_ptr(pc),d5
-  move.l     other_mem_ptr(pc),d6
   bsr        exec_free_mem
   moveq.l    #0,d0
   rts
 .error
-  move.l     chip_mem_ptr(pc),d5
-  move.l     other_mem_ptr(pc),d6
   bsr        exec_free_mem
   moveq.l    #1,d0
   rts
@@ -68,11 +70,6 @@ main:
   ifd        RELEASE
   bsr        exec_reboot
   endif
-
-chip_mem_ptr:
-  dc.l       0
-other_mem_ptr:
-  dc.l       0
 
 ;
 ; Includes

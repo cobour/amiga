@@ -21,6 +21,7 @@ MEMF_CLEAR               equ $10000
 
 Mem512K                  equ 0
 Mem1MB                   equ 1
+MemCustom                equ 2
 
 ; Memory sizes
 ; When program is loaded from bootblock and Amiga has 512k chip + 512k chip/slow/fast mem, 
@@ -33,7 +34,7 @@ ChipMemSize512k          equ 453700             ; 1.3: 476000, 2.0: 454900, 3.1:
 
 ; Allocates memory
 ; in:
-;   d0 - zero = 512k chip only, non-zero = 512k chip and 512k other
+;   d0 - zero = 512k chip only, 1 = 512k chip and 512k other, 2 = chip-mem size in d1 and other-mem size in d2
 ; out:
 ;   d0 - zero if successfull, non-zero otherwise
 ;   a5 - pointer to chip mem block
@@ -41,12 +42,29 @@ ChipMemSize512k          equ 453700             ; 1.3: 476000, 2.0: 454900, 3.1:
 exec_alloc_mem:
   movem.l    d1-d7/a0-a3/a6,-(sp)
 
-  ; 512k or 1m
+  ; 512k?
   tst.l      d0
   beq.s      .chip_only
 
+  move.l     d1,d5
+  move.l     d2,d6
+
+  ; 1M or custom?
+  moveq.l    #MemCustom,d3
+  cmp.l      d3,d0
+  beq.s      .do_alloc
+  move.l     #ChipMemSize,d5
+  move.l     #OtherMemSize,d6
+
+.do_alloc:
+  ; save sizes
+  lea.l      chip_mem_size(pc),a0
+  move.l     d5,(a0)
+  lea.l      other_mem_size(pc),a0
+  move.l     d6,(a0)
+
   ; alloc chip
-  move.l     #ChipMemSize,d0
+  move.l     d5,d0
   move.l     #MEMF_CHIP,d1                      ; move.l     #MEMF_CHIP|MEMF_CLEAR,d1
   move.l     ExecBase,a6
   jsr        AllocMem(a6)
@@ -55,7 +73,7 @@ exec_alloc_mem:
   move.l     d0,a5
 
   ; alloc other
-  move.l     #OtherMemSize,d0
+  move.l     d6,d0
   moveq.l    #0,d1                              ; move.l     #MEMF_CLEAR,d1
   move.l     ExecBase,a6
   jsr        AllocMem(a6)
@@ -65,6 +83,11 @@ exec_alloc_mem:
 
   bra.s      .exit
 .chip_only:
+  ; save sizes
+  lea.l      chip_mem_size(pc),a0
+  move.l     d5,(a0)
+  lea.l      other_mem_size(pc),a0
+  clr.l      (a0)
 
   ; alloc chip
   move.l     #ChipMemSize512k,d0
@@ -88,24 +111,23 @@ exec_alloc_mem:
   ifd        DEBUG
 
 ; Frees allocated memory blocks
-; in:
-;    d5 - Pointer to chip mem block
-;    d6 - Pointer to other mem block
 exec_free_mem:
   movem.l    d0-d7/a0-a6,-(sp)
 
-  tst.l      d5
+  move.l     chip_mem_ptr(pc),d0
+  tst.l      d0
   beq.s      .no_chip
-  move.l     d5,a1
-  move.l     #ChipMemSize,d0
+  move.l     d0,a1
+  move.l     chip_mem_size(pc),d0
   move.l     ExecBase,a6
   jsr        FreeMem(a6)
 
 .no_chip:
-  tst.l      d6
+  move.l     other_mem_ptr(pc),d0
+  tst.l      d0
   beq.s      .no_other
-  move.l     d6,a1
-  move.l     #OtherMemSize,d0
+  move.l     d0,a1
+  move.l     other_mem_size(pc),d0
   move.l     ExecBase,a6
   jsr        FreeMem(a6)
 
@@ -136,5 +158,15 @@ exec_reboot:
   jmp        (a0)
 
   endif                                         ; ifnd RELEASE
+
+chip_mem_ptr:
+  dc.l       0
+other_mem_ptr:
+  dc.l       0
+
+chip_mem_size:
+  dc.l       0
+other_mem_size:
+  dc.l       0
 
   endif                                         ; ifnd EXEC_ASM

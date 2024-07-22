@@ -13,7 +13,7 @@ SETPTRS                     macro
                             endm
 
 ; Select Memory Scheme
-MemScheme         equ Mem1MB
+MemScheme         equ MemCustom
 
 ; *******************************
 ; list of all filenames

@@ -16,6 +16,8 @@ RELEASE equ 1
 
 alloc:
   moveq.l    #MemScheme,d0
+  move.l     #200000,d1                                 ; FIXME: value from mem.i
+  move.l     #200000,d2                                 ; FIXME: value from mem.i
   bsr        exec_alloc_mem
   tst.l      d0
   bne.s      error
