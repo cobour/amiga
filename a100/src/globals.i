@@ -1,6 +1,6 @@
                             ifnd       GLOBALS_I
 GLOBALS_I         equ 1
-                            include    "files_index.i"
+                            include    "../a100/src/mem.i"
                             include    "../common/src/system/custom.i"
                             include    "../common/src/system/disk.i"
 

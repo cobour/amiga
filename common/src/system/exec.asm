@@ -16,6 +16,7 @@ LibVersion               equ $14
 EndOfKickstartROM        equ $01000000
 KickstartOffsetResetFunc equ -$14
 
+MEMF_ANY                 equ $0
 MEMF_CHIP                equ $2
 MEMF_CLEAR               equ $10000
 
@@ -65,7 +66,7 @@ exec_alloc_mem:
 
   ; alloc chip
   move.l     d5,d0
-  move.l     #MEMF_CHIP,d1                      ; move.l     #MEMF_CHIP|MEMF_CLEAR,d1
+  moveq.l    #MEMF_CHIP,d1                      ; move.l     #MEMF_CHIP|MEMF_CLEAR,d1
   move.l     ExecBase,a6
   jsr        AllocMem(a6)
   tst.l      d0
@@ -74,7 +75,7 @@ exec_alloc_mem:
 
   ; alloc other
   move.l     d6,d0
-  moveq.l    #0,d1                              ; move.l     #MEMF_CLEAR,d1
+  moveq.l    #MEMF_ANY,d1                       ; move.l     #MEMF_CLEAR,d1
   move.l     ExecBase,a6
   jsr        AllocMem(a6)
   tst.l      d0
@@ -91,7 +92,7 @@ exec_alloc_mem:
 
   ; alloc chip
   move.l     #ChipMemSize512k,d0
-  move.l     #MEMF_CHIP,d1                      ; move.l     #MEMF_CHIP|MEMF_CLEAR,d1
+  moveq.l    #MEMF_CHIP,d1                      ; move.l     #MEMF_CHIP|MEMF_CLEAR,d1
   move.l     ExecBase,a6
   jsr        AllocMem(a6)
   tst.l      d0

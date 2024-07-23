@@ -4,9 +4,9 @@
 ; define profile because adf-generator-tool does not support additional assembler options (e.g. -DRELEASE)
 RELEASE equ 1
 
-  dc.b       "DOS",0                                    ; disk type
-  dc.l       0                                          ; checksum
-  dc.l       880                                        ; rootblock
+  dc.b       "DOS",0                                        ; disk type
+  dc.l       0                                              ; checksum
+  dc.l       880                                            ; rootblock
 
   ; set first 4 colors to black
   lea.l      $dff180,a0
@@ -16,8 +16,8 @@ RELEASE equ 1
 
 alloc:
   moveq.l    #MemScheme,d0
-  move.l     #200000,d1                                 ; FIXME: value from mem.i
-  move.l     #200000,d2                                 ; FIXME: value from mem.i
+  move.l     #A100ChipMemSize,d1
+  move.l     #A100OtherMemSize,d2
   bsr        exec_alloc_mem
   tst.l      d0
   bne.s      error
@@ -33,7 +33,7 @@ alloc:
 
   ; calc memory location for code
   move.l     a4,a2
-  add.l      #OtherMemSize-c000_unzipped_filesize,a2
+  add.l      #A100OtherMemSize-c000_unzipped_filesize,a2
 
   ; read code file
   move.l     a5,a3
@@ -55,7 +55,7 @@ error:
   tst.l      d0
   beq.s      dos_lib_not_found
   move.l     d0,a0
-  move.l     22(a0),a0                                  ; DosInit
+  move.l     22(a0),a0                                      ; DosInit
   moveq.l    #0,d0
   rts
 dos_lib_not_found:

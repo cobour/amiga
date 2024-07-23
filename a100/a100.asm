@@ -1,6 +1,6 @@
   section    A100Code , code
 
-;       mem.i that calcs sizes for chip and other mem => use for exec.asm // WATCH OUT FOR FIXME's
+; DONE  mem.i that calcs sizes for chip and other mem => use for exec.asm // WATCH OUT FOR FIXME's
 ;       do not reset when exiting in RELEASE mode => crashes machine after reboot
 
 
@@ -11,8 +11,8 @@ main:
   ifd        DEBUG
   ; allocate mem
   moveq.l    #MemScheme,d0
-  move.l     #200000,d1                               ; FIXME: value from mem.i
-  move.l     #200000,d2                               ; FIXME: value from mem.i
+  move.l     #A100ChipMemSize,d1
+  move.l     #A100OtherMemSize,d2
   bsr        exec_alloc_mem
   tst.l      d0
   bne.s      .error
@@ -27,7 +27,7 @@ main:
   bsr        disk_begin_io
   tst.l      d0
   bne.s      .error
-  move.l     chip_mem_ptr(pc),a3                      ; TODO: inside framebuffer
+  move.l     chip_mem_ptr(pc),a3                      ; at this point in program flow there is nothing in chip mem area, so just use its beginning
   bsr        disk_read_file_list
   tst.l      d0
   bne.s      .error

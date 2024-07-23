@@ -14,8 +14,8 @@
             "remoteProgram": "SYS:A100",
             "emulatorType": "fs-uae",
             "emulatorArgs": [
-                "--chip_memory=1024", // 1024 because AmigaDOS is in mem
-                "--slow_memory=1024", // 1024 because AmigaDOS is in mem
+                "--chip_memory=512",
+                //"--slow_memory=512",
                 //"--kickstart_file=path/to/kick.rom",
                 "--hard_drive_0=${workspaceFolder}/uae/dh0",
                 "--floppy_drive_1=${workspaceFolder}/dist/A100.adf",
@@ -37,7 +37,7 @@
             "emulatorType": "fs-uae",
             "emulatorArgs": [
                 "--chip_memory=512",
-                "--slow_memory=512",
+                //"--slow_memory=512",
                 "--floppy_drive_0=${workspaceFolder}/dist/A100.adf",
                 "--joystick_port_1=keyboard",
                 "--amiga_model=A500",
