@@ -2,6 +2,9 @@
 
   include    "src/globals.i"
 
+;        use id-equs
+;        solve chicken-and-egg-problem with asm_files_index.i and files_index.i
+
 main:
   bsr.s      .init_ram_and_file_list
 
