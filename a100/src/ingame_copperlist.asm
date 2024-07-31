@@ -47,36 +47,36 @@
   dc.w       INTREQ,%1000000000010000
 ; colors
   dc.w       COLOR00,$0000
-  dc.w       COLOR01,$0444
-  dc.w       COLOR02,$0666
-  dc.w       COLOR03,$0888
-  dc.w       COLOR04,$0aaa
-  dc.w       COLOR05,$0ccc
-  dc.w       COLOR06,$0eee
-  dc.w       COLOR07,$0fff
-  dc.w       COLOR08,$0200
-  dc.w       COLOR09,$0400
-  dc.w       COLOR10,$0600
-  dc.w       COLOR11,$0800
-  dc.w       COLOR12,$0a00
-  dc.w       COLOR13,$0c00
-  dc.w       COLOR14,$0e00
-  dc.w       COLOR15,$0f00
-  dc.w       COLOR16,$0020
-  dc.w       COLOR17,$0040
-  dc.w       COLOR18,$0060
-  dc.w       COLOR19,$0080
-  dc.w       COLOR20,$00a0
-  dc.w       COLOR21,$00c0
-  dc.w       COLOR22,$00e0
-  dc.w       COLOR23,$00f0
-  dc.w       COLOR24,$0002
-  dc.w       COLOR25,$0004
-  dc.w       COLOR26,$0006
-  dc.w       COLOR27,$0008
-  dc.w       COLOR28,$000a
-  dc.w       COLOR29,$000c
-  dc.w       COLOR30,$000e
-  dc.w       COLOR31,$000f
+  dc.w       COLOR01,$0000
+  dc.w       COLOR02,$0000
+  dc.w       COLOR03,$0000
+  dc.w       COLOR04,$0000
+  dc.w       COLOR05,$0000
+  dc.w       COLOR06,$0000
+  dc.w       COLOR07,$0000
+  dc.w       COLOR08,$0000
+  dc.w       COLOR09,$0000
+  dc.w       COLOR10,$0000
+  dc.w       COLOR11,$0000
+  dc.w       COLOR12,$0000
+  dc.w       COLOR13,$0000
+  dc.w       COLOR14,$0000
+  dc.w       COLOR15,$0000
+  dc.w       COLOR16,$0000
+  dc.w       COLOR17,$0000
+  dc.w       COLOR18,$0000
+  dc.w       COLOR19,$0000
+  dc.w       COLOR20,$0000
+  dc.w       COLOR21,$0000
+  dc.w       COLOR22,$0000
+  dc.w       COLOR23,$0000
+  dc.w       COLOR24,$0000
+  dc.w       COLOR25,$0000
+  dc.w       COLOR26,$0000
+  dc.w       COLOR27,$0000
+  dc.w       COLOR28,$0000
+  dc.w       COLOR29,$0000
+  dc.w       COLOR30,$0000
+  dc.w       COLOR31,$0000
 ; end
   dc.w       $ffff,$fffe

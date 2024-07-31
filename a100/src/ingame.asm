@@ -47,7 +47,7 @@ ig_start:
 
 .init_screen_buffers:
   ; init pointers for both buffers
-  move.l     #"SCRN",d0
+  move.l     #f000_gfx_ingame_screen,d0
   bsr        datafiles_get_pointer
   move.l     df_idx_ptr_rawdata(a0),a0
   lea.l      ig_cm_screenbuffer(a5),a1
@@ -63,10 +63,11 @@ ig_start:
   rts
 
 .init_copper_list:
-; set bitplane pointer
-  move.l     #"IGCL",d0
+; set bitplane pointers
+  move.l     #f000_src_ingame_copperlist,d0
   bsr        datafiles_get_pointer
   move.l     df_idx_ptr_rawdata(a0),a0
+  move.l     a0,a1
   lea.l      ig_cm_cl_bitplanes(a0),a0
   move.l     ig_om_frontbuffer(a4),d0
   moveq.l    #IgScreenBitPlanes-1,d7
@@ -78,10 +79,25 @@ ig_start:
   add.l      #IgScreenWidthBytes,d0
   addq.l     #8,a0
   dbf        d7,.icl1
+
+; set colors
+  move.l     #f001_gfx_ingame_screen_colors,d0
+  bsr        datafiles_get_pointer
+  lea.l      df_idx_metadata(a0),a2
+  moveq.l    #0,d7
+  move.w     (a2),d7
+  lsr.w      #1,d7
+  subq.w     #1,d7
+  move.l     df_idx_ptr_rawdata(a0),a0
+  lea.l      ig_cm_cl_colors+2(a1),a1
+.icl2:
+  move.w     (a0)+,(a1)
+  addq.l     #4,a1
+  dbf        d7,.icl2
   rts
 
 .set_copper_list
-  move.l     #"IGCL",d0
+  move.l     #f000_src_ingame_copperlist,d0
   bsr        datafiles_get_pointer
   move.l     df_idx_ptr_rawdata(a0),a0
   lea.l      CustomBase,a6
@@ -90,10 +106,10 @@ ig_start:
   rts
 
 .init_music:
-  move.l     #"MS01",d0
+  move.l     #f000_music_revenge_of_earth_samples,d0
   bsr        datafiles_get_pointer
   move.l     df_idx_ptr_rawdata(a0),a1
-  move.l     #"MP01",d0
+  move.l     #f001_music_revenge_of_earth_mod,d0
   bsr        datafiles_get_pointer
   move.l     df_idx_ptr_rawdata(a0),a0
   moveq.l    #0,d0
@@ -112,7 +128,7 @@ lvl3_irq_handler:
   cmp.b      #$21,d0
   bne.s      .2
 
-  move.l     #"SFX1",d0
+  move.l     #f000_sfx_enter,d0
   bsr        datafiles_get_pointer
   lea.l      df_idx_metadata(a0),a0
   bsr        _mt_playfx

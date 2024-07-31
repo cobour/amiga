@@ -58,7 +58,7 @@ class ModSource extends AbstractSource {
 
 	@Override
 	protected String getIdEquLabel() {
-		return super.getIdEquLabel() + (this.getParent().getMemoryType().isChip() ? "_samples" : "");
+		return super.getIdEquLabel() + (this.getParent().getMemoryType().isChip() ? "_samples" : "_mod");
 	}
 
 	private byte[] getAllBytes(Config config) throws IOException, FileNotFoundException {
