@@ -24,10 +24,10 @@ targetFiles:
       - filename: gfx/ingame_screen.iff
         id: SCRN
         withMask: false
-      - filename: gfx/stones_big.iff
-        id: STNB
-      - filename: gfx/stones_small.iff
-        id: STNS
+      - filename: gfx/bricks_big.iff
+        id: BRBG
+      - filename: gfx/bricks_small.iff
+        id: BRSM
       - filename: music/revenge_of_earth.mod
         id: MS01
       - filename: sfx/enter.wav
