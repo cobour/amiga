@@ -17,18 +17,7 @@ ig_start:
   bsr        ctrl_set_handler
   bsr        keyboard_init
   bsr        .set_copper_list
-
-  ; init and start music
-  move.l     #"MS01",d0
-  bsr        datafiles_get_pointer
-  move.l     df_idx_ptr_rawdata(a0),a1
-  move.l     #"MP01",d0
-  bsr        datafiles_get_pointer
-  move.l     df_idx_ptr_rawdata(a0),a0
-  moveq.l    #0,d0
-  bsr        _mt_init
-  lea.l      _mt_Enable(pc),a0
-  move.b     #1,(a0)
+  bsr        .init_music
 
 .0:
   btst       #6,$bfe001
@@ -105,6 +94,19 @@ ig_start:
   lea.l      CustomBase,a6
   move.l     a0,COP1LC(a6)
   move.w     #$0000,COPJMP1(a6)
+  rts
+
+.init_music:
+  move.l     #"MS01",d0
+  bsr        datafiles_get_pointer
+  move.l     df_idx_ptr_rawdata(a0),a1
+  move.l     #"MP01",d0
+  bsr        datafiles_get_pointer
+  move.l     df_idx_ptr_rawdata(a0),a0
+  moveq.l    #0,d0
+  bsr        _mt_init
+  lea.l      _mt_Enable(pc),a0
+  move.b     #1,(a0)
   rts
 
 .copper_list:

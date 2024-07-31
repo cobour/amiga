@@ -2,7 +2,25 @@
 
   include    "src/globals.i"
 
+;       copperlist in data file
+
 main:
+  bsr.s      .init_ram_and_file_list
+
+  bsr        ctrl_save_orig_system_state
+  move.l     chip_mem_ptr(pc),a0
+  lea.l      c_cm_all_black_copperlist(a0),a0
+  bsr        ctrl_set_black_screen
+
+  SETPTRS
+  bsr        ig_start
+  bsr        ctrl_free_system
+
+  bsr        ctrl_restore_screen
+
+  bra.s      .exit_game
+
+.init_ram_and_file_list:
 
   ifd        DEBUG
   ; allocate mem
@@ -12,12 +30,7 @@ main:
   bsr        exec_alloc_mem
   tst.l      d0
   bne.s      .error
-  lea.l      chip_mem_ptr(pc),a0
-  move.l     a5,(a0)
-  lea.l      other_mem_ptr(pc),a0
-  move.l     a4,(a0)
-  lea.l      disk_struct_ptr(pc),a0
-  move.l     a4,(a0)
+  bsr.s      .save_a4_and_a5
   ; read file list from floppy drive
   move.l     disk_struct_ptr(pc),a4
   bsr        disk_begin_io
@@ -34,26 +47,21 @@ main:
   ifd        RELEASE
   ; bootblock allocated memory, pointers in a4 + a5
   ; bootblock already read file list from floppy drive
+  bsr.s      .save_a4_and_a5
+  endif
+
+  rts
+
+.save_a4_and_a5:
   lea.l      chip_mem_ptr(pc),a0
   move.l     a5,(a0)
   lea.l      other_mem_ptr(pc),a0
   move.l     a4,(a0)
   lea.l      disk_struct_ptr(pc),a0
   move.l     a4,(a0)
-  endif
+  rts
 
-  bsr        ctrl_save_orig_system_state
-  move.l     chip_mem_ptr(pc),a0
-  lea.l      c_cm_all_black_copperlist(a0),a0
-  bsr        ctrl_set_black_screen
-
-  move.l     other_mem_ptr(pc),a4
-  move.l     chip_mem_ptr(pc),a5
-  bsr        ig_start
-  bsr        ctrl_free_system
-
-  bsr        ctrl_restore_screen
-
+.exit_game:
   ifd        DEBUG
   bsr        exec_free_mem
   moveq.l    #0,d0
