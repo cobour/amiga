@@ -49,4 +49,6 @@ public interface Source {
 	void writeRawData(Config config, OutputStream data) throws Exception;
 
 	List<IndexEntry> getIndex();
+
+	String getIdEqu();
 }

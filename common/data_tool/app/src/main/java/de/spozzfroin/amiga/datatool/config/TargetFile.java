@@ -9,6 +9,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.List;
+import java.util.stream.Collectors;
 import java.util.zip.GZIPOutputStream;
 
 import de.spozzfroin.amiga.datatool.config.sources.Source;
@@ -116,6 +117,12 @@ public class TargetFile {
 
 	public void writeToIndexFile(PrintWriter writer, boolean codeFiles) throws IOException {
 		writer.println(this.getIdentifier() + "_unzipped_filesize equ " + this.sizeRawDataFile);
+		if (!this.isCodeFile()) {
+			var idEqus = this.sources.stream().map(source -> source.getIdEqu()).collect(Collectors.toList());
+			for (String idEqu : idEqus) {
+				writer.println(this.getIdentifier() + "_" + idEqu);
+			}
+		}
 		writer.flush();
 	}
 

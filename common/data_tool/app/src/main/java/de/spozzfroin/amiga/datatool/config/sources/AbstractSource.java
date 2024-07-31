@@ -43,6 +43,18 @@ abstract class AbstractSource implements Source {
 		this.setId((String) parameter.get("id"));
 	}
 
+	protected String getIdEquLabel() {
+		return this.filename.substring(0, this.filename.lastIndexOf(".")) // no file extension
+				.replaceAll("\\.", "") // no dots
+				.replaceAll("/", "_") // no slashes
+				.replaceAll("^_+", ""); // no leading underscores
+	}
+
+	@Override
+	public String getIdEqu() {
+		return String.format("%s equ \"%s\"", this.getIdEquLabel(), this.id.toString());
+	}
+
 	@Override
 	public String toString() {
 		return String.format("%s - %s", this.id, this.filename);

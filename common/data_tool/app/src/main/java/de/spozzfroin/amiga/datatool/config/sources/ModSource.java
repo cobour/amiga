@@ -56,6 +56,11 @@ class ModSource extends AbstractSource {
 		return Arrays.asList(IndexEntry.create(this.getId(), new byte[0], this));
 	}
 
+	@Override
+	protected String getIdEquLabel() {
+		return super.getIdEquLabel() + (this.getParent().getMemoryType().isChip() ? "_samples" : "");
+	}
+
 	private byte[] getAllBytes(Config config) throws IOException, FileNotFoundException {
 		var fullFilename = config.getSourceFolder() + this.getFilename();
 		Path srcPath = Paths.get(fullFilename);

@@ -147,6 +147,11 @@ class IffSource extends AbstractSource {
 		return Arrays.asList(IndexEntry.create(this.getId(), metadata.toByteArray(), this));
 	}
 
+	@Override
+	protected String getIdEquLabel() {
+		return super.getIdEquLabel() + (this.colorsOnly ? "_colors" : "");
+	}
+
 	private String readChunkID(FileInputStream src) throws IOException {
 		byte[] bytes = new byte[4];
 		src.read(bytes);
