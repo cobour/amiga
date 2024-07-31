@@ -1,16 +1,8 @@
                       ifnd       INGAME_I
-INGAME_I           equ 1
-                      include    "src/globals.i"
+INGAME_I equ 1
 
-; Ingame screen definitions
-IgScreenBitPlanes  equ 5
-IgScreenWidth      equ 256
-IgScreenWidthBytes equ (IgScreenWidth/8)
-IgScreenHeight     equ 256
-IgScreenStartX     equ $a1
-IgScreenStartY     equ $2c
-IgScreenStopX      equ IgScreenStartX+IgScreenWidth
-IgScreenStopY      equ IgScreenStartY+IgScreenHeight
+                      include    "src/globals.i"
+                      include    "src/ingame_screen.i"
 
 ; Ingame copperlist struct
                       rsreset
