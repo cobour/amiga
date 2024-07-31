@@ -9,6 +9,7 @@ public class Config {
 	private String sourceFolder;
 	private String tempFolder;
 	private String targetFolder;
+	private String asmWorkingFolder;
 	private String indexFilename;
 	private String asmIndexFilename;
 
@@ -53,6 +54,14 @@ public class Config {
 
 	void setTargetFolder(String theTargetFolder) {
 		this.targetFolder = theTargetFolder;
+	}
+
+	public String getAsmWorkingFolder() {
+		return this.asmWorkingFolder.endsWith("/") ? this.asmWorkingFolder : this.asmWorkingFolder + "/";
+	}
+
+	void setAsmWorkingFolder(String theAsmWorkingFolder) {
+		this.asmWorkingFolder = theAsmWorkingFolder;
 	}
 
 	public String getIndexFilename() {

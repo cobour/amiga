@@ -1,8 +1,10 @@
 package de.spozzfroin.amiga.datatool.config.sources;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.Arrays;
 import java.util.List;
 
 import de.spozzfroin.amiga.datatool.config.Config;
@@ -51,7 +53,7 @@ class AsmSource extends AbstractSource {
 
 	@Override
 	public List<IndexEntry> getIndex() {
-		throw new UnsupportedOperationException(); // TODO: when including code snippets in dat-files
+		return Arrays.asList(IndexEntry.create(this.getId(), new byte[0], this));
 	}
 
 	private String assemble(Config config) throws IOException {
@@ -59,7 +61,8 @@ class AsmSource extends AbstractSource {
 		var sourceFilename = config.getSourceFolder() + this.getFilename();
 		var objectFilename = sourceFilename.substring(sourceFilename.lastIndexOf("/") + 1).replaceFirst(".asm", ".o");
 		var process = new ProcessBuilder(config.getVasm(), sourceFilename, "-o",
-				config.getTempFolder() + objectFilename, "-m68000", "-Fhunk", "-DRELEASE").inheritIO().start();
+				config.getTempFolder() + objectFilename, "-m68000", "-Fhunk", "-DRELEASE")
+				.directory(new File(config.getAsmWorkingFolder())).inheritIO().start();
 		try {
 			int returnCode = process.waitFor();
 			if (returnCode != 0) {

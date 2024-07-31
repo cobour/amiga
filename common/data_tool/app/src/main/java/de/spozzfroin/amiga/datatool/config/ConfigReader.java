@@ -55,6 +55,9 @@ public class ConfigReader {
 		var targetFolder = (String) elements.get("targetFolder");
 		config.setTargetFolder(targetFolder);
 		//
+		var asmWorkingFolder = (String) elements.get("asmWorkingFolder");
+		config.setAsmWorkingFolder(asmWorkingFolder);
+		//
 		var indexFilename = (String) elements.get("indexFilename");
 		config.setIndexFilename(indexFilename);
 		//

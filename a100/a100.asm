@@ -2,8 +2,6 @@
 
   include    "src/globals.i"
 
-;       copperlist in data file
-
 main:
   bsr.s      .init_ram_and_file_list
 
