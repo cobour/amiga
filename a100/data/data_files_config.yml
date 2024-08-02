@@ -10,8 +10,8 @@ asmIndexFilename: ../asm_files_index.i
 # filenames of source files are relative to sourceFolder
 targetFiles:
 
-  # main code file
   - filename: C000
+    description: main_code_file
     memoryType: OTHER
     doZip: false
     codeFile: true
@@ -19,8 +19,8 @@ targetFiles:
       - filename: ../a100.asm
         id: A100
 
-  # ingame chip
   - filename: F000
+    description: ingame_chip
     memoryType: CHIP
     sources:
       - filename: gfx/ingame_screen.iff
@@ -39,8 +39,8 @@ targetFiles:
       - filename: ../src/ingame_copperlist.asm
         id: IGCL
 
-  # ingame other
   - filename: F001
+    description: ingame_other
     memoryType: OTHER
     relatedFile: F000
     sources:

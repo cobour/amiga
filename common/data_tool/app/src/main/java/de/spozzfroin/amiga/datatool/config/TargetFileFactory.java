@@ -16,6 +16,9 @@ class TargetFileFactory {
 		var filename = (String) parameter.get("filename");
 		targetFile.setFilename(filename);
 		//
+		var description = (String) parameter.get("description");
+		targetFile.setDescription(description);
+		//
 		var memoryType = MemoryType.valueOf((String) parameter.get("memoryType"));
 		targetFile.setMemoryType(memoryType);
 		//

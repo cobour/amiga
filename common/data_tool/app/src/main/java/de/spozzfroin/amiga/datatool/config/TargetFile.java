@@ -20,6 +20,7 @@ public class TargetFile {
 	private static final SimpleLogger LOG = SimpleLogger.getInstance();
 
 	private String filename;
+	private String description;
 	private MemoryType memoryType;
 	private boolean doZip;
 	private boolean codeFile;
@@ -116,6 +117,7 @@ public class TargetFile {
 	}
 
 	public void writeToIndexFile(PrintWriter writer, boolean codeFiles) throws IOException {
+		writer.println("fn_" + this.description + " equ \"" + this.getIdentifier().toUpperCase() + "\"");
 		writer.println(this.getIdentifier() + "_unzipped_filesize equ " + this.sizeRawDataFile);
 		if (!this.isCodeFile()) {
 			var idEqus = this.sources.stream().map(source -> source.getIdEqu()).collect(Collectors.toList());
@@ -136,6 +138,10 @@ public class TargetFile {
 
 	void setFilename(String theFilename) {
 		this.filename = theFilename;
+	}
+
+	void setDescription(String thedescription) {
+		this.description = thedescription;
 	}
 
 	public MemoryType getMemoryType() {

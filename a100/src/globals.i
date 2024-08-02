@@ -1,5 +1,5 @@
                             ifnd       GLOBALS_I
-GLOBALS_I         equ 1
+GLOBALS_I equ 1
                             include    "../a100/src/mem.i"
                             include    "../common/src/system/custom.i"
                             include    "../common/src/system/disk.i"
@@ -13,15 +13,7 @@ SETPTRS                     macro
                             endm
 
 ; Select Memory Scheme
-MemScheme         equ MemCustom
-
-; *******************************
-; list of all filenames
-; must match these in config-yaml
-; *******************************
-fn_main_code_file equ "C000"
-fn_ingame_chip    equ "F000"
-fn_ingame_other   equ "F001"
+MemScheme equ MemCustom
 
 ; *********************
 ; common memory structs
