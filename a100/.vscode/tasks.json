@@ -66,6 +66,18 @@
 			"options": {
 				"cwd": "../common/data_tool/app/"
 			},
+			"problemMatcher": [],
+			"dependsOn": [
+				"Clean"
+			]
+		},
+		{
+			"label": "Clean",
+			"type": "shell",
+			"command": "./clean.sh",
+			"options": {
+				"cwd": "../a100/"
+			},
 			"problemMatcher": []
 		}
 	]
