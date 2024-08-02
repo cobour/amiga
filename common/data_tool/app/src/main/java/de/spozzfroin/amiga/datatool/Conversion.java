@@ -66,6 +66,7 @@ class Conversion {
 		try (PrintWriter writer = new PrintWriter(Files.newBufferedWriter(indexFile, StandardCharsets.UTF_8))) {
 			writer.println("; generated " + LocalDateTime.now());
 			if (codeFiles) {
+				writer.println("; IMPORTANT: only to be used in bootblock (to avoid chicken-and-egg-problem)");
 				writer.println(" ifnd ASM_FILES_INDEX_I");
 				writer.println("ASM_FILES_INDEX_I equ 1");
 				writer.println(" ");

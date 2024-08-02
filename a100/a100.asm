@@ -2,8 +2,6 @@
 
   include    "src/globals.i"
 
-;        solve chicken-and-egg-problem with asm_files_index.i (mem.i uses asm_files_index.i => so a100.asm cannot assemble)
-
 main:
   bsr.s      .init_ram_and_file_list
 

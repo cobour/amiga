@@ -17,7 +17,7 @@ RELEASE equ 1
 alloc:
   moveq.l    #MemScheme,d0
   move.l     #A100ChipMemSize,d1
-  move.l     #A100OtherMemSize,d2
+  move.l     #A100OtherMemSize+c000_unzipped_filesize,d2
   bsr        exec_alloc_mem
   tst.l      d0
   bne.s      error
@@ -33,7 +33,7 @@ alloc:
 
   ; calc memory location for code
   move.l     a4,a2
-  add.l      #A100OtherMemSize-c000_unzipped_filesize,a2
+  add.l      #A100OtherMemSize,a2
 
   ; read code file
   move.l     a5,a3
