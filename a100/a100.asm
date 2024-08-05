@@ -82,6 +82,6 @@ main:
   include    "../common/src/system/disk.asm"
   include    "../common/src/system/control.asm"
   include    "../common/src/system/keyboard.asm"
-  include    "src/ingame.asm"
+  include    "../a100/src/ingame/ingame.asm"
   include    "../common/src/3rdparty/inflate.asm"
   include    "../common/src/3rdparty/ptplayer.asm"

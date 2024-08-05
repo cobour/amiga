@@ -1,7 +1,7 @@
   ifnd       INGAME_ASM
 INGAME_ASM equ 1
 
-  include    "src/ingame.i"
+  include    "../a100/src/ingame/ingame.i"
 
 ; called by loader when system is not yet taken
 ; a4 - other mem pointer

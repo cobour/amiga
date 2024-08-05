@@ -2,7 +2,7 @@
 INGAME_I equ 1
 
                       include    "src/globals.i"
-                      include    "src/ingame_screen.i"
+                      include    "src/ingame/screen.i"
 
 ; Ingame copperlist struct
                       rsreset

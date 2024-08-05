@@ -1,6 +1,6 @@
 ; DO NOT INCLUDE ANYWHERE IN OTHER ASM-FILES --- file is included in datafile
 
-  include    "ingame_screen.i"
+  include    "../a100/src/ingame/screen.i"
   include    "../common/src/system/custom.i"
 
 ; sprite pointer
