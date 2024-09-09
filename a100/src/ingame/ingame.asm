@@ -10,6 +10,8 @@ ig_start:
   ; init stuff
   bsr        .load_and_inflate_files
   SETPTRS
+  bsr        .init_screen_buffer_pointers
+  bsr        pf_init
   bsr        .init_screen_buffers
   bsr        .init_copper_list
   bsr        ctrl_take_system
@@ -45,7 +47,7 @@ ig_start:
   bne.s      .error
   rts
 
-.init_screen_buffers:
+.init_screen_buffer_pointers:
   ; init pointers for both buffers
   move.l     #f000_gfx_ingame_screen,d0
   bsr        datafiles_get_pointer
@@ -53,13 +55,16 @@ ig_start:
   lea.l      ig_cm_screenbuffer(a5),a1
   move.l     a0,ig_om_frontbuffer(a4)
   move.l     a1,ig_om_backbuffer(a4)
+  rts
 
+.init_screen_buffers:
   ; copy screen-image from buffer in loaded file to empty buffer
+  move.l     ig_om_frontbuffer(a4),a0
+  move.l     ig_om_backbuffer(a4),a1
   move.w     #((IgScreenWidthBytes*IgScreenHeight*IgScreenBitPlanes)/2)-1,d7
 .isb_loop:
   move.w     (a0)+,(a1)+
   dbf        d7,.isb_loop
-
   rts
 
 .init_copper_list:
