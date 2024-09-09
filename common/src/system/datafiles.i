@@ -22,6 +22,7 @@ df_idx_header_sizeof:    rs.b       0
                          rsreset
 df_iff_width:            rs.w       1
 df_iff_height:           rs.w       1
+df_iff_rawsize:          rs.l       1
 df_iff_bitplanes:        rs.b       1
 df_iff_mask:             rs.b       1
 df_iff_sizeof:           rs.b       0

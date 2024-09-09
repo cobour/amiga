@@ -139,8 +139,10 @@ class IffSource extends AbstractSource {
 			BINARY_VALUE_CONVERTER.writeWord(this.colors.size() * 2, metadata);
 		} else {
 			// see datafiles.i df_iff_*
+			var rawsize = (this.width / 8 * this.height * this.bitplanes); // size applies both for gfx and mask data
 			BINARY_VALUE_CONVERTER.writeWord(this.width, metadata);
 			BINARY_VALUE_CONVERTER.writeWord(this.height, metadata);
+			BINARY_VALUE_CONVERTER.writeLong(rawsize, metadata);
 			BINARY_VALUE_CONVERTER.writeByte(this.bitplanes, metadata);
 			BINARY_VALUE_CONVERTER.writeByte(this.withMask ? 1 : 0, metadata);
 		}
