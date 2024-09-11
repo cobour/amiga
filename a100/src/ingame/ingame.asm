@@ -111,10 +111,10 @@ ig_start:
   rts
 
 .init_music:
-  move.l     #f000_music_revenge_of_earth_samples,d0
+  move.l     #f000_music_peace_of_mind_samples,d0
   bsr        datafiles_get_pointer
   move.l     df_idx_ptr_rawdata(a0),a1
-  move.l     #f001_music_revenge_of_earth_mod,d0
+  move.l     #f001_music_peace_of_mind_mod,d0
   bsr        datafiles_get_pointer
   move.l     df_idx_ptr_rawdata(a0),a0
   moveq.l    #0,d0
