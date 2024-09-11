@@ -15,7 +15,7 @@
             "emulatorType": "fs-uae",
             "emulatorArgs": [
                 "--chip_memory=512",
-                //"--slow_memory=512",
+                "--slow_memory=0",
                 //"--kickstart_file=path/to/kick.rom",
                 "--hard_drive_0=${workspaceFolder}/uae/dh0",
                 "--floppy_drive_1=${workspaceFolder}/dist/A100.adf",
@@ -37,7 +37,7 @@
             "emulatorType": "fs-uae",
             "emulatorArgs": [
                 "--chip_memory=512",
-                //"--slow_memory=512",
+                "--slow_memory=0",
                 "--floppy_drive_0=${workspaceFolder}/dist/A100.adf",
                 "--joystick_port_1=keyboard",
                 "--amiga_model=A500",
