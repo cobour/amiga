@@ -30,7 +30,7 @@ targetFiles:
         id: BRBG
       - filename: gfx/bricks_small.iff
         id: BRSM
-      - filename: music/revenge_of_earth.mod
+      - filename: music/peace_of_mind.mod
         id: MS01
       - filename: sfx/enter.wav
         id: SFX1
@@ -47,5 +47,81 @@ targetFiles:
       - filename: gfx/ingame_screen.iff
         id: COLS
         colorsOnly: true
-      - filename: music/revenge_of_earth.mod
+      - filename: music/peace_of_mind.mod
         id: MP01
+      - filename: tiled/brick_3x3_big.tmx
+        id: B01B
+      - filename: tiled/brick_3x3_small.tmx
+        id: B01S
+      - filename: tiled/brick_2x2_big.tmx
+        id: B02B
+      - filename: tiled/brick_2x2_small.tmx
+        id: B02S
+      - filename: tiled/brick_1x1_big.tmx
+        id: B03B
+      - filename: tiled/brick_1x1_small.tmx
+        id: B03S
+      - filename: tiled/brick_5x1_big.tmx
+        id: B04B
+      - filename: tiled/brick_5x1_small.tmx
+        id: B04S
+      - filename: tiled/brick_4x1_big.tmx
+        id: B05B
+      - filename: tiled/brick_4x1_small.tmx
+        id: B05S
+      - filename: tiled/brick_3x1_big.tmx
+        id: B06B
+      - filename: tiled/brick_3x1_small.tmx
+        id: B06S
+      - filename: tiled/brick_2x1_big.tmx
+        id: B07B
+      - filename: tiled/brick_2x1_small.tmx
+        id: B07S
+      - filename: tiled/brick_1x2_big.tmx
+        id: B08B
+      - filename: tiled/brick_1x2_small.tmx
+        id: B08S
+      - filename: tiled/brick_1x3_big.tmx
+        id: B09B
+      - filename: tiled/brick_1x3_small.tmx
+        id: B09S
+      - filename: tiled/brick_1x4_big.tmx
+        id: B10B
+      - filename: tiled/brick_1x4_small.tmx
+        id: B10S
+      - filename: tiled/brick_1x5_big.tmx
+        id: B11B
+      - filename: tiled/brick_1x5_small.tmx
+        id: B11S
+      - filename: tiled/brick_2x2_a1_big.tmx
+        id: B12B
+      - filename: tiled/brick_2x2_a1_small.tmx
+        id: B12S
+      - filename: tiled/brick_2x2_a2_big.tmx
+        id: B13B
+      - filename: tiled/brick_2x2_a2_small.tmx
+        id: B13S
+      - filename: tiled/brick_2x2_a3_big.tmx
+        id: B14B
+      - filename: tiled/brick_2x2_a3_small.tmx
+        id: B14S
+      - filename: tiled/brick_2x2_a4_big.tmx
+        id: B15B
+      - filename: tiled/brick_2x2_a4_small.tmx
+        id: B15S
+      - filename: tiled/brick_3x3_a1_big.tmx
+        id: B16B
+      - filename: tiled/brick_3x3_a1_small.tmx
+        id: B16S
+      - filename: tiled/brick_3x3_a2_big.tmx
+        id: B17B
+      - filename: tiled/brick_3x3_a2_small.tmx
+        id: B17S
+      - filename: tiled/brick_3x3_a3_big.tmx
+        id: B18B
+      - filename: tiled/brick_3x3_a3_small.tmx
+        id: B18S
+      - filename: tiled/brick_3x3_a4_big.tmx
+        id: B19B
+      - filename: tiled/brick_3x3_a4_small.tmx
+        id: B19S
