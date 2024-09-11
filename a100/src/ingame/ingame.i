@@ -27,6 +27,7 @@ ig_cm_sizeof:         rs.b       0
 ig_om_common:         rs.b       c_om_sizeof
 ig_om_frontbuffer:    rs.l       1                                                      ; points to currently shown buffer
 ig_om_backbuffer:     rs.l       1                                                      ; points to buffer that is currently drawn to
+ig_om_playfield:      rs.b       100                                                    ; index array for brick per field
 ig_om_datfile:        rs.b       f001_unzipped_filesize
 ig_om_sizeof:         rs.b       0
 

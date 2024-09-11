@@ -5,9 +5,12 @@ PLAYFIELD_ASM equ 1
   include     "../a100/src/ingame/screen.i"
 
 ; is called before anything is seen on screen
+pf_init:
+  bsr         .init_data
+
 ; fills playfield with empty bricks
 ; draws to frontbuffer (which is copied to backbuffer after init)
-pf_init:
+.init_gfx:
   ; get empty brick - gfx and mask pointers
   move.l      #f000_gfx_bricks_big,d0
   bsr         datafiles_get_pointer
@@ -41,12 +44,12 @@ pf_init:
 
   ; rows loop
   moveq.l     #9,d7
-.rows_loop:
+.ig_rows_loop:
 
   ; columns loop
   moveq.l     #9,d6
   move.l      d2,d3
-.columns_loop:
+.ig_columns_loop:
 
   WAIT_BLT
 
@@ -63,11 +66,22 @@ pf_init:
 
   ; next columns loop iteration
   addq.l      #2,d3
-  dbf         d6,.columns_loop
+  dbf         d6,.ig_columns_loop
 
   ; next rows loop iteration
   add.l       #(IgScreenWidthBytes*IgScreenBitPlanes*16),d2
-  dbf         d7,.rows_loop
+  dbf         d7,.ig_rows_loop
+
+  rts
+
+; initializes data structure
+.init_data:
+  lea.l       ig_om_playfield(a4),a0
+  moveq.l     #0,d0
+  moveq.l     #24,d7                                             ; 100 bytes = 25 longs
+.id_array_loop:
+  move.l      d0,(a0)+
+  dbf         d7,.id_array_loop
 
   rts
 
