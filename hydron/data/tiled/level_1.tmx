@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <map version="1.10" tiledversion="1.10.2" orientation="orthogonal" renderorder="right-up" width="16" height="64" tilewidth="16" tileheight="16" infinite="0" nextlayerid="2" nextobjectid="1">
  <tileset firstgid="1" source="background_tiles_tileset.tsx"/>
- <layer id="1" name="playfield layer" width="16" height="64">
+ <layer id="1" name="tiles layer" width="16" height="64">
   <data encoding="csv">
 64,64,64,64,64,64,64,64,64,64,64,64,64,64,64,64,
 63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,

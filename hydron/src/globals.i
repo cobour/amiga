@@ -1,5 +1,5 @@
                             ifnd       GLOBALS_I
-GLOBALS_I         equ 1
+GLOBALS_I equ 1
                             include    "files_index.i"
                             include    "../common/src/system/custom.i"
                             include    "../common/src/system/disk.i"
@@ -11,14 +11,6 @@ SETPTRS                     macro
                             move.l     chip_mem_ptr(pc),a5
                             move.l     other_mem_ptr(pc),a4
                             endm
-
-; *******************************
-; list of all filenames
-; must match these in config-yaml
-; *******************************
-fn_main_code_file equ "C000"
-fn_ingame_chip    equ "F000"
-fn_ingame_other   equ "F001"
 
 ; *********************
 ; common memory structs

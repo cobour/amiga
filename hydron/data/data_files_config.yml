@@ -2,12 +2,15 @@
 sourceFolder: ./
 tempFolder: ./converted
 targetFolder: ../uae/dh0
+# asmWorkingFolder is relative to amiga/common/data-tool/app folder
+asmWorkingFolder: ../../../a100
 # index filenames are relative to folder of this config file
 indexFilename: ../files_index.i
 asmIndexFilename: ../asm_files_index.i
 # filenames of source files are relative to sourceFolder
 targetFiles:
   - filename: C000
+    description: main_code_file
     memoryType: OTHER
     doZip: false
     codeFile: true
@@ -16,6 +19,7 @@ targetFiles:
         id: HYDR
 
   - filename: F000
+    description: ingame_chip
     memoryType: CHIP
     sources:
       - filename: gfx/test_ehb_256x256.iff
@@ -29,6 +33,7 @@ targetFiles:
         priority: 64
 
   - filename: F001
+    description: ingame_other
     memoryType: OTHER
     relatedFile: F000
     sources:

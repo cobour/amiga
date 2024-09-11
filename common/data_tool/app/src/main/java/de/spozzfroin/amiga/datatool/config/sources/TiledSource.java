@@ -64,7 +64,7 @@ class TiledSource extends AbstractSource {
 	public void readAndConvertSourceData(Config config) throws Exception {
 		LOG.print(String.format("reading source data of \"%s\"", this.getFilename()));
 		var document = this.getDocument(config);
-		var playfieldData = this.getLayerData(document, "playfield layer");
+		var playfieldData = this.getLayerData(document, "tiles layer");
 		this.offsets = this.readAndConvert(playfieldData);
 	}
 
@@ -120,7 +120,7 @@ class TiledSource extends AbstractSource {
 		var layerExpression = xPathFactory.newXPath().compile(String.format("//layer[@name='%s']", layerName));
 		var layers = (NodeList) layerExpression.evaluate(document, XPathConstants.NODESET);
 		if (layers.getLength() != 1) {
-			throw new IllegalStateException("playfield layer not found");
+			throw new IllegalStateException("layer not found: " + layerName);
 		}
 		var dataNodeExpression = xPathFactory.newXPath().compile("//data");
 		Node dataNode = (Node) dataNodeExpression.evaluate(layers.item(0), XPathConstants.NODE);
