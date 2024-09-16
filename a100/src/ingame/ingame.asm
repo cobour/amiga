@@ -12,6 +12,7 @@ ig_start:
   SETPTRS
   bsr        .init_screen_buffer_pointers
   bsr        pf_init
+  bsr        bs_init
   bsr        .init_screen_buffers
   bsr        .init_copper_list
   bsr        ctrl_take_system

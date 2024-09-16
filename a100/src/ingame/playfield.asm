@@ -25,7 +25,7 @@ pf_init:
 
   WAIT_BLT
 
-  ; no pixel shift
+  ; no pixel shift; masked copy
   moveq.l     #-1,d7
   move.w      d7,BLTAFWM(a6)
   move.w      d7,BLTALWM(a6)
