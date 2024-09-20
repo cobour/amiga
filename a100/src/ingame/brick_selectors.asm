@@ -100,7 +100,7 @@ bs_init:
 
 ; initializes data structure
 .init_data:
-  lea.l       ig_om_selectors(a4),a0
+  lea.l       selectors(pc),a0
   moveq.l     #0,d0
   moveq.l     #74,d7
 .id_array_loop:
@@ -108,5 +108,14 @@ bs_init:
   dbf         d7,.id_array_loop
 
   rts
+
+
+;
+; vars section
+;
+
+selectors: ; index arrays for brick per field
+  dcb.b       3*25
+  even
 
   endif                                                            ; ifnd BRICK_SELECTORS_ASM

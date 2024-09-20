@@ -76,7 +76,7 @@ pf_init:
 
 ; initializes data structure
 .init_data:
-  lea.l       ig_om_playfield(a4),a0
+  lea.l       playfield_data(pc),a0
   moveq.l     #0,d0
   moveq.l     #24,d7                                             ; 100 bytes = 25 longs
 .id_array_loop:
@@ -84,5 +84,12 @@ pf_init:
   dbf         d7,.id_array_loop
 
   rts
+
+;
+; vars section
+;
+
+playfield_data: ; index array for brick per field
+  dcb.b       100
 
   endif                                                          ; ifnd PLAYFIELD_ASM
