@@ -11,8 +11,9 @@ ig_start:
   bsr        .load_and_inflate_files
   SETPTRS
   bsr        .init_screen_buffer_pointers
-  bsr        pf_init
-  bsr        bs_init
+  bsr        playfield_init
+  bsr        brick_selectors_init
+  bsr        bricks_init
   bsr        .init_screen_buffers
   bsr        .init_copper_list
   bsr        ctrl_take_system
