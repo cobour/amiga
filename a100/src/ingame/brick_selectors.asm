@@ -4,7 +4,7 @@ BRICK_SELECTORS_ASM equ 1
   include     "../common/src/system/blitter.i"
   include     "../a100/src/ingame/screen.i"
 
-bs_init:
+brick_selectors_init:
 
   bsr         .init_data
 

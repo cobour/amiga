@@ -5,7 +5,7 @@ PLAYFIELD_ASM equ 1
   include     "../a100/src/ingame/screen.i"
 
 ; is called before anything is seen on screen
-pf_init:
+playfield_init:
   bsr         .init_data
 
 ; fills playfield with empty bricks
