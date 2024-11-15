@@ -3,6 +3,7 @@ BRICK_SELECTORS_ASM equ 1
 
   include     "../common/src/system/blitter.i"
   include     "../a100/src/ingame/screen.i"
+  include     "../a100/src/ingame/brick_selectors_internal.i"
 
 brick_selectors_init:
 
@@ -35,6 +36,7 @@ brick_selectors_init:
 
 ; fills one selector with empty bricks
 ; in:
+;   a1 - pointer to small bricks metadata
 ;   d0 - pointer to source gfx
 ;   d1 - pointer to source mask
 ;   d2 - pointer to target
@@ -102,20 +104,90 @@ brick_selectors_init:
 .init_data:
   lea.l       selectors(pc),a0
   moveq.l     #0,d0
-  moveq.l     #74,d7
+  moveq.l     #(3*bs_sizeof/2)-1,d7
 .id_array_loop:
-  move.b      d0,(a0)+
+  move.w      d0,(a0)+
   dbf         d7,.id_array_loop
 
   rts
 
+brick_selectors_refill:
+  lea.l       selectors(pc),a1
+  moveq.l     #bs_sizeof,d0
+  moveq.l     #2,d7
+.bsr_loop: 
+
+; get random brick
+  bsr         get_random_brick
+  move.l      (a0),bs_big(a1)
+  move.l      4(a0),bs_small(a1)
+
+; clear bs_area
+  moveq.l     #24,d6
+  lea.l       bs_area(a1),a0
+.bsr_bs_area_clr_loop:
+  clr.b       (a0)+
+  dbf         d6,.bsr_bs_area_clr_loop
+
+; fill bs_area - init
+  move.l      bs_small(a1),a0
+  move.l      df_idx_ptr_rawdata(a0),a2
+  lea.l       df_idx_metadata(a0),a3
+  move.w      df_tld_plf_width(a3),d1
+  move.w      df_tld_plf_height(a3),d2
+  subq.w      #1,d1
+  subq.w      #1,d2
+
+; x- and y-offsets in bs_area
+  lea.l       bs_area(a1),a3
+  move.l      a3,d4
+  moveq.l     #0,d5
+  lea.l       .x_offsets(pc),a3
+  move.b      (a3,d1.w),d5
+  add.l       d5,d4
+  lea.l       .y_offsets(pc),a3
+  move.b      (a3,d2.w),d5
+  add.l       d5,d4
+
+; fill bs_area - loops
+  move.w      d2,d6
+.bsr_bs_area_fill_row_loop:
+  move.w      d1,d5
+  move.l      d4,a3
+.bsr_bs_area_fill_column_loop:
+  move.w      (a2)+,d3
+  move.b      d3,(a3)+
+  dbf         d5,.bsr_bs_area_fill_column_loop
+  addq.w      #5,d4
+  dbf         d6,.bsr_bs_area_fill_row_loop
+
+; next selector
+  add.l       d0,a1
+  dbf         d7,.bsr_loop
+
+; trigger redraw (all draw-operations in main loop; not in IRQ)
+  lea.l       redraw_trigger(pc),a0
+  move.w      #1,(a0)
+
+  rts
+
+.x_offsets:
+  dc.b        2,1,1,0,0,0
+.y_offsets:
+  dc.b        10,5,5,0,0,0
+
+brick_selectors_draw:
+  move.w      redraw_trigger(pc),d0
+  ; TODO: draw one row at a time with delay-effect
+  rts
 
 ;
 ; vars section
 ;
 
-selectors: ; index arrays for brick per field
-  dcb.b       3*25
-  even
+selectors: ; see bs_*
+  dcb.b       3*bs_sizeof
+redraw_trigger:
+  dc.w        0
 
   endif                                                            ; ifnd BRICK_SELECTORS_ASM

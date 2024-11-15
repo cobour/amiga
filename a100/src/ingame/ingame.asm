@@ -2,6 +2,7 @@
 INGAME_ASM equ 1
 
   include    "../a100/src/ingame/ingame.i"
+  include    "../common/src/system/screen.i"
 
 ; called by loader when system is not yet taken
 ; a4 - other mem pointer
@@ -10,10 +11,12 @@ ig_start:
   ; init stuff
   bsr        .load_and_inflate_files
   SETPTRS
+  clr.l      ig_om_framecounter(a4)
   bsr        .init_screen_buffer_pointers
   bsr        playfield_init
   bsr        brick_selectors_init
   bsr        bricks_init
+  bsr        brick_selectors_refill
   bsr        .init_screen_buffers
   bsr        .init_copper_list
   bsr        ctrl_take_system
@@ -23,9 +26,30 @@ ig_start:
   bsr        .set_copper_list
   bsr        .init_music
 
-.0:
+.ig_loop:
+  bsr        brick_selectors_draw
+
+  ; ----------------- REMOVE ME -----------------
+  ; read all available key codes
+.1:
+  bsr        keyboard_get_key
+  ; play sample when S is pressed
+  cmp.b      #$21,d0
+  bne.s      .2
+
+  move.l     #f000_sfx_enter,d0
+  bsr        datafiles_get_pointer
+  lea.l      df_idx_metadata(a0),a0
+  bsr        _mt_playfx
+
+.2:
+  tst.b      d0
+  bge.s      .1
+  ; ----------------- REMOVE ME -----------------
+
+  WAITVB
   btst       #6,$bfe001
-  bne.s      .0
+  bne.s      .ig_loop
 
   bsr        _mt_end
   bsr        keyboard_cleanup
@@ -128,21 +152,11 @@ ig_start:
 lvl3_irq_handler:
   movem.l    d0-d7/a0-a6,-(sp)
 
-  ; read all available key codes
-.1:
-  bsr        keyboard_get_key
-  ; play sample when S is pressed
-  cmp.b      #$21,d0
-  bne.s      .2
+  SETPTRS
 
-  move.l     #f000_sfx_enter,d0
-  bsr        datafiles_get_pointer
-  lea.l      df_idx_metadata(a0),a0
-  bsr        _mt_playfx
-
-.2:
-  tst.b      d0
-  bge.s      .1
+  ; increment frame counter
+  moveq.l    #1,d0
+  add.l      d0,ig_om_framecounter(a4)
 
   ; clear Copper-IRQ-Bit
   move.w     #%0000000000010000,INTREQ(a6)

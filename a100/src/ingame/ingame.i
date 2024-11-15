@@ -25,6 +25,7 @@ ig_cm_sizeof:         rs.b       0
 ; Ingame other mem struct
                       rsreset
 ig_om_common:         rs.b       c_om_sizeof
+ig_om_framecounter:   rs.l       1                                                      ; incremented by copper irq
 ig_om_frontbuffer:    rs.l       1                                                      ; points to currently shown buffer
 ig_om_backbuffer:     rs.l       1                                                      ; points to buffer that is currently drawn to
 ig_om_datfile:        rs.b       f001_unzipped_filesize

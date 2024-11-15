@@ -10,6 +10,7 @@ DdfResolution equ 8
 DMACONR       equ $2
 VPOSR         equ $4
 VHPOSR        equ $6
+JOY0DAT       equ $a
 JOY1DAT       equ $c
 CLXDAT        equ $e
 ADKCONR       equ $10

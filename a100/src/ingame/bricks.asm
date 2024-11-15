@@ -2,7 +2,7 @@
 BRICKS_ASM             equ 1
 
 BRICKS_ARRAY_SIZE      equ 32
-BRICKS_ARRAY_SIZE_MASK equ $1f          ; mask for BRICKS_ARRAY_SIZE fragment
+BRICKS_ARRAY_SIZE_MASK equ $1f             ; mask for BRICKS_ARRAY_SIZE fragment
 
 bricks_init:
 
@@ -41,7 +41,7 @@ bricks_init:
 
   ; next iteration
   add.l      d4,d1
-  cmp.w      #": ",d1                   ; ascii sign after '9'
+  cmp.w      #": ",d1                      ; ascii sign after '9'
   bne.s      .ibp_loop_next
   move.w     #"0 ",d1
   add.l      d5,d1
@@ -51,21 +51,64 @@ bricks_init:
   rts
 
 .init_randomizer:
-; generate two "random" seed numbers in d5 and d6
-  move.l     #$deadbeef,d5
-  move.l     #$12345678,d6
-  move.w     VHPOSR(a6),d7
+; generate two "random" seed numbers in d0 and d1
+
+  move.l     $4.w,a0
+  move.l     280(a0),d7                    ; exec IdleCount
+  move.l     #$deadbeef,d0
+  move.l     #$12345678,d1
+  add.w      JOY0DAT(a6),d7
 .ir_loop:
-  swap       d5
-  add.l      d6,d5
-  add.l      d5,d6
+  swap       d0
+  add.l      d1,d0
+  add.l      d0,d1
   dbf        d7,.ir_loop
 
   ; store numbers
   lea.l      random(pc),a0
-  move.l     d5,(a0)+
-  move.l     d6,(a0)
+  move.l     d0,(a0)+
+  move.l     d1,(a0)
 
+  rts
+
+; get new random brick
+; out:
+;    a0 - pointer to big and small brick index pointers
+get_random_brick:
+  movem.l    d0-d2/d7,-(sp)
+
+; get new random number in d2
+  lea.l      random(pc),a0
+  move.l     (a0),d0
+  move.l     4(a0),d1
+  move.l     ig_om_framecounter(a4),d7
+  add.w      VHPOSR(a6),d7
+  and.w      #$f,d7
+.grb_loop
+  swap       d0
+  add.l      d1,d0
+  add.l      d0,d1
+  dbf        d7,.grb_loop
+
+  move.w     VHPOSR(a6),d2
+  btst       #0,d2
+  bne.s      .grb_other
+  move.l     d0,d2
+  bra.s      .grb_store_values
+.grb_other:
+  move.l     d1,d2
+
+.grb_store_values:
+  move.l     d0,(a0)
+  move.l     d1,4(a0)
+
+  and.l      #BRICKS_ARRAY_SIZE_MASK,d2
+  lsl.l      #3,d2
+
+  lea.l      brick_pointers(pc),a0
+  add.l      d2,a0
+ 
+  movem.l    (sp)+,d0-d2/d7
   rts
 
 ;
@@ -78,4 +121,4 @@ random:
 brick_pointers: ; two longs for one brick (first big, second small) - for up to BRICKS_ARRAY_SIZE bricks with repeating bricks (for easier randomized lookup)
   dcb.l      BRICKS_ARRAY_SIZE*2
 
-  endif                                 ; ifnd BRICKS_ASM
+  endif                                    ; ifnd BRICKS_ASM
