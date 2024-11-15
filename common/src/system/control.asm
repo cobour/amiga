@@ -2,6 +2,7 @@
 CONTROL_ASM   equ 1
 
   include    "../common/src/system/custom.i"
+  include    "../common/src/system/screen.i"
 
 ; vectors
 Level2Handler equ $68
@@ -11,35 +12,6 @@ Level3Handler equ $6c
 CurrentView   equ $22
 CurrentCopper equ $26
 LoadView      equ -$de
-
-; Waits vor vertical blank period
-  macro      WAITVB
-  movem.l    d0/a6,-(sp)
-  lea.l      CustomBase,a6
-.1\@:  
-  move.l     VPOSR(a6),d0
-  and.l      #$1ff00,d0
-  cmp.l      #303<<8,d0
-  bne.s      .1\@
-  movem.l    (sp)+,d0/a6
-  endm
-
-; Waits for two vbp's - may be necessary when screen was/is in interlaced mode (then there are two different frames with two different copperlists)
-  macro      WAITVB2
-  movem.l    d0/a6,-(sp)
-  lea.l      CustomBase,a6
-.1\@:  
-  move.l     VPOSR(a6),d0
-  and.l      #$1ff00,d0
-  cmp.l      #304<<8,d0
-  bne.s      .1\@
-.2\@:  
-  move.l     VPOSR(a6),d0
-  and.l      #$1ff00,d0
-  cmp.l      #303<<8,d0
-  bne.s      .2\@
-  movem.l    (sp)+,d0/a6
-  endm
 
 ; Saves system state for later restoring
 ctrl_save_orig_system_state:
