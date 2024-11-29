@@ -16,23 +16,29 @@ brick_selectors_init:
   move.l      #f000_gfx_bricks_small,d0
   bsr         datafiles_get_pointer
   lea.l       df_idx_metadata(a0),a1
-  move.l      df_idx_ptr_rawdata(a0),d0                            ; source gfx data
+  move.l      df_idx_ptr_rawdata(a0),d0                          ; source gfx data
   move.l      d0,d1
-  add.l       df_iff_rawsize(a1),d1                                ; source mask data
+  add.l       df_iff_rawsize(a1),d1                              ; source mask data
+
+  ; store values for later use
+  lea.l       small_bricks_metadata(pc),a2
+  move.l      a1,(a2)+
+  move.l      d0,(a2)+
+  move.l      d1,(a2)
 
   ; init first selector
   move.l      ig_om_frontbuffer(a4),d2
-  add.l       #(IgScreenWidthBytes*IgScreenBitPlanes*16)+24,d2
+  add.l       #SelectorOffset_1,d2
   bsr.s       .is_sub_selector
 
   ; init second selector
   move.l      ig_om_frontbuffer(a4),d2
-  add.l       #(IgScreenWidthBytes*IgScreenBitPlanes*76)+24,d2
+  add.l       #SelectorOffset_2,d2
   bsr.s       .is_sub_selector
 
   ; init third selector
   move.l      ig_om_frontbuffer(a4),d2
-  add.l       #(IgScreenWidthBytes*IgScreenBitPlanes*136)+24,d2
+  add.l       #SelectorOffset_3,d2
 
 ; fills one selector with empty bricks
 ; in:
@@ -166,8 +172,9 @@ brick_selectors_refill:
   dbf         d7,.bsr_loop
 
 ; trigger redraw (all draw-operations in main loop; not in IRQ)
-  lea.l       redraw_trigger(pc),a0
-  move.w      #1,(a0)
+  lea.l       redraw_countdown(pc),a0
+  move.w      #BsDrawCountdown,(a0)+
+  clr.l       (a0)
 
   rts
 
@@ -177,17 +184,198 @@ brick_selectors_refill:
   dc.b        10,5,5,0,0,0
 
 brick_selectors_draw:
-  move.w      redraw_trigger(pc),d0
-  ; TODO: draw one row at a time with delay-effect
+  ; check if redraw is currently taking place
+  lea.l       redraw_countdown(pc),a0
+  move.w      (a0)+,d0
+  tst.w       d0
+  beq.s       .exit
+
+  ; set redraw scheme if necessary (different schemes possible)
+  tst.l       (a0)
+  bne.s       .scheme_is_set
+  lea.l       .redraw_scheme(pc),a1
+  move.l      a1,(a0)
+.scheme_is_set:
+
+  ; check if and which bricks must be drawn
+  move.l      (a0),a0
+  moveq.l     #0,d2
+  moveq.l     #24,d7
+.check_loop:
+  move.b      (a0,d2.w),d1
+  cmp.b       d0,d1
+  beq.s       .draw  
+.check_second_draw:
+  subq.b      #1,d1
+  cmp.b       d0,d1
+  bne.s       .next
+.draw:
+  ; selector 0
+  lea.l       selectors(pc),a1
+  move.l      #SelectorOffset_1,d3
+  bsr.s       .draw_brick
+  ; selector 1
+  lea.l       selectors+bs_sizeof(pc),a1
+  move.l      #SelectorOffset_2,d3
+  bsr.s       .draw_brick
+  ; selector 2
+  lea.l       selectors+bs_sizeof+bs_sizeof(pc),a1
+  move.l      #SelectorOffset_3,d3
+  bsr.s       .draw_brick
+.next:
+  addq.b      #1,d2
+  dbf         d7,.check_loop
+
+  ; redraw is done for this frame
+  lea.l       redraw_countdown(pc),a0
+  sub.w       #1,(a0)
+.exit:
   rts
+
+; in:
+;   a1 - pointer to bs_area
+;   d2 - number of brick (0..24)
+;   d3 - offset of selector in framebuffer
+; ALLOWED TO USE: a2,a3,d4,d5,d6
+.draw_brick:
+  ; destination address
+  move.l      d2,d4
+  add.l       d4,d4
+  add.l       d4,d4
+  lea.l       .brick_offsets(pc),a2
+  move.l      (a2,d4.w),d4
+  add.l       d3,d4
+  add.l       ig_om_backbuffer(a4),d4
+  ; d4 = destination address
+
+  ; number of gfx brick
+  move.l      a1,a2
+  lea.l       bs_area(a2),a2
+  moveq.l     #0,d5
+  move.b      (a2,d2.w),d5
+  ; d5 = number of gfx brick
+
+  WAIT_BLT
+
+  ; modulos
+  move.l      small_bricks_metadata(pc),a2
+  move.w      df_iff_width(a2),d6
+  lsr.w       #3,d6
+  subq.w      #2,d6
+  move.w      d6,BLTAMOD(a6)
+  move.w      d6,BLTBMOD(a6)
+  move.w      #IgScreenWidthBytes-2,d6
+  move.w      d6,BLTCMOD(a6)
+  move.w      d6,BLTDMOD(a6)
+
+  ; check for alignment of source
+  btst        #0,d5
+  bne.s       .odd_source
+
+  move.w      #$ff00,BLTAFWM(a6)
+  move.w      #$ff00,BLTALWM(a6)
+
+  btst        #0,d4
+  bne.s       .even_source_odd_destination
+
+  clr.w       BLTCON1(a6)
+  move.w      #%0000111111001010,BLTCON0(a6)
+  bra.s       .set_pointers_and_blit
+
+.even_source_odd_destination:
+  move.w      #$8000,BLTCON1(a6)
+  move.w      #%1000111111001010,BLTCON0(a6)
+  bra.s       .set_pointers_and_blit
+
+.odd_source:
+  
+  move.w      #$00ff,BLTAFWM(a6)
+  move.w      #$00ff,BLTALWM(a6)
+
+  btst        #0,d4
+  bne.s       .odd_source_odd_destination
+
+  move.w      #$8000,BLTCON1(a6)
+  move.w      #%1000111111001010,BLTCON0(a6)
+  addq.l      #8,d5                                              ; TODO: check correctness
+  bra.s       .set_pointers_and_blit
+
+.odd_source_odd_destination:
+  clr.w       BLTCON1(a6)
+  move.w      #%0000111111001010,BLTCON0(a6)
+
+.set_pointers_and_blit:
+  ; source pointers
+  move.l      small_bricks_mask(pc),d6
+  add.l       d5,d6
+  move.l      d6,BLTAPTH(a6)
+  move.l      small_bricks_gfx(pc),d6
+  add.l       d5,d6
+  move.l      d6,BLTBPTH(a6)
+
+  ; destination pointers
+  move.l      d4,BLTCPTH(a6)
+  move.l      d4,BLTDPTH(a6)
+
+  ; start blit
+  move.w      #(8*IgScreenBitPlanes<<6)+1,BLTSIZE(a6)
+
+  rts
+
+.redraw_scheme:
+  dc.b        BsDrCd_1,BsDrCd_1,BsDrCd_1,BsDrCd_1,BsDrCd_1
+  dc.b        BsDrCd_2,BsDrCd_2,BsDrCd_2,BsDrCd_2,BsDrCd_2
+  dc.b        BsDrCd_3,BsDrCd_3,BsDrCd_3,BsDrCd_3,BsDrCd_3
+  dc.b        BsDrCd_4,BsDrCd_4,BsDrCd_4,BsDrCd_4,BsDrCd_4
+  dc.b        BsDrCd_5,BsDrCd_5,BsDrCd_5,BsDrCd_5,BsDrCd_5
+  even
+
+; offsets of bricks in selector in framebuffer
+.brick_offsets:
+; row 0
+  dc.l        0,1,2,3,4
+; row 1
+  dc.l        (IgScreenWidthBytes*IgScreenBitPlanes*8)
+  dc.l        (IgScreenWidthBytes*IgScreenBitPlanes*8)+1
+  dc.l        (IgScreenWidthBytes*IgScreenBitPlanes*8)+2
+  dc.l        (IgScreenWidthBytes*IgScreenBitPlanes*8)+3
+  dc.l        (IgScreenWidthBytes*IgScreenBitPlanes*8)+4
+; row 2
+  dc.l        (IgScreenWidthBytes*IgScreenBitPlanes*16)
+  dc.l        (IgScreenWidthBytes*IgScreenBitPlanes*16)+1
+  dc.l        (IgScreenWidthBytes*IgScreenBitPlanes*16)+2
+  dc.l        (IgScreenWidthBytes*IgScreenBitPlanes*16)+3
+  dc.l        (IgScreenWidthBytes*IgScreenBitPlanes*16)+4
+; row 3
+  dc.l        (IgScreenWidthBytes*IgScreenBitPlanes*24)
+  dc.l        (IgScreenWidthBytes*IgScreenBitPlanes*24)+1
+  dc.l        (IgScreenWidthBytes*IgScreenBitPlanes*24)+2
+  dc.l        (IgScreenWidthBytes*IgScreenBitPlanes*24)+3
+  dc.l        (IgScreenWidthBytes*IgScreenBitPlanes*24)+4
+; row 4
+  dc.l        (IgScreenWidthBytes*IgScreenBitPlanes*32)
+  dc.l        (IgScreenWidthBytes*IgScreenBitPlanes*32)+1
+  dc.l        (IgScreenWidthBytes*IgScreenBitPlanes*32)+2
+  dc.l        (IgScreenWidthBytes*IgScreenBitPlanes*32)+3
+  dc.l        (IgScreenWidthBytes*IgScreenBitPlanes*32)+4
 
 ;
 ; vars section
 ;
 
+small_bricks_metadata:
+  dc.l        0
+small_bricks_gfx:
+  dc.l        0
+small_bricks_mask:
+  dc.l        0
+
 selectors: ; see bs_*
   dcb.b       3*bs_sizeof
-redraw_trigger:
-  dc.w        0
 
-  endif                                                            ; ifnd BRICK_SELECTORS_ASM
+redraw_countdown:
+  dc.w        0
+redraw_scheme:
+  dc.l        0
+
+  endif                                                          ; ifnd BRICK_SELECTORS_ASM

@@ -48,6 +48,7 @@ ig_start:
   ; ----------------- REMOVE ME -----------------
 
   WAITVB
+  bsr.s      .swap_buffers
   btst       #6,$bfe001
   bne.s      .ig_loop
 
@@ -55,6 +56,27 @@ ig_start:
   bsr        keyboard_cleanup
 
 .error:
+  rts
+
+.swap_buffers:
+  ; swap pointers
+  move.l     ig_om_backbuffer(a4),d0
+  move.l     ig_om_frontbuffer(a4),d1
+  move.l     d0,ig_om_frontbuffer(a4)
+  move.l     d1,ig_om_backbuffer(a4)
+
+  ; update copperlist
+  move.l     ig_om_copperlist(a4),a0
+  lea.l      ig_cm_cl_bitplanes(a0),a0
+  moveq.l    #IgScreenBitPlanes-1,d7
+.icl:
+  move.w     d0,6(a0)
+  swap       d0
+  move.w     d0,2(a0)
+  swap       d0
+  add.l      #IgScreenWidthBytes,d0
+  addq.l     #8,a0
+  dbf        d7,.icl
   rts
 
 .load_and_inflate_files:
@@ -98,6 +120,7 @@ ig_start:
   move.l     #f000_src_ingame_copperlist,d0
   bsr        datafiles_get_pointer
   move.l     df_idx_ptr_rawdata(a0),a0
+  move.l     a0,ig_om_copperlist(a4)
   move.l     a0,a1
   lea.l      ig_cm_cl_bitplanes(a0),a0
   move.l     ig_om_frontbuffer(a4),d0
