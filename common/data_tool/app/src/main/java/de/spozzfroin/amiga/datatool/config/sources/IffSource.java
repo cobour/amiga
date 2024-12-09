@@ -22,6 +22,7 @@ class IffSource extends AbstractSource {
 	private static final BinaryValueConverter BINARY_VALUE_CONVERTER = BinaryValueConverter.getInstance();
 
 	private boolean withMask;
+	private boolean invertMask;
 	private boolean flatten;
 	private int flattenedTileWidth;
 	private int flattenedTileHeight;
@@ -55,6 +56,12 @@ class IffSource extends AbstractSource {
 			this.withMask = (boolean) parameter.get("withMask");
 		} else {
 			this.withMask = true;
+		}
+		//
+		if (parameter.containsKey("invertMask")) {
+			this.invertMask = (boolean) parameter.get("invertMask");
+		} else {
+			this.invertMask = false;
 		}
 		//
 		if (parameter.containsKey("flattenedTileFormat")) {
@@ -424,6 +431,11 @@ class IffSource extends AbstractSource {
 					for (int bitplane = 0; bitplane < uow.bitplanes; bitplane++) {
 						int i = (row * bytesPerRow * uow.bitplanes) + (bitplane * bytesPerRow) + col;
 						mask = (byte) (mask | uow.rawdata[i]);
+					}
+					if (uow.invertMask) {
+						int dummy = mask;
+						dummy = ~dummy;
+						mask = (byte) dummy;
 					}
 					// write mask to all bitplanes (because of interleaved format)
 					for (int bitplane = 0; bitplane < uow.bitplanes; bitplane++) {

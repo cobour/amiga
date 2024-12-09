@@ -30,6 +30,7 @@ targetFiles:
         id: BRBG
       - filename: gfx/bricks_small.iff
         id: BRSM
+        invertMask: true
       - filename: music/peace_of_mind.mod
         id: MS01
       - filename: sfx/enter.wav
