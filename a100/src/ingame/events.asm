@@ -4,6 +4,11 @@ EVENTS_ASM equ 1
   include    "../a100/src/ingame/events.i"
   include    "../common/src/system/joystick.i"
 
+events_init:
+  lea.l      event_delay(pc),a0
+  move.l     #EventDelay,(a0)
+  rts
+
 ; checks for new events
 events_check:
 
@@ -124,7 +129,7 @@ events_check:
   move.l     (a1),d2
   move.l     ig_om_framecounter(a4),d3
 
-  add.l      #50,d2                               ; TODO: configurable delay value
+  add.l      event_delay(pc),d2
   cmp.l      d2,d3
   ble.s      .no_new_event
 
@@ -160,5 +165,12 @@ events_check:
 ; framenumbers when events where last issued
 .events_last_issued:
   dcb.l      EventsCount,0
+
+;
+; vars
+;
+
+event_delay:
+  dc.l       0
 
   endif                                           ; ifnd EVENTS_ASM

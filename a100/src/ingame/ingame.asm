@@ -8,8 +8,15 @@ INGAME_ASM equ 1
 ; a4 - other mem pointer
 ; a5 - chip mem pointer
 ig_start:
-  ; init stuff
+
+  ;
+  ; init
+  ;
+
   bsr        .load_and_inflate_files
+  tst.l      d0
+  bne        .error
+
   SETPTRS
   clr.l      ig_om_framecounter(a4)
   bsr        .init_screen_buffer_pointers
@@ -17,6 +24,7 @@ ig_start:
   bsr        brick_selectors_init
   bsr        bricks_init
   bsr        brick_selectors_refill
+  bsr        events_init
   bsr        .init_screen_buffers
   bsr        .init_copper_list
   bsr        ctrl_take_system
@@ -26,6 +34,10 @@ ig_start:
   bsr        .set_copper_list
   bsr        .init_music
 
+  ;
+  ; main loop
+  ;
+
 .ig_loop:
   bsr        events_check
   bsr        brick_selectors_draw
@@ -34,6 +46,10 @@ ig_start:
   bsr.s      .swap_buffers
   btst       #6,CIAA
   bne.s      .ig_loop
+
+  ;
+  ; cleanup
+  ;
 
   bsr        _mt_end
   bsr        keyboard_cleanup
@@ -74,8 +90,6 @@ ig_start:
   move.l     chip_mem_ptr(pc),a1
   add.l      #ig_cm_datfile,a1
   bsr        datafiles_load_and_unzip
-  tst.l      d0
-  bne.s      .error
   rts
 
 .init_screen_buffer_pointers:

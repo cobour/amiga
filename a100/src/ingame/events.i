@@ -10,4 +10,6 @@ EventUnselect equ 6
 
 EventsCount   equ 6    ; count of possible events
 
+EventDelay    equ 50
+
   endif                ; ifnd EVENTS_I
