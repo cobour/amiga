@@ -101,7 +101,7 @@ keyboard_handler:
 
 ; Gets the raw key code of the next pressed key. 
 ; out:
-;  d0.w   - raw key code or -1 when no more key code is in the buffer
+;  d0.b   - raw key code or -1 when no more key code is in the buffer
 keyboard_get_key:
   movem.l    d1/a0,-(sp)
 
