@@ -31,6 +31,8 @@ targetFiles:
       - filename: gfx/bricks_small.iff
         id: BRSM
         invertMask: true
+      - filename: gfx/active_selector.iff
+        id: ASEL
       - filename: music/peace_of_mind.mod
         id: MS01
       - filename: sfx/select.wav
