@@ -9,7 +9,7 @@ brick_selectors_init:
 
   bsr        .init_data
 
-; fills all three selectors  with empty bricks
+; fills all three selectors with placeholder bricks
 ; draws to frontbuffer (which is copied to backbuffer after init)
 .init_gfx:
   ; get empty brick - gfx and mask pointers
@@ -72,17 +72,38 @@ brick_selectors_init:
 
   rts
 
-; initializes data structure
+; initializes data structures
 .init_data:
-  lea.l      selectors(pc),a0
-  moveq.l    #0,d0
-  moveq.l    #(3*bs_sizeof/2)-1,d7
-.id_array_loop:
-  move.w     d0,(a0)+
-  dbf        d7,.id_array_loop
-
+  lea.l      selectors(pc),a1
+  moveq.l    #bs_sizeof,d6
+  moveq.l    #2,d7
+.id_loop:
+  move.l     a1,a0
+  bsr.s      reset_brick_selector
+  add.l      d6,a1
+  dbf        d7,.id_loop
   rts
 
+; resets data structure of a single brick selector
+; does not trigger redraw
+; does not check structure size, code MUST be changed when structure size is changed
+; in:
+;   a0 - pointer to data structure
+reset_brick_selector:
+  moveq.l    #0,d0
+  move.l     #$07070707,d1
+  move.l     d0,(a0)+
+  move.l     d0,(a0)+
+  move.l     d1,(a0)+
+  move.l     d1,(a0)+
+  move.l     d1,(a0)+
+  move.l     d1,(a0)+
+  move.l     d1,(a0)+
+  move.l     d1,(a0)+
+  move.w     d1,(a0)
+  rts
+
+; fills data structures of all three selectors with new random bricks
 brick_selectors_refill:
   lea.l      selectors(pc),a1
   moveq.l    #bs_sizeof,d0
@@ -93,6 +114,7 @@ brick_selectors_refill:
   bsr        get_random_brick
   move.l     (a0),bs_big(a1)
   move.l     4(a0),bs_small(a1)
+  clr.b      bs_empty(a1)
 
 ; clear bs_area
   moveq.l    #24,d6
@@ -213,11 +235,12 @@ draw_one_brick:
   rts
 
 brick_selectors_draw:
-  ; check if redraw is currently taking place
+  ; check if redraw of all three selectors is currently happening
   lea.l      redraw_countdown(pc),a0
   move.w     (a0)+,d0
   tst.w      d0
   beq.s      .exit
+  ; TODO: if not, check if redraw of single selector is currently happening
 
   ; set redraw scheme if necessary (different schemes possible)
   tst.l      (a0)
@@ -346,6 +369,7 @@ small_bricks_mask:
 selectors: ; see bs_*
   dcb.b      3*bs_sizeof
 
+; redraw all three selectors
 redraw_countdown:
   dc.w       0
 redraw_scheme:

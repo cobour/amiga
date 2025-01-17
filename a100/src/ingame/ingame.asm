@@ -27,29 +27,12 @@ ig_start:
   bsr        .init_music
 
 .ig_loop:
+  bsr        events_check
   bsr        brick_selectors_draw
-
-  ; ----------------- REMOVE ME -----------------
-  ; read all available key codes
-.1:
-  bsr        keyboard_get_key
-  ; play sample when S is pressed
-  cmp.b      #$21,d0
-  bne.s      .2
-
-  move.l     #f000_sfx_enter,d0
-  bsr        datafiles_get_pointer
-  lea.l      df_idx_metadata(a0),a0
-  bsr        _mt_playfx
-
-.2:
-  tst.b      d0
-  bge.s      .1
-  ; ----------------- REMOVE ME -----------------
 
   WAITVB
   bsr.s      .swap_buffers
-  btst       #6,$bfe001
+  btst       #6,CIAA
   bne.s      .ig_loop
 
   bsr        _mt_end

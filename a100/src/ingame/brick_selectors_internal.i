@@ -1,4 +1,4 @@
-             ifnd       BRICK_SELECTORS_INTERNAL_I
+            ifnd       BRICK_SELECTORS_INTERNAL_I
 BRICK_SELECTORS_INTERNAL_I equ 1
 
 ; smallest value must be greater than 1, otherwise not drawn to both buffers
@@ -14,11 +14,12 @@ SelectorOffset_1           equ (IgScreenWidthBytes*IgScreenBitPlanes*16)+25
 SelectorOffset_2           equ (IgScreenWidthBytes*IgScreenBitPlanes*76)+25
 SelectorOffset_3           equ (IgScreenWidthBytes*IgScreenBitPlanes*136)+25
 
-             rsreset
-bs_big:      rs.l       1
-bs_small:    rs.l       1
-bs_area:     rs.b       25
-bs_padding:  rs.b       1
-bs_sizeof:   rs.b       0
+            rsreset
+bs_big:     rs.l       1
+bs_small:   rs.l       1
+bs_area:    rs.b       25
+bs_empty:   rs.b       1                             ; is selector empty (no = 0, yes = any other value)
+bs_sizeof:  rs.b       0
+; when changing size, see reset_brick_selector
 
-             endif                                    ; ifnd BRICK_SELECTORS_INTERNAL_I
+            endif                                    ; ifnd BRICK_SELECTORS_INTERNAL_I

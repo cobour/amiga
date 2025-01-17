@@ -33,8 +33,16 @@ targetFiles:
         invertMask: true
       - filename: music/peace_of_mind.mod
         id: MS01
-      - filename: sfx/enter.wav
-        id: SFX1
+      - filename: sfx/select.wav
+        id: SSEL
+        volume: 64
+        priority: 64
+      - filename: sfx/unselect.wav
+        id: SUNS
+        volume: 64
+        priority: 64
+      - filename: sfx/step.wav
+        id: SSTP
         volume: 64
         priority: 64
       - filename: ../src/ingame/copperlist.asm
