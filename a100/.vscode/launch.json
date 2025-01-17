@@ -19,7 +19,7 @@
                 //"--kickstart_file=path/to/kick.rom",
                 "--hard_drive_0=${workspaceFolder}/uae/dh0",
                 "--floppy_drive_1=${workspaceFolder}/dist/A100.adf",
-                "--automatic_input_grab=0",
+                //"--automatic_input_grab=0",
                 "--joystick_port_1=keyboard",
                 "--amiga_model=A500",
                 "--automatic_input_grab=0",
@@ -41,7 +41,7 @@
                 "--floppy_drive_0=${workspaceFolder}/dist/A100.adf",
                 "--joystick_port_1=keyboard",
                 "--amiga_model=A500",
-                "--automatic_input_grab=0",
+                //"--automatic_input_grab=0",
                 "--video_sync=0",
                 "--fullscreen=0"
             ],
