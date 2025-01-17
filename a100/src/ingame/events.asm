@@ -136,7 +136,13 @@ events_check:
   ; update last issued
   move.l     d3,(a1)
 
-  ; TODO: add event to queue
+  ; add event to queue
+  lea.l      event_struct(pc),a1
+  move.w     (a1),d2                              ; event_write_index
+  move.b     d1,event_queue(a1,d2.w)
+  addq.w     #1,d2
+  and.w      #EventQueueSize-1,d2                 ; ring buffer
+  move.w     d2,(a1)                              ; update event_write_index
 
   ; ################### REMOVE ME - play sample for testing purposes ####
   move.l     d0,-(sp)
@@ -166,11 +172,41 @@ events_check:
 .events_last_issued:
   dcb.l      EventsCount,0
 
+; returns next event from queue or -1 when queue is empty
+; out:
+;   d0.b - next event
+get_next_event:
+  movem.l    d1/a0,-(sp)
+
+  lea.l      event_struct(pc),a0
+  move.w     (a0)+,d0                             ; event_write_index
+  move.w     (a0)+,d1                             ; event_read_index
+  cmp.w      d0,d1
+  bne        .1
+
+	; queue is empty
+  moveq.l    #-1,d0
+
+  movem.l    (sp)+,d1/a0
+  rts
+
+.1:  
+  move.b     (a0,d1.w),d0                         ; event_queue
+  addq.w     #1,d1
+  and.w      #EventQueueSize-1,d1                 ; ring buffer
+  move.w     d1,-(a0)                             ; event_read_index
+
+  movem.l    (sp)+,d1/a0
+  rts
+
 ;
 ; vars
 ;
 
 event_delay:
   dc.l       0
+
+event_struct:
+  dcb.b      event_size
 
   endif                                           ; ifnd EVENTS_ASM
