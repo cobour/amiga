@@ -19,6 +19,8 @@ ig_start:
 
   SETPTRS
   clr.l      ig_om_framecounter(a4)
+  move.b     #IgModeSelect,ig_om_act_mode(a4)
+
   bsr        .init_screen_buffer_pointers
   bsr        playfield_init
   bsr        brick_selectors_init
@@ -40,11 +42,12 @@ ig_start:
 
 .ig_loop:
   bsr        events_check
+  bsr        brick_selectors_process_events
   bsr        brick_selectors_draw
 
   WAITVB
   bsr.s      .swap_buffers
-  btst       #6,CIAA
+  btst       #6,CIAA                                                            ; REMOVE
   bne.s      .ig_loop
 
   ;
@@ -53,6 +56,7 @@ ig_start:
 
   bsr        _mt_end
   bsr        keyboard_cleanup
+  ; TODO: remove LVL3 handler or call ctrl_free_system
 
 .error:
   rts
@@ -165,12 +169,14 @@ ig_start:
   move.l     df_idx_ptr_rawdata(a0),a0
   moveq.l    #0,d0
   bsr        _mt_init
+  move.w     #32,d0
+  bsr        _mt_mastervol
   lea.l      _mt_Enable(pc),a0
   move.b     #1,(a0)
   rts
 
 lvl3_irq_handler:
-  movem.l    d0-d7/a0-a6,-(sp)
+  movem.l    d0/a4-a6,-(sp)
 
   SETPTRS
 
@@ -181,7 +187,7 @@ lvl3_irq_handler:
   ; clear Copper-IRQ-Bit
   move.w     #%0000000000010000,INTREQ(a6)
 
-  movem.l    (sp)+,d0-d7/a0-a6
+  movem.l    (sp)+,d0/a4-a6
   rte
 
 

@@ -16,6 +16,7 @@ events_check:
   ; check keyboard
   ;
 
+.check_keyboard:
   bsr        keyboard_get_key
   tst.b      d0
   blt.s      .check_joystick
@@ -73,6 +74,7 @@ events_check:
   moveq.l    #EventLeft,d1
   bsr        .add_event_to_queue
 .ck8:
+  bra.s      .check_keyboard                      ; another key?
 
   ;
   ; check joystick
@@ -143,27 +145,6 @@ events_check:
   addq.w     #1,d2
   and.w      #EventQueueSize-1,d2                 ; ring buffer
   move.w     d2,(a1)                              ; update event_write_index
-
-  ; ################### REMOVE ME - play sample for testing purposes ####
-  move.l     d0,-(sp)
-  move.l     d1,d2
-  subq.l     #1,d2
-  add.l      d2,d2
-  add.l      d2,d2
-  move.l     (.sfx_ids,pc,d2.w),d0
-  bsr        datafiles_get_pointer
-  lea.l      df_idx_metadata(a0),a0
-  bsr        _mt_playfx
-  move.l     (sp)+,d0
-  bra.s      .no_new_event
-.sfx_ids:
-  dc.l       f000_sfx_step
-  dc.l       f000_sfx_step
-  dc.l       f000_sfx_step
-  dc.l       f000_sfx_step
-  dc.l       f000_sfx_select
-  dc.l       f000_sfx_unselect
-  ; ################################# REMOVE ME #########################
 
 .no_new_event:
   rts
