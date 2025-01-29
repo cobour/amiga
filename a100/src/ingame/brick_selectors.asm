@@ -396,12 +396,26 @@ brick_selectors_draw:
 
 .restore_not_necessary:
 
-  ; backup background
+  ; calc position
   lea.l       .active_selector_mark_offsets(pc),a1
   move.w      active_selection(pc),d0
   add.w       d0,d0
   add.w       d0,d0
-  move.l      (a1,d0.w),d1                                       ; d1 = offset in screenbuffer
+  move.l      (a1,d0.w),d1                                       ; d1 = target offset in screenbuffer
+
+  lea.l       active_selector_mark_ypos(pc),a2
+  lea.l       active_selector_mark_add(pc),a3
+  move.l      (a2),d2
+  move.l      (a3),d3
+  add.l       d3,d2                                              ; d2 = current offset in screenbuffer
+  move.l      d2,(a2)
+  cmp.l       d1,d2
+  bne.s       .target_offset_not_reached
+  clr.l       (a3)
+.target_offset_not_reached:
+  move.l      d2,d1
+
+  ; backup background
   add.l       ig_om_backbuffer(a4),d1
   move.l      d1,(a0)
 
@@ -445,11 +459,11 @@ brick_selectors_draw:
 
   rts
 
-; offsets in screenbuffer of the three possible positions
+; offsets in screenbuffer of the three possible target positions
 .active_selector_mark_offsets:
-  dc.l        22+(IgScreenBitPlanes*IgScreenWidthBytes*27)
-  dc.l        22+(IgScreenBitPlanes*IgScreenWidthBytes*87)
-  dc.l        22+(IgScreenBitPlanes*IgScreenWidthBytes*147)
+  dc.l        ActiveSelectorMarkerOffset0
+  dc.l        ActiveSelectorMarkerOffset1
+  dc.l        ActiveSelectorMarkerOffset2
 
 ; processes pending events if ig_om_act_mode is IgModeSelect
 brick_selectors_process_events:
@@ -466,8 +480,10 @@ brick_selectors_process_events:
   bne.s       .pe_down
   lea.l       active_selection(pc),a0
   tst.w       (a0)
-  beq.s       .pe_other
+  beq         .pe_other
   sub.w       #1,(a0)
+  lea.l       active_selector_mark_add(pc),a0
+  move.l      #ActiveSelectorMarkAddUp,(a0)
   SFX         f000_sfx_step
   bra.s       .process_event
 .pe_down:
@@ -477,6 +493,8 @@ brick_selectors_process_events:
   cmp.w       #2,(a0)
   beq.s       .pe_other
   add.w       #1,(a0)
+  lea.l       active_selector_mark_add(pc),a0
+  move.l      #ActiveSelectorMarkAddDown,(a0)
   SFX         f000_sfx_step
   bra.s       .process_event
 .pe_select:
@@ -519,7 +537,8 @@ clear_vars:
   move.l      d0,(a0)+
   move.l      a5,(a0)
   add.l       #ig_cm_asm_backup_1,(a0)+
-  move.l      a1,(a0)+
+  move.l      #ActiveSelectorMarkerOffset0,(a0)+
+  move.l      d0,(a0)+
 
   rts
 
@@ -548,7 +567,10 @@ active_selection:
   dc.w        0                                                  ; 0, 1 or 2
 active_selector_mark_backups:
   dcb.l       4                                                  ; 2 pairs of: pointer in screenbuffer for background backups and pointer to backup buffer
-
+active_selector_mark_ypos:
+  dc.l        ActiveSelectorMarkerOffset0                        ; actual y-pos as offset in screenbuffer
+active_selector_mark_add:
+  dc.l        0                                                  ; value to add to ypos each drawn frame
 
 ; brick selectors structures
 selectors: ; see bs_*
