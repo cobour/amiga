@@ -10,7 +10,7 @@ EventUnselect  equ 6
 
 EventsCount    equ 6                             ; count of possible events
 
-EventDelay     equ 35                            ; time in 1/50th of a second that must at least be between two identical events
+EventDelay     equ 25                            ; time in 1/50th of a second that must at least be between two identical events
 
 EventQueueSize equ 16                            ; size of key buffer, must be a power of 2, below 256
 
