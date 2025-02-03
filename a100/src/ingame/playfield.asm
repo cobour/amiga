@@ -3,6 +3,7 @@ PLAYFIELD_ASM equ 1
 
   include     "../common/src/system/blitter.i"
   include     "../a100/src/ingame/screen.i"
+  include     "../a100/src/ingame/sfx.i"
 
 ; is called before anything is seen on screen
 playfield_init:
@@ -83,6 +84,32 @@ playfield_init:
   move.l      d0,(a0)+
   dbf         d7,.id_array_loop
 
+  rts
+
+playfield_process_events:
+  cmp.b       #IgModePlace,ig_om_act_mode(a4)
+  bne.s       .exit
+
+.process_event:
+  bsr         get_next_event
+  tst.b       d0
+  blt.s       .exit
+
+.pe_unselect:
+  cmp.b       #EventUnselect,d0
+  bne.s       .pe_other
+  move.b      #IgModeSelect,ig_om_act_mode(a4)
+  bsr         clear_event_queue
+  bsr         refill_selected_brick_selector
+  SFX         f000_sfx_unselect
+  bra.s       .process_event
+
+.pe_other:
+  ; ignore all other events
+  SFX         f000_sfx_error
+  bra         .process_event
+
+.exit:
   rts
 
 ;
