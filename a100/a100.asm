@@ -88,5 +88,6 @@ main:
   include    "../a100/src/ingame/brick_selectors.asm"
   include    "../a100/src/ingame/bricks.asm"
   include    "../a100/src/ingame/events.asm"
+  include    "../a100/src/ingame/sfx.asm"
   include    "../common/src/3rdparty/inflate.asm"
   include    "../common/src/3rdparty/ptplayer.asm"

@@ -21,6 +21,7 @@ ig_start:
   clr.l      ig_om_framecounter(a4)
   move.b     #IgModeSelect,ig_om_act_mode(a4)
 
+  bsr        init_ingame_sfx
   bsr        .init_screen_buffer_pointers
   bsr        playfield_init
   bsr        brick_selectors_init
@@ -43,6 +44,7 @@ ig_start:
 .ig_loop:
   bsr        events_check
   bsr        brick_selectors_process_events
+  bsr        playfield_process_events
   bsr        brick_selectors_draw
 
   WAITVB
