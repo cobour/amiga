@@ -180,6 +180,16 @@ get_next_event:
   movem.l    (sp)+,d1/a0
   rts
 
+; clears all staging events in queue
+clear_event_queue:
+  move.l     d0,-(sp)
+.loop:
+  bsr        get_next_event
+  tst.b      d0
+  bge.s      .loop
+  move.l     (sp)+,d0
+  rts
+
 ;
 ; vars
 ;
