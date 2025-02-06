@@ -46,6 +46,7 @@ ig_start:
   bsr        brick_selectors_process_events
   bsr        playfield_process_events
   bsr        brick_selectors_draw
+  bsr        playfield_draw
 
   WAITVB
   bsr.s      .swap_buffers
