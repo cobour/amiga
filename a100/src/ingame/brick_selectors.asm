@@ -86,7 +86,7 @@ brick_selectors_init:
   rts
 
 .init_data:
-  bsr         clear_vars
+  bsr         bs_clear_vars
 
   ; initializes selectors data structures
   lea.l       selectors(pc),a1
@@ -608,19 +608,21 @@ brick_selectors_process_events:
 .pe_process_select:
   move.b      #IgModePlace,ig_om_act_mode(a4)
   bsr         clear_event_queue
-  move.l      active_selection_struct(pc),a3
+  move.l      active_selection_struct(pc),a1
   bsr         clear_selector
   bsr         redraw_active_selector
+  move.l      bs_big(a1),a1
+  bsr         playfield_set_brick
   SFX         f000_sfx_select
   bra         .process_event
 
 ; fills empty blocks in selector's data structure
 ; in:
-;   a3 - pointer to bs-struct
+;   a1 - pointer to bs-struct
 clear_selector:
   movem.l     d0/a0,-(sp)
   move.l      #$07070707,d0
-  move.l      a3,a0
+  move.l      a1,a0
   lea.l       bs_area(a0),a0
   move.l      d0,(a0)+
   move.l      d0,(a0)+
@@ -655,7 +657,7 @@ redraw_active_selector:
 ; vars section
 ;
 
-clear_vars:
+bs_clear_vars:
   moveq.l     #0,d0
   lea.l       small_bricks_metadata(pc),a0
 
