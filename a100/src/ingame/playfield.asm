@@ -205,7 +205,7 @@ pf_process_events:
   bra         .process_event
 
 .pe_process_unselect:
-  bsr         refill_selected_brick_selector                     ; before mode switch - otherwise selectors get refilled when unselected brick was the last one
+  bsr         bs_refill_selected_brick_selector                  ; before mode switch - otherwise selectors get refilled when unselected brick was the last one
   bsr         ig_switch_mode_select
   bsr         clear_event_queue
   SFX         f000_sfx_unselect

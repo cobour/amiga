@@ -6,7 +6,7 @@ BRICK_SELECTORS_ASM equ 1
   include     "../a100/src/ingame/brick_selectors_internal.i"
   include     "../a100/src/ingame/sfx.i"
 
-brick_selectors_init:
+bs_init:
 
   bsr         .init_data
 
@@ -20,7 +20,7 @@ brick_selectors_init:
   move.l      df_idx_ptr_rawdata(a0),d0                          ; source gfx data
   move.l      d0,d1
   add.l       df_iff_rawsize(a1),d1                              ; source mask data
-  lea.l       active_selector_metadata(pc),a2
+  lea.l       bs_active_selector_metadata(pc),a2
   move.l      a1,(a2)+
   move.l      d0,(a2)+
   move.l      d1,(a2)
@@ -34,7 +34,7 @@ brick_selectors_init:
   add.l       df_iff_rawsize(a1),d1                              ; source mask data
 
   ; store values for later use
-  lea.l       small_bricks_metadata(pc),a2
+  lea.l       bs_small_bricks_metadata(pc),a2
   move.l      a1,(a2)+
   move.l      d0,(a2)+
   move.l      d1,(a2)
@@ -73,7 +73,7 @@ brick_selectors_init:
   move.l      d2,d3
 .ig_columns_loop:
 
-  bsr         draw_one_brick
+  bsr         bs_draw_one_brick
 
   ; next columns loop iteration
   addq.l      #1,d3
@@ -89,12 +89,12 @@ brick_selectors_init:
   bsr         bs_clear_vars
 
   ; initializes selectors data structures
-  lea.l       selectors(pc),a1
+  lea.l       bs_selectors(pc),a1
   moveq.l     #bs_sizeof,d6
   moveq.l     #2,d7
 .id_loop:
   move.l      a1,a0
-  bsr.s       reset_selector
+  bsr.s       bs_reset_selector
   add.l       d6,a1
   dbf         d7,.id_loop
 
@@ -105,10 +105,10 @@ brick_selectors_init:
 ; does not check structure size, code MUST be changed when structure size is changed
 ; in:
 ;   a0 - pointer to data structure
-reset_selector:
+bs_reset_selector:
   movem.l     d0-d1/a3,-(sp)
   move.l      a0,a3
-  bsr         clear_selector
+  bsr         bs_clear_selector
   moveq.l     #0,d0
   move.l      d0,(a0)+
   move.l      d0,(a0)
@@ -118,7 +118,7 @@ reset_selector:
 ; called when switched to selection-mode
 bs_gained_mode:
   ; refill when all three selectors are empty
-  lea.l       selectors(pc),a0
+  lea.l       bs_selectors(pc),a0
   moveq.l     #bs_sizeof,d0
   tst.b       bs_empty(a0)
   beq.s       .exit
@@ -128,13 +128,13 @@ bs_gained_mode:
   add.l       d0,a0
   tst.b       bs_empty(a0)
   beq.s       .exit
-  bra.s       brick_selectors_refill
+  bra.s       bs_refill
 .exit:
   rts
 
 ; fills data structures of all three selectors with new random bricks
-brick_selectors_refill:
-  lea.l       selectors(pc),a1
+bs_refill:
+  lea.l       bs_selectors(pc),a1
   moveq.l     #bs_sizeof,d0
   moveq.l     #2,d7
 .bsr_loop: 
@@ -144,14 +144,14 @@ brick_selectors_refill:
   move.l      (a0),bs_big(a1)
   move.l      4(a0),bs_small(a1)
 
-  bsr         fill_bs_area
+  bsr         bs_fill_bs_area
 
 ; next selector
   add.l       d0,a1
   dbf         d7,.bsr_loop
 
 ; trigger redraw (all draw-operations in main loop; not in IRQ)
-  lea.l       redraw_all_struct(pc),a0
+  lea.l       bs_redraw_all_struct(pc),a0
   move.w      #BsDrawCountdown,(a0)+
   clr.l       (a0)
 
@@ -160,7 +160,7 @@ brick_selectors_refill:
 ; fills bs_area of bs-struct with brick from metadata (bs_small)
 ; in:
 ;   a1 - pointer to bs-struct
-fill_bs_area:
+bs_fill_bs_area:
   movem.l     d1-d6/a0/a2-a3,-(sp)
 
   clr.b       bs_empty(a1)
@@ -213,18 +213,18 @@ fill_bs_area:
   dc.b        10,5,5,0,0,0
 
 ; fills bs_area from bs_small and triggers redraw of active (aka selected) brick selector
-refill_selected_brick_selector:
-  move.l      active_selection_struct(pc),a1
-  bsr         fill_bs_area
-  bra         redraw_active_selector
-  ; no rts - bra to redraw_active_selector which does rts at the end
+bs_refill_selected_brick_selector:
+  move.l      bs_active_selection_struct(pc),a1
+  bsr         bs_fill_bs_area
+  bra         bs_redraw_active_selector
+  ; no rts - bra to bs_redraw_active_selector which does rts at the end
 
 ; draws one small brick with cpu (because 8px draws are pita with blitter)
 ; does not check metadata, code MUST be changed when small bricks gfx or screen dimensions are changed
 ;   d0 - pointer to source gfx
 ;   d1 - pointer to source mask
 ;   d3 - pointer to target
-draw_one_brick:
+bs_draw_one_brick:
   movem.l     d4/a0-a2,-(sp)
 
   move.l      d0,a0
@@ -282,26 +282,26 @@ draw_one_brick:
   movem.l     (sp)+,d4/a0-a2
   rts
 
-brick_selectors_draw:
+bs_draw:
   bsr         .draw_active_selector_mark
 
   ; check if redraw of all three selectors is currently happening
-  lea.l       redraw_all_struct(pc),a0
+  lea.l       bs_redraw_all_struct(pc),a0
   move.w      (a0)+,d0
   tst.w       d0
   bne.s       .redraw_all
 
   ; check if redraw of single selector is currently happening
-  lea.l       redraw_single_structs(pc),a0
+  lea.l       bs_redraw_single_structs(pc),a0
   ; check 0
-  lea.l       selectors(pc),a1
+  lea.l       bs_selectors(pc),a1
   move.l      #SelectorOffset_1,d3
   moveq.l     #0,d1
   move.w      (a0)+,d0
   tst.w       d0
   bne.s       .redraw_single
   ; check 1
-  lea.l       selectors+bs_sizeof(pc),a1
+  lea.l       bs_selectors+bs_sizeof(pc),a1
   move.l      #SelectorOffset_2,d3
   moveq.l     #bs_sizeof,d1
   addq.l      #bsrd_sizeof-2,a0
@@ -309,7 +309,7 @@ brick_selectors_draw:
   tst.w       d0
   bne.s       .redraw_single
   ; check 2
-  lea.l       selectors+bs_sizeof+bs_sizeof(pc),a1
+  lea.l       bs_selectors+bs_sizeof+bs_sizeof(pc),a1
   move.l      #SelectorOffset_3,d3
   moveq.l     #bs_sizeof*2,d1
   addq.l      #bsrd_sizeof-2,a0
@@ -342,15 +342,15 @@ brick_selectors_draw:
   bne.s       .next
 .draw:
   ; selector 0
-  lea.l       selectors(pc),a1
+  lea.l       bs_selectors(pc),a1
   move.l      #SelectorOffset_1,d3
   bsr.s       .draw_brick
   ; selector 1
-  lea.l       selectors+bs_sizeof(pc),a1
+  lea.l       bs_selectors+bs_sizeof(pc),a1
   move.l      #SelectorOffset_2,d3
   bsr.s       .draw_brick
   ; selector 2
-  lea.l       selectors+bs_sizeof+bs_sizeof(pc),a1
+  lea.l       bs_selectors+bs_sizeof+bs_sizeof(pc),a1
   move.l      #SelectorOffset_3,d3
   bsr.s       .draw_brick
 .next:
@@ -358,7 +358,7 @@ brick_selectors_draw:
   dbf         d7,.check_loop
 
   ; redraw is done for this frame
-  lea.l       redraw_all_struct(pc),a0
+  lea.l       bs_redraw_all_struct(pc),a0
   sub.w       #1,(a0)
 .exit:
   rts
@@ -378,7 +378,7 @@ brick_selectors_draw:
   move.l      a2,(a0)
 .single_scheme_is_set:
 
-  lea.l       selectors(pc),a2
+  lea.l       bs_selectors(pc),a2
   add.l       d1,a2                                              ; a2 = selector struct
 
   ; check if and which bricks must be drawn
@@ -429,13 +429,13 @@ brick_selectors_draw:
   ; d5 = number of gfx brick
 
   movem.l     d0-d1,-(sp)
-  move.l      small_bricks_gfx(pc),d0
+  move.l      bs_small_bricks_gfx(pc),d0
   add.l       d5,d0
   ; d0 = gfx pointer
-  move.l      small_bricks_mask(pc),d1
+  move.l      bs_small_bricks_mask(pc),d1
   add.l       d5,d1
   ; d1 = mask pointer
-  bsr         draw_one_brick
+  bsr         bs_draw_one_brick
   movem.l     (sp)+,d0-d1
   rts
 
@@ -480,7 +480,7 @@ brick_selectors_draw:
 .draw_active_selector_mark:
 
   ; restore background if necessary
-  lea.l       active_selector_mark_backups(pc),a0
+  lea.l       bs_active_selector_mark_backups(pc),a0
   move.l      (a0),d1
   tst.l       d1
   beq.s       .restore_not_necessary
@@ -501,13 +501,13 @@ brick_selectors_draw:
 
   ; calc position
   lea.l       .active_selector_mark_offsets(pc),a1
-  move.w      active_selection(pc),d0
+  move.w      bs_active_selection(pc),d0
   add.w       d0,d0
   add.w       d0,d0
   move.l      (a1,d0.w),d1                                       ; d1 = target offset in screenbuffer
 
-  lea.l       active_selector_mark_ypos(pc),a2
-  lea.l       active_selector_mark_add(pc),a3
+  lea.l       bs_active_selector_mark_ypos(pc),a2
+  lea.l       bs_active_selector_mark_add(pc),a3
   move.l      (a2),d2
   move.l      (a3),d3
   add.l       d3,d2                                              ; d2 = current offset in screenbuffer
@@ -545,14 +545,14 @@ brick_selectors_draw:
   clr.w       BLTBMOD(a6)
   move.w      #IgScreenWidthBytes-2,BLTCMOD(a6)
   move.w      #IgScreenWidthBytes-2,BLTDMOD(a6)
-  move.l      active_selector_mask(pc),BLTAPTH(a6)               ; pointers
-  move.l      active_selector_gfx(pc),BLTBPTH(a6)
+  move.l      bs_active_selector_mask(pc),BLTAPTH(a6)            ; pointers
+  move.l      bs_active_selector_gfx(pc),BLTBPTH(a6)
   move.l      d1,BLTCPTH(a6)
   move.l      d1,BLTDPTH(a6)
   move.w      #(16*IgScreenBitPlanes<<6)+1,BLTSIZE(a6)           ; start blit
  
   ; switch pointers for next frame
-  lea.l       active_selector_mark_backups(pc),a0
+  lea.l       bs_active_selector_mark_backups(pc),a0
   move.l      (a0),d0
   move.l      4(a0),d1
   move.l      8(a0),(a0)
@@ -569,7 +569,7 @@ brick_selectors_draw:
   dc.l        ActiveSelectorMarkerOffset2
 
 ; processes pending events if ig_om_act_mode is IgModeSelect
-brick_selectors_process_events:
+bs_process_events:
   cmp.b       #IgModeSelect,ig_om_act_mode(a4)
   bne         .exit
 
@@ -599,37 +599,37 @@ brick_selectors_process_events:
   rts
 
 .pe_process_up:
-  lea.l       active_selection(pc),a0
+  lea.l       bs_active_selection(pc),a0
   tst.w       (a0)
   beq         .pe_other
   sub.w       #1,(a0)
-  lea.l       active_selection_struct(pc),a0
+  lea.l       bs_active_selection_struct(pc),a0
   sub.l       #bs_sizeof,(a0)
-  lea.l       active_selector_mark_add(pc),a0
+  lea.l       bs_active_selector_mark_add(pc),a0
   move.l      #ActiveSelectorMarkAddUp,(a0)
   SFX         f000_sfx_step
   bra         .process_event
 
 .pe_process_down:
-  lea.l       active_selection(pc),a0
+  lea.l       bs_active_selection(pc),a0
   cmp.w       #2,(a0)
   beq.s       .pe_other
   add.w       #1,(a0)
-  lea.l       active_selection_struct(pc),a0
+  lea.l       bs_active_selection_struct(pc),a0
   add.l       #bs_sizeof,(a0)
-  lea.l       active_selector_mark_add(pc),a0
+  lea.l       bs_active_selector_mark_add(pc),a0
   move.l      #ActiveSelectorMarkAddDown,(a0)
   SFX         f000_sfx_step
   bra         .process_event
 
 .pe_process_select:
-  move.l      active_selection_struct(pc),a1
+  move.l      bs_active_selection_struct(pc),a1
   tst.b       bs_empty(a1)
   bne.s       .pe_process_select__empty
   bsr         ig_switch_mode_place
   bsr         clear_event_queue
-  bsr         clear_selector
-  bsr         redraw_active_selector
+  bsr         bs_clear_selector
+  bsr         bs_redraw_active_selector
   move.l      bs_big(a1),a1
   bsr         pf_set_brick
   SFX         f000_sfx_select
@@ -641,7 +641,7 @@ brick_selectors_process_events:
 ; fills empty blocks in selector's data structure
 ; in:
 ;   a1 - pointer to bs-struct
-clear_selector:
+bs_clear_selector:
   movem.l     d0/a0,-(sp)
   move.l      #$07070707,d0
   move.l      a1,a0
@@ -658,14 +658,14 @@ clear_selector:
 
 ; triggers redraw of active selected selector
 ; bs_area must be set to desired result before calling this
-redraw_active_selector:
+bs_redraw_active_selector:
   movem.l     d0/a0,-(sp)
   moveq.l     #0,d0
-  move.w      active_selection(pc),d0
+  move.w      bs_active_selection(pc),d0
   add.w       d0,d0
   lea.l       .offsets(pc),a0
   move.w      (a0,d0.w),d0
-  lea.l       redraw_single_structs(pc),a0
+  lea.l       bs_redraw_single_structs(pc),a0
   add.l       d0,a0
   move.w      #BsDrawCountdown,bsrd_countdown(a0)
   movem.l     (sp)+,d0/a0
@@ -681,7 +681,7 @@ redraw_active_selector:
 
 bs_clear_vars:
   moveq.l     #0,d0
-  lea.l       small_bricks_metadata(pc),a0
+  lea.l       bs_small_bricks_metadata(pc),a0
 
   ; gfx ptrs
   move.l      d0,(a0)+
@@ -701,7 +701,7 @@ bs_clear_vars:
   move.l      d0,(a0)+
   ; selection
   move.w      d0,(a0)+
-  lea.l       selectors(pc),a1
+  lea.l       bs_selectors(pc),a1
   move.l      a1,(a0)+
   move.l      d0,(a0)+
   move.l      a5,(a0)
@@ -715,41 +715,41 @@ bs_clear_vars:
   rts
 
 ; gfx ptrs
-small_bricks_metadata:
+bs_small_bricks_metadata:
   dc.l        0
-small_bricks_gfx:
+bs_small_bricks_gfx:
   dc.l        0
-small_bricks_mask:
+bs_small_bricks_mask:
   dc.l        0
-active_selector_metadata: ; marker
+bs_active_selector_metadata: ; marker
   dc.l        0
-active_selector_gfx: ; marker
+bs_active_selector_gfx: ; marker
   dc.l        0
-active_selector_mask: ; marker
+bs_active_selector_mask: ; marker
   dc.l        0
 
 ; redraw all three selectors
-redraw_all_struct:
+bs_redraw_all_struct:
   dcb.b       bsrd_sizeof
 
 ; redraw single selectors
-redraw_single_structs:
+bs_redraw_single_structs:
   dcb.b       3*bsrd_sizeof
 
 ; selection
-active_selection:
+bs_active_selection:
   dc.w        0                                                  ; 0, 1 or 2
-active_selection_struct:
-  dc.l        0                                                  ; pointer to bs-struct of active_selection
-active_selector_mark_backups:
+bs_active_selection_struct:
+  dc.l        0                                                  ; pointer to bs-struct of bs_active_selection
+bs_active_selector_mark_backups:
   dcb.l       4                                                  ; 2 pairs of: pointer in screenbuffer for background backups and pointer to backup buffer
-active_selector_mark_ypos:
+bs_active_selector_mark_ypos:
   dc.l        ActiveSelectorMarkerOffset0                        ; actual y-pos as offset in screenbuffer
-active_selector_mark_add:
+bs_active_selector_mark_add:
   dc.l        0                                                  ; value to add to ypos each drawn frame
 
 ; brick selectors structures
-selectors: ; see bs_*
+bs_selectors: ; see bs_*
   dcb.b       3*bs_sizeof
 
   endif                                                          ; ifnd BRICK_SELECTORS_ASM

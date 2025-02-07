@@ -24,9 +24,9 @@ ig_start:
   bsr        init_ingame_sfx
   bsr        .init_screen_buffer_pointers
   bsr        pf_init
-  bsr        brick_selectors_init
+  bsr        bs_init
   bsr        bricks_init
-  bsr        brick_selectors_refill
+  bsr        bs_refill
   bsr        events_init
   bsr        .init_screen_buffers
   bsr        .init_copper_list
@@ -43,9 +43,9 @@ ig_start:
 
 .ig_loop:
   bsr        events_check
-  bsr        brick_selectors_process_events
+  bsr        bs_process_events
   bsr        pf_process_events
-  bsr        brick_selectors_draw
+  bsr        bs_draw
   bsr        pf_draw
 
   WAITVB
