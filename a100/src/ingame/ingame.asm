@@ -178,6 +178,16 @@ ig_start:
   move.b     #1,(a0)
   rts
 
+ig_switch_mode_select:
+  move.b     #IgModeSelect,ig_om_act_mode(a4)
+  bsr        bs_gained_mode
+  rts
+
+ig_switch_mode_place:
+  move.b     #IgModePlace,ig_om_act_mode(a4)
+  bsr        pf_gained_mode
+  rts
+
 lvl3_irq_handler:
   movem.l    d0/a4-a6,-(sp)
 

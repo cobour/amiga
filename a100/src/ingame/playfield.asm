@@ -86,6 +86,11 @@ playfield_init:
   bsr         pf_clear_vars
   rts
 
+; called when switched to placement-mode
+pf_gained_mode:
+  ; empty for now
+  rts
+
 ; sets the brick that is to be placed
 ; in:
 ;   a1 - pointer to metadata of brick
@@ -99,8 +104,12 @@ playfield_set_brick:
   move.b      df_tld_plf_height+1(a0),(a2)+
   move.l      df_idx_ptr_rawdata(a1),(a2)+
 
-  ; set initial position
+  ; clear pf_brick_is_placable
   moveq.l     #0,d0
+  lea.l       pf_brick_is_placable(pc),a0
+  move.b      d0,(a0)
+
+  ; set initial position
   lea.l       .initial_position_tab(pc),a0
   move.b      pf_brick_width(pc),d0
   move.b      (a0,d0.w),(a2)+
@@ -129,31 +138,31 @@ playfield_process_events:
 .pe_unselect:
   cmp.b       #EventUnselect,d0
   bne.s       .pe_up
-  bra.s       .pe_process_unselect
+  bra         .pe_process_unselect
 .pe_up:
   cmp.b       #EventUp,d0
   bne.s       .pe_down
   moveq.l     #0,d1
   moveq.l     #-1,d2
-  bra.s       .pr_process_movement
+  bra         .pe_process_movement
 .pe_down:
   cmp.b       #EventDown,d0
   bne.s       .pe_left
   moveq.l     #0,d1
   moveq.l     #1,d2
-  bra.s       .pr_process_movement
+  bra         .pe_process_movement
 .pe_left:
   cmp.b       #EventLeft,d0
   bne.s       .pe_right
   moveq.l     #-1,d1
   moveq.l     #0,d2
-  bra.s       .pr_process_movement
+  bra         .pe_process_movement
 .pe_right:
   cmp.b       #EventRight,d0
   bne.s       .pe_other
   moveq.l     #1,d1
   moveq.l     #0,d2
-  bra.s       .pr_process_movement
+  bra         .pe_process_movement
 .pe_other:
   ; ignore all other events
   SFX         f000_sfx_error
@@ -163,14 +172,42 @@ playfield_process_events:
   rts
 
 .pe_process_select:
-  ; TODO: handle placement of brick (updates playfield_data with data from brick's tiled area with the not-empty bricks from that area)
+  lea.l       pf_brick_is_placable(pc),a0
+  tst.b       (a0)
+  beq.s       .pe_process_select__not_placable
+
+  ; update playfield_data with data from brick's tiled area with the not-empty bricks from that area
+  bsr         playfield_init_pos_brick
+  bsr         playfield_init_loop_counters
+  bsr         playfield_get_pointer_for_pos
+  move.l      pf_brick_rawdata(pc),a1
+  moveq.l     #10,d2
+.pe_process_select__row_loop:
+  move.w      d5,d6
+  move.l      a0,a2
+.pe_process_select__column_loop:
+  move.w      (a1)+,d3
+  tst.w       d3
+  beq.s       .pe_process_select__skip
+  move.b      d3,(a2)
+.pe_process_select__skip:
+  addq.l      #1,a2
+  dbf         d6,.pe_process_select__column_loop
+  add.l       d2,a0
+  dbf         d7,.pe_process_select__row_loop
+
+  bsr         ig_switch_mode_select
+  bsr         clear_event_queue
+  SFX         f000_sfx_select
+  bra         .process_event
+.pe_process_select__not_placable:
   SFX         f000_sfx_error
-  bra.s       .process_event
+  bra         .process_event
 
 .pe_process_unselect:
-  move.b      #IgModeSelect,ig_om_act_mode(a4)
+  bsr         refill_selected_brick_selector                     ; before mode switch - otherwise selectors get refilled when unselected brick was the last one
+  bsr         ig_switch_mode_select
   bsr         clear_event_queue
-  bsr         refill_selected_brick_selector
   SFX         f000_sfx_unselect
   bra         .process_event
 
@@ -178,7 +215,7 @@ playfield_process_events:
 ; in:
 ;   d1 - x-pos-add (-1, 0 or +1)
 ;   d2 - y-pos-add (-1, 0 or +1)
-.pr_process_movement:
+.pe_process_movement:
   lea.l       pf_brick_xpos(pc),a0
   lea.l       pf_brick_ypos(pc),a1
 
@@ -189,23 +226,23 @@ playfield_process_events:
 
   ; check left border
   tst.b       d3
-  blt.s       .invalid_position
+  blt.s       .pe_process_movement__invalid_position
 
   ; check top border
   tst.b       d4
-  blt.s       .invalid_position
+  blt.s       .pe_process_movement__invalid_position
 
   ; check right border
   move.b      d3,d1
   add.b       pf_brick_width(pc),d1
   cmp.b       #10,d1
-  bgt.s       .invalid_position
+  bgt.s       .pe_process_movement__invalid_position
 
   ; check bottom border
   move.b      d4,d1
   add.b       pf_brick_height(pc),d1
   cmp.b       #10,d1
-  bgt.s       .invalid_position
+  bgt.s       .pe_process_movement__invalid_position
   
   ; new position is inside playfield
   move.b      d3,(a0)
@@ -213,7 +250,7 @@ playfield_process_events:
   SFX         f000_sfx_step
   bra         .process_event
 
-.invalid_position:
+.pe_process_movement__invalid_position:
   SFX         f000_sfx_error
   bra         .process_event
 
@@ -248,7 +285,7 @@ playfield_draw:
 ; restore background
 .restore_background:
   bsr         .init_pos_restore
-  bsr         .init_loop_counters
+  bsr         playfield_init_loop_counters
   bsr         .get_gfx_and_mask_pointers_and_init_blitter
 .rb_row_loop:
   bsr.s       .get_target_offset_in_framebuffer
@@ -271,9 +308,10 @@ playfield_draw:
 
 ; draw_brick
 .draw_brick:
-  bsr         .init_pos_draw
-  bsr         .init_loop_counters
+  bsr         playfield_init_pos_brick
+  bsr         playfield_init_loop_counters
   bsr         .get_gfx_and_mask_pointers_and_init_blitter
+  move.b      #1,(a1)                                            ; pf_brick_is_placable
 .db_row_loop:
   bsr.s       .get_target_offset_in_framebuffer
   move.w      d0,d2
@@ -286,6 +324,7 @@ playfield_draw:
   beq.s       .db_skip
   ; draw stop sign = field is occupied AND brick is solid in this square
   move.w      #14,d4
+  clr.b       (a1)                                               ; pf_brick_is_placable
   bra.s       .db_draw
 .db_draw_normal:
   move.w      (a0),d4
@@ -371,29 +410,6 @@ playfield_draw:
   move.b      3(a0),d1
   rts
 
-; out:
-;   d0.w - xpos (0-9)
-;   d1.w - ypos (0-9)
-.init_pos_draw:
-  clr.w       d0
-  clr.w       d1
-  move.b      pf_brick_xpos(pc),d0
-  move.b      pf_brick_ypos(pc),d1
-  rts
-
-; get counters for row- and column-loops
-; out:
-;   d5.w - counter for columns-loop
-;   d7.w - counter for rows-loop
-.init_loop_counters:
-  clr.w       d5
-  clr.w       d7
-  move.b      pf_brick_width(pc),d5
-  subq.w      #1,d5
-  move.b      pf_brick_height(pc),d7
-  subq.w      #1,d7
-  rts
-
 ; gets index from playfield_data for given position
 ; in:
 ;   d2 - xpos
@@ -402,7 +418,7 @@ playfield_draw:
 ;   d4 - index in big_bricks gfx and mask
 .get_field:
   movem.l     d7/a0,-(sp)
-  lea.l       .gf_row_offsets(pc),a0
+  lea.l       playfield_row_offsets(pc),a0
   move.w      d1,d7
   add.w       d7,d7
   move.w      (a0,d7.w),d7
@@ -413,21 +429,9 @@ playfield_draw:
   movem.l     (sp)+,d7/a0
   rts
 
-.gf_row_offsets:
-  dc.w        0
-  dc.w        10
-  dc.w        20
-  dc.w        30
-  dc.w        40
-  dc.w        50
-  dc.w        60
-  dc.w        70
-  dc.w        80
-  dc.w        90
-
 ; out:
 ;   a0 - brick tiled raw data
-;   a1 - big_bricks metadata
+;   a1 - pointer to pf_brick_is_placable
 ;   a2 - base gfx pointer
 ;   a3 - base mask pointer
 .get_gfx_and_mask_pointers_and_init_blitter:
@@ -435,7 +439,7 @@ playfield_draw:
   ; get pointers
   move.l      #f000_gfx_bricks_big,d0
   bsr         datafiles_get_pointer
-  lea.l       df_idx_metadata(a0),a1                             ; a1 = big_bricks metadata
+  lea.l       df_idx_metadata(a0),a1
   move.l      df_idx_ptr_rawdata(a0),a2                          ; a2 = source gfx data
   move.l      a2,a3
   add.l       df_iff_rawsize(a1),a3                              ; a3 = source mask data
@@ -460,8 +464,65 @@ playfield_draw:
   move.w      d7,BLTCMOD(a6)
   move.w      d7,BLTDMOD(a6)
 
+  lea.l       pf_brick_is_placable(pc),a1                        ; a1 = pointer to pf_brick_is_placable
+
   movem.l     (sp)+,d0/d7
   rts
+
+; out:
+;   d0.w - xpos (0-9)
+;   d1.w - ypos (0-9)
+playfield_init_pos_brick:
+  clr.w       d0
+  clr.w       d1
+  move.b      pf_brick_xpos(pc),d0
+  move.b      pf_brick_ypos(pc),d1
+  rts
+
+; get counters for row- and column-loops
+; out:
+;   d5.w - counter for columns-loop
+;   d7.w - counter for rows-loop
+playfield_init_loop_counters:
+  clr.w       d5
+  clr.w       d7
+  move.b      pf_brick_width(pc),d5
+  subq.w      #1,d5
+  move.b      pf_brick_height(pc),d7
+  subq.w      #1,d7
+  rts
+
+; gets pointer in playfield_data for given position
+; in:
+;    d0.w - xpos
+;    d1.w - ypos
+; out:
+;    a0 - pointer in playfield_data
+playfield_get_pointer_for_pos:
+  move.l      d2,-(sp)
+  moveq.l     #0,d2
+  move.w      d1,d2
+  add.w       d2,d2
+  lea.l       playfield_row_offsets(pc),a0
+  move.w      (a0,d2.w),d2
+  add.w       d0,d2
+  lea.l       playfield_data(pc),a0
+  add.l       d2,a0
+  move.l      (sp)+,d2
+  rts
+
+; offsets of beginning of rows in playfield_data
+playfield_row_offsets:
+  dc.w        0
+  dc.w        10
+  dc.w        20
+  dc.w        30
+  dc.w        40
+  dc.w        50
+  dc.w        60
+  dc.w        70
+  dc.w        80
+  dc.w        90
 
 ;
 ; vars section
@@ -475,7 +536,8 @@ pf_clear_vars:
   ; brick to be placed
   move.l      d0,(a0)+
   move.l      d0,(a0)+
-  move.l      d1,(a0)
+  move.l      d1,(a0)+
+  move.w      d1,(a0)
 
   rts
 
@@ -492,6 +554,10 @@ pf_brick_ypos:
   dc.b        0                                                  ; 0-9
 pf_brick_old_positions:
   dc.l        0                                                  ; x- and y-positions from the last 2 drawn frames, used for restoring the background
+pf_brick_is_placable:
+  dc.b        0                                                  ; 0 = false; any other value = true
+.padding_byte:
+  dc.b        0
 
 playfield_data: ; index array for brick per field
   dcb.b       100

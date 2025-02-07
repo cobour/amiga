@@ -115,6 +115,23 @@ reset_selector:
   movem.l     (sp)+,d0-d1/a3
   rts
 
+; called when switched to selection-mode
+bs_gained_mode:
+  ; refill when all three selectors are empty
+  lea.l       selectors(pc),a0
+  moveq.l     #bs_sizeof,d0
+  tst.b       bs_empty(a0)
+  beq.s       .exit
+  add.l       d0,a0
+  tst.b       bs_empty(a0)
+  beq.s       .exit
+  add.l       d0,a0
+  tst.b       bs_empty(a0)
+  beq.s       .exit
+  bra.s       brick_selectors_refill
+.exit:
+  rts
+
 ; fills data structures of all three selectors with new random bricks
 brick_selectors_refill:
   lea.l       selectors(pc),a1
@@ -606,14 +623,19 @@ brick_selectors_process_events:
   bra         .process_event
 
 .pe_process_select:
-  move.b      #IgModePlace,ig_om_act_mode(a4)
-  bsr         clear_event_queue
   move.l      active_selection_struct(pc),a1
+  tst.b       bs_empty(a1)
+  bne.s       .pe_process_select__empty
+  bsr         ig_switch_mode_place
+  bsr         clear_event_queue
   bsr         clear_selector
   bsr         redraw_active_selector
   move.l      bs_big(a1),a1
   bsr         playfield_set_brick
   SFX         f000_sfx_select
+  bra         .process_event
+.pe_process_select__empty:
+  SFX         f000_sfx_error
   bra         .process_event
 
 ; fills empty blocks in selector's data structure
