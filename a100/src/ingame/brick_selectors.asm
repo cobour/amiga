@@ -140,7 +140,7 @@ bs_refill:
 .bsr_loop: 
 
 ; get random brick
-  bsr         get_random_brick
+  bsr         b_get_random_brick
   move.l      (a0),bs_big(a1)
   move.l      4(a0),bs_small(a1)
 

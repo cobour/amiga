@@ -4,7 +4,7 @@ BRICKS_ASM             equ 1
 BRICKS_ARRAY_SIZE      equ 32
 BRICKS_ARRAY_SIZE_MASK equ $1f             ; mask for BRICKS_ARRAY_SIZE fragment
 
-bricks_init:
+b_init:
 
   bsr        .init_randomizer
 
@@ -16,7 +16,7 @@ bricks_init:
   moveq.l    #0,d3
   move.l     #$100,d4
   move.l     #$10000,d5
-  lea.l      brick_pointers(pc),a1
+  lea.l      b_brick_pointers(pc),a1
   moveq.l    #BRICKS_ARRAY_SIZE-1,d7
 
 .ibp_loop:
@@ -65,7 +65,7 @@ bricks_init:
   dbf        d7,.ir_loop
 
   ; store numbers
-  lea.l      random(pc),a0
+  lea.l      b_random(pc),a0
   move.l     d0,(a0)+
   move.l     d1,(a0)
 
@@ -74,11 +74,11 @@ bricks_init:
 ; get new random brick
 ; out:
 ;    a0 - pointer to big and small brick index pointers
-get_random_brick:
+b_get_random_brick:
   movem.l    d0-d2/d7,-(sp)
 
 ; get new random number in d2
-  lea.l      random(pc),a0
+  lea.l      b_random(pc),a0
   move.l     (a0),d0
   move.l     4(a0),d1
   move.l     ig_om_framecounter(a4),d7
@@ -105,7 +105,7 @@ get_random_brick:
   and.l      #BRICKS_ARRAY_SIZE_MASK,d2
   lsl.l      #3,d2
 
-  lea.l      brick_pointers(pc),a0
+  lea.l      b_brick_pointers(pc),a0
   add.l      d2,a0
  
   movem.l    (sp)+,d0-d2/d7
@@ -115,10 +115,10 @@ get_random_brick:
 ; vars section
 ;
 
-random:
+b_random:
   dcb.l      2
 
-brick_pointers: ; two longs for one brick (first big, second small) - for up to BRICKS_ARRAY_SIZE bricks with repeating bricks (for easier randomized lookup)
+b_brick_pointers: ; two longs for one brick (first big, second small) - for up to BRICKS_ARRAY_SIZE bricks with repeating bricks (for easier randomized lookup)
   dcb.l      BRICKS_ARRAY_SIZE*2
 
   endif                                    ; ifnd BRICKS_ASM

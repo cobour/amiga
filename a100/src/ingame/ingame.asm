@@ -25,7 +25,7 @@ ig_start:
   bsr        .init_screen_buffer_pointers
   bsr        pf_init
   bsr        bs_init
-  bsr        bricks_init
+  bsr        b_init
   bsr        bs_refill
   bsr        events_init
   bsr        .init_screen_buffers
