@@ -6,7 +6,7 @@ PLAYFIELD_ASM equ 1
   include     "../a100/src/ingame/sfx.i"
 
 ; is called before anything is seen on screen
-playfield_init:
+pf_init:
   bsr         .init_data
 
 ; fills playfield with empty bricks
@@ -77,7 +77,7 @@ playfield_init:
 
 ; initializes data structure
 .init_data:
-  lea.l       playfield_data(pc),a0
+  lea.l       pf_data(pc),a0
   moveq.l     #0,d0
   moveq.l     #24,d7                                             ; 100 bytes = 25 longs
 .id_array_loop:
@@ -94,7 +94,7 @@ pf_gained_mode:
 ; sets the brick that is to be placed
 ; in:
 ;   a1 - pointer to metadata of brick
-playfield_set_brick:
+pf_set_brick:
   movem.l     d0/a0/a2,-(sp)
 
   ; copy relevant data
@@ -122,7 +122,7 @@ playfield_set_brick:
 .initial_position_tab:
   dc.b        -1,4,4,3,3,2                                       ; width/height start with 1 not 0, so first entry is never used
 
-playfield_process_events:
+pf_process_events:
   cmp.b       #IgModePlace,ig_om_act_mode(a4)
   bne.s       .exit
 
@@ -176,10 +176,10 @@ playfield_process_events:
   tst.b       (a0)
   beq.s       .pe_process_select__not_placable
 
-  ; update playfield_data with data from brick's tiled area with the not-empty bricks from that area
-  bsr         playfield_init_pos_brick
-  bsr         playfield_init_loop_counters
-  bsr         playfield_get_pointer_for_pos
+  ; update pf_data with data from brick's tiled area with the not-empty bricks from that area
+  bsr         pf_init_pos_brick
+  bsr         pf_init_loop_counters
+  bsr         pf_get_pointer_for_pos
   move.l      pf_brick_rawdata(pc),a1
   moveq.l     #10,d2
 .pe_process_select__row_loop:
@@ -255,7 +255,7 @@ playfield_process_events:
   bra         .process_event
 
 ; draws relevant parts of the playfield
-playfield_draw:
+pf_draw:
 
   ; restore background behind brick to be placed (may be necessary even when not in placement-mode)
   lea.l       pf_brick_old_positions(pc),a0
@@ -285,7 +285,7 @@ playfield_draw:
 ; restore background
 .restore_background:
   bsr         .init_pos_restore
-  bsr         playfield_init_loop_counters
+  bsr         pf_init_loop_counters
   bsr         .get_gfx_and_mask_pointers_and_init_blitter
 .rb_row_loop:
   bsr.s       .get_target_offset_in_framebuffer
@@ -308,8 +308,8 @@ playfield_draw:
 
 ; draw_brick
 .draw_brick:
-  bsr         playfield_init_pos_brick
-  bsr         playfield_init_loop_counters
+  bsr         pf_init_pos_brick
+  bsr         pf_init_loop_counters
   bsr         .get_gfx_and_mask_pointers_and_init_blitter
   move.b      #1,(a1)                                            ; pf_brick_is_placable
 .db_row_loop:
@@ -410,7 +410,7 @@ playfield_draw:
   move.b      3(a0),d1
   rts
 
-; gets index from playfield_data for given position
+; gets index from pf_data for given position
 ; in:
 ;   d2 - xpos
 ;   d1 - ypos
@@ -418,12 +418,12 @@ playfield_draw:
 ;   d4 - index in big_bricks gfx and mask
 .get_field:
   movem.l     d7/a0,-(sp)
-  lea.l       playfield_row_offsets(pc),a0
+  lea.l       pf_row_offsets(pc),a0
   move.w      d1,d7
   add.w       d7,d7
   move.w      (a0,d7.w),d7
   add.w       d2,d7
-  lea.l       playfield_data(pc),a0
+  lea.l       pf_data(pc),a0
   clr.w       d4
   move.b      (a0,d7.w),d4
   movem.l     (sp)+,d7/a0
@@ -472,7 +472,7 @@ playfield_draw:
 ; out:
 ;   d0.w - xpos (0-9)
 ;   d1.w - ypos (0-9)
-playfield_init_pos_brick:
+pf_init_pos_brick:
   clr.w       d0
   clr.w       d1
   move.b      pf_brick_xpos(pc),d0
@@ -483,7 +483,7 @@ playfield_init_pos_brick:
 ; out:
 ;   d5.w - counter for columns-loop
 ;   d7.w - counter for rows-loop
-playfield_init_loop_counters:
+pf_init_loop_counters:
   clr.w       d5
   clr.w       d7
   move.b      pf_brick_width(pc),d5
@@ -492,27 +492,27 @@ playfield_init_loop_counters:
   subq.w      #1,d7
   rts
 
-; gets pointer in playfield_data for given position
+; gets pointer in pf_data for given position
 ; in:
 ;    d0.w - xpos
 ;    d1.w - ypos
 ; out:
-;    a0 - pointer in playfield_data
-playfield_get_pointer_for_pos:
+;    a0 - pointer in pf_data
+pf_get_pointer_for_pos:
   move.l      d2,-(sp)
   moveq.l     #0,d2
   move.w      d1,d2
   add.w       d2,d2
-  lea.l       playfield_row_offsets(pc),a0
+  lea.l       pf_row_offsets(pc),a0
   move.w      (a0,d2.w),d2
   add.w       d0,d2
-  lea.l       playfield_data(pc),a0
+  lea.l       pf_data(pc),a0
   add.l       d2,a0
   move.l      (sp)+,d2
   rts
 
-; offsets of beginning of rows in playfield_data
-playfield_row_offsets:
+; offsets of beginning of rows in pf_data
+pf_row_offsets:
   dc.w        0
   dc.w        10
   dc.w        20
@@ -559,7 +559,7 @@ pf_brick_is_placable:
 .padding_byte:
   dc.b        0
 
-playfield_data: ; index array for brick per field
-  dcb.b       100
+pf_data:
+  dcb.b       100                                                ; index array for brick per field
 
   endif                                                          ; ifnd PLAYFIELD_ASM

@@ -631,7 +631,7 @@ brick_selectors_process_events:
   bsr         clear_selector
   bsr         redraw_active_selector
   move.l      bs_big(a1),a1
-  bsr         playfield_set_brick
+  bsr         pf_set_brick
   SFX         f000_sfx_select
   bra         .process_event
 .pe_process_select__empty:
