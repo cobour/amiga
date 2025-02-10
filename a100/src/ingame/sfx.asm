@@ -1,8 +1,8 @@
   ifnd       INGAME_SFX_ASM
 INGAME_SFX_ASM equ 1
 
-init_ingame_sfx:
-  lea.l      ingame_sfx(pc),a1
+sfx_ingame_init:
+  lea.l      sfx_ingame(pc),a1
 .next:
   move.l     (a1)+,d0
   tst.l      d0
@@ -14,9 +14,9 @@ init_ingame_sfx:
 .exit:
   rts
 
-play_ingame_sfx:
+sfx_ingame_play:
   movem.l    d1/a1,-(sp)
-  lea.l      ingame_sfx-8(pc),a1
+  lea.l      sfx_ingame-8(pc),a1
 .next:
   addq.l     #8,a1
   move.l     (a1),d1
@@ -30,7 +30,7 @@ play_ingame_sfx:
   movem.l    (sp)+,d1/a1
   rts
 
-ingame_sfx:
+sfx_ingame:
   dc.l       f000_sfx_select
   dc.l       0
   dc.l       f000_sfx_unselect

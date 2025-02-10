@@ -574,7 +574,7 @@ bs_process_events:
   bne         .exit
 
 .process_event:
-  bsr         get_next_event
+  bsr         ev_ingame_get_next_event
   tst.b       d0
   blt         .exit
 
@@ -627,7 +627,7 @@ bs_process_events:
   tst.b       bs_empty(a1)
   bne.s       .pe_process_select__empty
   bsr         ig_switch_mode_place
-  bsr         clear_event_queue
+  bsr         ev_ingame_clear_event_queue
   bsr         bs_clear_selector
   bsr         bs_redraw_active_selector
   move.l      bs_big(a1),a1

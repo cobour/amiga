@@ -21,13 +21,13 @@ ig_start:
   clr.l      ig_om_framecounter(a4)
   move.b     #IgModeSelect,ig_om_act_mode(a4)
 
-  bsr        init_ingame_sfx
+  bsr        sfx_ingame_init
   bsr        .init_screen_buffer_pointers
   bsr        pf_init
   bsr        bs_init
   bsr        b_init
   bsr        bs_refill
-  bsr        events_init
+  bsr        ev_ingame_init
   bsr        .init_screen_buffers
   bsr        .init_copper_list
   bsr        ctrl_take_system
@@ -42,7 +42,7 @@ ig_start:
   ;
 
 .ig_loop:
-  bsr        events_check
+  bsr        ev_ingame_check
   bsr        bs_process_events
   bsr        pf_process_events
   bsr        bs_draw

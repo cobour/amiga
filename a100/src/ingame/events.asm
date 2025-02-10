@@ -4,13 +4,13 @@ EVENTS_ASM equ 1
   include    "../a100/src/ingame/events.i"
   include    "../common/src/system/joystick.i"
 
-events_init:
-  lea.l      event_delay(pc),a0
+ev_ingame_init:
+  lea.l      ev_ingame_delay(pc),a0
   move.l     #EventDelay,(a0)
   rts
 
 ; checks for new events
-events_check:
+ev_ingame_check:
 
   ;
   ; check keyboard
@@ -131,7 +131,7 @@ events_check:
   move.l     (a1),d2
   move.l     ig_om_framecounter(a4),d3
 
-  add.l      event_delay(pc),d2
+  add.l      ev_ingame_delay(pc),d2
   cmp.l      d2,d3
   ble.s      .no_new_event
 
@@ -139,7 +139,7 @@ events_check:
   move.l     d3,(a1)
 
   ; add event to queue
-  lea.l      event_struct(pc),a1
+  lea.l      ev_ingame_struct(pc),a1
   move.w     (a1),d2                              ; event_write_index
   move.b     d1,event_queue(a1,d2.w)
   addq.w     #1,d2
@@ -156,10 +156,10 @@ events_check:
 ; returns next event from queue or -1 when queue is empty
 ; out:
 ;   d0.b - next event
-get_next_event:
+ev_ingame_get_next_event:
   movem.l    d1/a0,-(sp)
 
-  lea.l      event_struct(pc),a0
+  lea.l      ev_ingame_struct(pc),a0
   move.w     (a0)+,d0                             ; event_write_index
   move.w     (a0)+,d1                             ; event_read_index
   cmp.w      d0,d1
@@ -181,10 +181,10 @@ get_next_event:
   rts
 
 ; clears all staging events in queue
-clear_event_queue:
+ev_ingame_clear_event_queue:
   move.l     d0,-(sp)
 .loop:
-  bsr        get_next_event
+  bsr        ev_ingame_get_next_event
   tst.b      d0
   bge.s      .loop
   move.l     (sp)+,d0
@@ -194,10 +194,10 @@ clear_event_queue:
 ; vars
 ;
 
-event_delay:
+ev_ingame_delay:
   dc.l       0
 
-event_struct:
+ev_ingame_struct:
   dcb.b      event_size
 
   endif                                           ; ifnd EVENTS_ASM
