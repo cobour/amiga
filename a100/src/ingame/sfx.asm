@@ -39,6 +39,10 @@ sfx_ingame:
   dc.l       0
   dc.l       f000_sfx_error
   dc.l       0
-  dc.l       -1                        ; end of list
+  dc.l       f000_sfx_clear_row_column
+  dc.l       0
+  dc.l       f000_sfx_placed
+  dc.l       0
+  dc.l       -1                           ; end of list
 
-  endif                                ; ifnd INGAME_SFX_ASM
+  endif                                   ; ifnd INGAME_SFX_ASM

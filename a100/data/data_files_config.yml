@@ -38,17 +38,25 @@ targetFiles:
       - filename: sfx/select.wav
         id: SSEL
         volume: 64
-        priority: 64
+        priority: 48
       - filename: sfx/unselect.wav
         id: SUNS
         volume: 64
-        priority: 64
+        priority: 48
       - filename: sfx/step.wav
         id: SSTP
         volume: 64
-        priority: 64
+        priority: 32
+      - filename: sfx/placed.wav
+        id: SPLC
+        volume: 64
+        priority: 48
       - filename: sfx/error.wav
         id: SERR
+        volume: 64
+        priority: 48
+      - filename: sfx/clear_row_column.wav
+        id: SCLR
         volume: 64
         priority: 64
       - filename: ../src/ingame/copperlist.asm
