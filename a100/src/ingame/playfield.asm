@@ -16,9 +16,9 @@ pf_init:
   move.l      #f000_gfx_bricks_big,d0
   bsr         datafiles_get_pointer
   lea.l       df_idx_metadata(a0),a1
-  move.l      df_idx_ptr_rawdata(a0),d0                          ; source gfx data
+  move.l      df_idx_ptr_rawdata(a0),d0                            ; source gfx data
   move.l      d0,d1
-  add.l       df_iff_rawsize(a1),d1                              ; source mask data
+  add.l       df_iff_rawsize(a1),d1                                ; source mask data
 
   ; get target pointer for first brick
   move.l      ig_om_frontbuffer(a4),d2
@@ -79,7 +79,7 @@ pf_init:
 .init_data:
   lea.l       pf_data(pc),a0
   moveq.l     #0,d0
-  moveq.l     #24,d7                                             ; 100 bytes = 25 longs
+  moveq.l     #24,d7                                               ; 100 bytes = 25 longs
 .id_array_loop:
   move.l      d0,(a0)+
   dbf         d7,.id_array_loop
@@ -120,7 +120,7 @@ pf_set_brick:
   rts
 
 .initial_position_tab:
-  dc.b        -1,4,4,3,3,2                                       ; width/height start with 1 not 0, so first entry is never used
+  dc.b        -1,4,4,3,3,2                                         ; width/height start with 1 not 0, so first entry is never used
 
 pf_process_events:
   cmp.b       #IgModePlace,ig_om_act_mode(a4)
@@ -196,16 +196,17 @@ pf_process_events:
   add.l       d2,a0
   dbf         d7,.pe_process_select__row_loop
 
+  bsr         pf_check_completed
   bsr         ig_switch_mode_select
   bsr         ev_ingame_clear_event_queue
-  SFX         f000_sfx_select
+  SFX         f000_sfx_placed
   bra         .process_event
 .pe_process_select__not_placable:
   SFX         f000_sfx_error
   bra         .process_event
 
 .pe_process_unselect:
-  bsr         bs_refill_selected_brick_selector                  ; before mode switch - otherwise selectors get refilled when unselected brick was the last one
+  bsr         bs_refill_selected_brick_selector                    ; before mode switch - otherwise selectors get refilled when unselected brick was the last one
   bsr         ig_switch_mode_select
   bsr         ev_ingame_clear_event_queue
   SFX         f000_sfx_unselect
@@ -260,13 +261,20 @@ pf_draw:
   ; restore background behind brick to be placed (may be necessary even when not in placement-mode)
   lea.l       pf_brick_old_positions(pc),a0
   tst.w       2(a0)
-  blt.s       .check_draw_brick
+  blt.s       .check_clearance_in_progress
   bsr.s       .restore_background
+
+.check_clearance_in_progress:
+  move.b      pf_clearance_in_progress(pc),d0
+  tst.b       d0
+  beq.s       .check_draw_brick
+  bsr.s       .clearance_of_completed_rows_columns
+  bra.s       .update_pf_brick_old_positions
 
 .check_draw_brick:
   cmp.b       #IgModePlace,ig_om_act_mode(a4)
   bne.s       .update_pf_brick_old_positions
-  bsr.s       .draw_brick
+  bsr         .draw_brick
 
 .update_pf_brick_old_positions:
   lea.l       pf_brick_old_positions(pc),a0
@@ -288,7 +296,7 @@ pf_draw:
   bsr         pf_init_loop_counters
   bsr         .get_gfx_and_mask_pointers_and_init_blitter
 .rb_row_loop:
-  bsr.s       .get_target_offset_in_framebuffer
+  bsr         .get_target_offset_in_framebuffer
   move.w      d0,d2
   move.w      d5,d6
 .rb_column_loop:
@@ -306,12 +314,115 @@ pf_draw:
 
   rts
 
+; clearance of completed rows/columns
+.clearance_of_completed_rows_columns:
+  lea.l       pf_clearance_frame_counter(pc),a0
+  moveq.l     #0,d0
+  move.b      (a0),d0                                              ; d0 = frames since pf_clearance_in_progress was set
+  cmp.b       #3,d0
+  blt         .clearance_update_vars
+
+  bsr         .get_gfx_and_mask_pointers_and_init_blitter          ; a0+a1 not needed, a2+a3 needed
+
+.clearance_columns_to_clear:
+  lea.l       pf_columns_to_clear(pc),a0
+  lea.l       pf_clearance_column_offset_framebuffer(pc),a1
+  move.l      (a1),d3
+  moveq.l     #0,d1
+  moveq.l     #0,d2
+  moveq.l     #0,d4
+.clearance_columns_loop:
+  tst.b       (a0,d2.w)
+  blt.s       .clearance_columns_loop_next
+
+  ; clear field in pf_data
+  move.b      (a0,d2.w),d1
+  bsr         .set_field
+
+  ; blit empty block (.draw_single_field)
+  bsr         .draw_single_field
+
+  move.b      pf_clearance_frame_counter(pc),d7
+  btst        #0,d7
+  bne.s       .clearance_columns_loop_next
+  ; update values every second run (because of double-buffering)
+  add.b       #1,(a0,d2.w)
+
+.clearance_columns_loop_next:
+  addq.l      #2,d3
+  addq.l      #1,d2
+  cmp.b       #10,d2
+  blt.s       .clearance_columns_loop
+
+  move.b      pf_clearance_frame_counter(pc),d7
+  btst        #0,d7
+  bne.s       .clearance_rows_to_clear
+  ; update values every second run (because of double-buffering)
+  add.l       #(IgScreenWidthBytes*IgScreenBitPlanes*16),(a1)
+
+.clearance_rows_to_clear:
+  lea.l       pf_rows_to_clear(pc),a0
+  lea.l       pf_clearance_row_offset_framebuffer(pc),a1
+  move.l      (a1),d3
+  moveq.l     #0,d1
+  moveq.l     #0,d2
+  moveq.l     #0,d4
+.clearance_rows_loop:
+  tst.b       (a0,d1.w)
+  blt.s       .clearance_rows_loop_next
+
+  ; clear field in pf_data
+  move.b      (a0,d1.w),d2
+  bsr         .set_field
+
+  ; blit empty block (.draw_single_field)
+  bsr         .draw_single_field
+
+  move.b      pf_clearance_frame_counter(pc),d7
+  btst        #0,d7
+  bne.s       .clearance_rows_loop_next
+  ; update values every second run (because of double-buffering)
+  add.b       #1,(a0,d1.w)
+
+.clearance_rows_loop_next:
+  add.l       #(IgScreenWidthBytes*IgScreenBitPlanes*16),d3
+  addq.l      #1,d1
+  cmp.b       #10,d1
+  blt.s       .clearance_rows_loop
+
+  move.b      pf_clearance_frame_counter(pc),d7
+  btst        #0,d7
+  bne.s       .clearance_update_vars
+  ; update values every second run (because of double-buffering)
+  moveq.l     #2,d7
+  add.l       d7,(a1)
+
+.clearance_update_vars:
+  lea.l       pf_clearance_frame_counter(pc),a0
+  add.b       #1,(a0)
+  cmp.b       #23,(a0)
+  ; clearance is done  -reset all relevant values
+  bne.s       .clearance_exit
+  clr.b       (a0)
+  lea.l       pf_clearance_in_progress(pc),a0
+  clr.b       (a0)
+  lea.l       pf_rows_to_clear(pc),a0
+  moveq.l     #-1,d0
+  move.l      d0,(a0)+
+  move.l      d0,(a0)+
+  move.l      d0,(a0)+
+  move.l      d0,(a0)+
+  move.l      d0,(a0)
+
+.clearance_exit:
+  rts
+
 ; draw_brick
 .draw_brick:
   bsr         pf_init_pos_brick
   bsr         pf_init_loop_counters
   bsr         .get_gfx_and_mask_pointers_and_init_blitter
-  move.b      #1,(a1)                                            ; pf_brick_is_placable
+  move.b      #1,(a1)                                              ; pf_brick_is_placable
 .db_row_loop:
   bsr.s       .get_target_offset_in_framebuffer
   move.w      d0,d2
@@ -324,7 +435,7 @@ pf_draw:
   beq.s       .db_skip
   ; draw stop sign = field is occupied AND brick is solid in this square
   move.w      #14,d4
-  clr.b       (a1)                                               ; pf_brick_is_placable
+  clr.b       (a1)                                                 ; pf_brick_is_placable
   bra.s       .db_draw
 .db_draw_normal:
   move.w      (a0),d4
@@ -353,10 +464,10 @@ pf_draw:
   add.w       d4,d4
   add.w       d4,d4
   lea.l       .row_offsets(pc),a0
-  move.l      (a0,d4.w),d3                                       ; target offset in framebuffer for the beginning of the row
+  move.l      (a0,d4.w),d3                                         ; target offset in framebuffer for the beginning of the row
   move.w      d0,d4
   add.w       d4,d4
-  add.l       d4,d3                                              ; target offset in framebuffer for first field to draw
+  add.l       d4,d3                                                ; target offset in framebuffer for first field to draw
   movem.l     (sp)+,a0/d4
   rts
 .row_offsets:
@@ -381,11 +492,11 @@ pf_draw:
   movem.l     d0-d2,-(sp)
 
   move.l      ig_om_backbuffer(a4),d0
-  add.l       d3,d0                                              ; d0 = target pointer
+  add.l       d3,d0                                                ; d0 = target pointer
   move.l      a2,d1
-  add.l       d4,d1                                              ; d1 = source gfx pointer
+  add.l       d4,d1                                                ; d1 = source gfx pointer
   move.l      a3,d2
-  add.l       d4,d2                                              ; d2 = source mask pointer
+  add.l       d4,d2                                                ; d2 = source mask pointer
 
   WAIT_BLT
 
@@ -429,6 +540,23 @@ pf_draw:
   movem.l     (sp)+,d7/a0
   rts
 
+; sets index in pf_data for given position
+; in:
+;   d2 - xpos
+;   d1 - ypos
+;   d4 - index in big_bricks gfx and mask
+.set_field:
+  movem.l     d7/a0,-(sp)
+  lea.l       pf_row_offsets(pc),a0
+  move.w      d1,d7
+  add.w       d7,d7
+  move.w      (a0,d7.w),d7
+  add.w       d2,d7
+  lea.l       pf_data(pc),a0
+  move.b      d4,(a0,d7.w)
+  movem.l     (sp)+,d7/a0
+  rts
+
 ; out:
 ;   a0 - brick tiled raw data
 ;   a1 - pointer to pf_brick_is_placable
@@ -440,10 +568,10 @@ pf_draw:
   move.l      #f000_gfx_bricks_big,d0
   bsr         datafiles_get_pointer
   lea.l       df_idx_metadata(a0),a1
-  move.l      df_idx_ptr_rawdata(a0),a2                          ; a2 = source gfx data
+  move.l      df_idx_ptr_rawdata(a0),a2                            ; a2 = source gfx data
   move.l      a2,a3
-  add.l       df_iff_rawsize(a1),a3                              ; a3 = source mask data
-  move.l      pf_brick_rawdata(pc),a0                            ; a0 = brick tiled raw data
+  add.l       df_iff_rawsize(a1),a3                                ; a3 = source mask data
+  move.l      pf_brick_rawdata(pc),a0                              ; a0 = brick tiled raw data
 
   WAIT_BLT
 
@@ -464,7 +592,7 @@ pf_draw:
   move.w      d7,BLTCMOD(a6)
   move.w      d7,BLTDMOD(a6)
 
-  lea.l       pf_brick_is_placable(pc),a1                        ; a1 = pointer to pf_brick_is_placable
+  lea.l       pf_brick_is_placable(pc),a1                          ; a1 = pointer to pf_brick_is_placable
 
   movem.l     (sp)+,d0/d7
   rts
@@ -511,6 +639,92 @@ pf_get_pointer_for_pos:
   move.l      (sp)+,d2
   rts
 
+; checks for completed rows and/or columns and updates pf_rows_to_clear, pf_columns_to_clear and pf_clearance_in_progress
+pf_check_completed:
+  lea.l       pf_clearance_in_progress(pc),a1
+  moveq.l     #10,d0
+  moveq.l     #1,d1
+  moveq.l     #0,d2
+  moveq.l     #0,d6                                                ; any clearance detected?
+
+  ; check rows
+  lea.l       pf_rows_to_clear(pc),a0
+  lea.l       pf_clearance_row_offset_framebuffer(pc),a2
+  lea.l       pf_data(pc),a3
+  moveq.l     #9,d7
+.rows_loop:
+  tst.b       (a3)
+  beq.s       .next_row
+  tst.b       1(a3)
+  beq.s       .next_row
+  tst.b       2(a3)
+  beq.s       .next_row
+  tst.b       3(a3)
+  beq.s       .next_row
+  tst.b       4(a3)
+  beq.s       .next_row
+  tst.b       5(a3)
+  beq.s       .next_row
+  tst.b       6(a3)
+  beq.s       .next_row
+  tst.b       7(a3)
+  beq.s       .next_row
+  tst.b       8(a3)
+  beq.s       .next_row
+  tst.b       9(a3)
+  beq.s       .next_row
+  move.b      d2,(a0)
+  move.b      d1,(a1)
+  move.b      d2,1(a1)
+  move.l      #(IgScreenWidthBytes*IgScreenBitPlanes*16)+2,(a2)
+  moveq.l     #1,d6
+.next_row:
+  addq.l      #1,a0
+  add.l       d0,a3
+  dbf         d7,.rows_loop
+
+  ; check columns
+  lea.l       pf_columns_to_clear(pc),a0
+  lea.l       pf_clearance_column_offset_framebuffer(pc),a2
+  lea.l       pf_data(pc),a3
+  moveq.l     #9,d7
+.columns_loop:
+  tst.b       (a3)
+  beq.s       .next_column
+  tst.b       10(a3)
+  beq.s       .next_column
+  tst.b       20(a3)
+  beq.s       .next_column
+  tst.b       30(a3)
+  beq.s       .next_column
+  tst.b       40(a3)
+  beq.s       .next_column
+  tst.b       50(a3)
+  beq.s       .next_column
+  tst.b       60(a3)
+  beq.s       .next_column
+  tst.b       70(a3)
+  beq.s       .next_column
+  tst.b       80(a3)
+  beq.s       .next_column
+  tst.b       90(a3)
+  beq.s       .next_column
+  move.b      d2,(a0)
+  move.b      d1,(a1)
+  move.b      d2,1(a1)
+  move.l      #(IgScreenWidthBytes*IgScreenBitPlanes*16)+2,(a2)
+  moveq.l     #1,d6
+.next_column:
+  addq.l      #1,a0
+  addq.l      #1,a3
+  dbf         d7,.columns_loop
+
+  tst.b       d6
+  beq.s       .exit
+  SFX         f000_sfx_clear_row_column
+.exit:
+  rts
+
 ; offsets of beginning of rows in pf_data
 pf_row_offsets:
   dc.w        0
@@ -537,29 +751,53 @@ pf_clear_vars:
   move.l      d0,(a0)+
   move.l      d0,(a0)+
   move.l      d1,(a0)+
-  move.w      d1,(a0)
+  move.w      d1,(a0)+
+
+  ; completed rows/columns must be cleared
+  move.l      d1,(a0)+
+  move.l      d1,(a0)+
+  move.l      d1,(a0)+
+  move.l      d1,(a0)+
+  move.l      d1,(a0)+
+  move.w      d0,(a0)+
+  move.l      d0,(a0)+
+  move.l      d0,(a0)+
 
   rts
 
 ; brick to be placed
 pf_brick_width:
-  dc.b        0                                                  ; 1-5
+  dc.b        0                                                    ; 1-5
 pf_brick_height:
-  dc.b        0                                                  ; 1-5
+  dc.b        0                                                    ; 1-5
 pf_brick_rawdata:
   dc.l        0
 pf_brick_xpos:
-  dc.b        0                                                  ; 0-9
+  dc.b        0                                                    ; 0-9
 pf_brick_ypos:
-  dc.b        0                                                  ; 0-9
+  dc.b        0                                                    ; 0-9
 pf_brick_old_positions:
-  dc.l        0                                                  ; x- and y-positions from the last 2 drawn frames, used for restoring the background
+  dc.l        0                                                    ; x- and y-positions from the last 2 drawn frames, used for restoring the background
 pf_brick_is_placable:
-  dc.b        0                                                  ; 0 = false; any other value = true
+  dc.b        0                                                    ; 0 = false; any other value = true
 .padding_byte:
   dc.b        0
 
-pf_data:
-  dcb.b       100                                                ; index array for brick per field
+; completed rows/columns must be cleared
+pf_rows_to_clear:
+  dcb.b       10,-1                                                ; -1 = false; 0-9 intervall to be cleared
+pf_columns_to_clear:
+  dcb.b       10,-1                                                ; -1 = false; 0-9 intervall to be cleared
+pf_clearance_in_progress:
+  dc.b        0                                                    ; 0 = false; any other value = true
+pf_clearance_frame_counter:
+  dc.b        0                                                    ; framecount since pf_clearance_in_progress was set
+pf_clearance_row_offset_framebuffer:
+  dc.l        0                                                    ; offset in framebuffer for next row clearance
+pf_clearance_column_offset_framebuffer:
+  dc.l        0                                                    ; offset in framebuffer for next column clearance
 
-  endif                                                          ; ifnd PLAYFIELD_ASM
+pf_data:
+  dcb.b       100                                                  ; index array for brick per field
+
+  endif                                                            ; ifnd PLAYFIELD_ASM
