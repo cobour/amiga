@@ -28,6 +28,7 @@ ig_start:
   bsr        b_init
   bsr        bs_refill
   bsr        ev_ingame_init
+  bsr        sc_init
   bsr        .init_screen_buffers
   bsr        .init_copper_list
   bsr        ctrl_take_system
@@ -47,10 +48,11 @@ ig_start:
   bsr        pf_process_events
   bsr        bs_draw
   bsr        pf_draw
+  bsr        sc_draw
 
   WAITVB
   bsr.s      .swap_buffers
-  btst       #6,CIAA                                                            ; REMOVE
+  btst       #6,CIAA                                                            ; REMOVE - other exit-option needed (game-over recognition)
   bne.s      .ig_loop
 
   ;

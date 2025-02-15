@@ -26,6 +26,10 @@ targetFiles:
       - filename: gfx/ingame_screen.iff
         id: SCRN
         withMask: false
+      - filename: gfx/font16.iff
+        id: FONT
+        flattenedTileFormat: 16x16
+        flattenedReducedTileCount: 59
       - filename: gfx/bricks_big.iff
         id: BRBG
       - filename: gfx/bricks_small.iff

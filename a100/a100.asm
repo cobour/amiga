@@ -77,6 +77,7 @@ main:
 ; Includes
 ;
   include    "files_index.i"
+  include    "../common/src/system/bcd.asm"
   include    "../common/src/system/exec.asm"
   include    "../common/src/system/datafiles.asm"
   include    "../common/src/system/disk.asm"
@@ -89,5 +90,6 @@ main:
   include    "../a100/src/ingame/bricks.asm"
   include    "../a100/src/ingame/events.asm"
   include    "../a100/src/ingame/sfx.asm"
+  include    "../a100/src/ingame/score.asm"
   include    "../common/src/3rdparty/inflate.asm"
   include    "../common/src/3rdparty/ptplayer.asm"

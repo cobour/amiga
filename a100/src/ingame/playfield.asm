@@ -5,6 +5,30 @@ PLAYFIELD_ASM equ 1
   include     "../a100/src/ingame/screen.i"
   include     "../a100/src/ingame/sfx.i"
 
+  ; add constant value to score
+  macro       SCORE_C
+  movem.l     d0-d1/a0,-(sp)
+  lea.l       c_om_score(a4),a0
+  move.l      (a0),d0
+  moveq.l     #\1,d1
+  bsr         bcd_add
+  move.l      d0,(a0)
+  move.b      #2,ig_om_score_draw_counter(a4)
+  movem.l     (sp)+,d0-d1/a0
+  endm
+
+  ; add value from data-register to score
+  macro       SCORE_D
+  movem.l     d0-d1/a0,-(sp)
+  lea.l       c_om_score(a4),a0
+  move.l      (a0),d0
+  move.l      \1,d1
+  bsr         bcd_add
+  move.l      d0,(a0)
+  move.b      #2,ig_om_score_draw_counter(a4)
+  movem.l     (sp)+,d0-d1/a0
+  endm
+
 ; is called before anything is seen on screen
 pf_init:
   bsr         .init_data
@@ -182,6 +206,7 @@ pf_process_events:
   bsr         pf_get_pointer_for_pos
   move.l      pf_brick_rawdata(pc),a1
   moveq.l     #10,d2
+  moveq.l     #0,d4
 .pe_process_select__row_loop:
   move.w      d5,d6
   move.l      a0,a2
@@ -190,11 +215,13 @@ pf_process_events:
   tst.w       d3
   beq.s       .pe_process_select__skip
   move.b      d3,(a2)
+  addq.b      #1,d4                                                ; calc score for placement of brick
 .pe_process_select__skip:
   addq.l      #1,a2
   dbf         d6,.pe_process_select__column_loop
   add.l       d2,a0
   dbf         d7,.pe_process_select__row_loop
+  SCORE_D     d4
 
   bsr         pf_check_completed
   bsr         ig_switch_mode_select
@@ -401,7 +428,7 @@ pf_draw:
   lea.l       pf_clearance_frame_counter(pc),a0
   add.b       #1,(a0)
   cmp.b       #23,(a0)
-  ; clearance is done  -reset all relevant values
+  ; clearance is done - reset all relevant values
   bne.s       .clearance_exit
   clr.b       (a0)
   lea.l       pf_clearance_in_progress(pc),a0
@@ -678,6 +705,7 @@ pf_check_completed:
   move.b      d2,1(a1)
   move.l      #(IgScreenWidthBytes*IgScreenBitPlanes*16)+2,(a2)
   moveq.l     #1,d6
+  SCORE_C     $10
 .next_row:
   addq.l      #1,a0
   add.l       d0,a3
@@ -714,6 +742,7 @@ pf_check_completed:
   move.b      d2,1(a1)
   move.l      #(IgScreenWidthBytes*IgScreenBitPlanes*16)+2,(a2)
   moveq.l     #1,d6
+  SCORE_C     $10
 .next_column:
   addq.l      #1,a0
   addq.l      #1,a3

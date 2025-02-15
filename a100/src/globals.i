@@ -27,6 +27,7 @@ c_cm_sizeof:                rs.b       0
 ; common other-mem base struct (MUST be included in any other-mem-struct at the beginning)
                             rsreset
 c_om_disk:                  rs.b       disk_sizeof
+c_om_score:                 rs.l       1                                  ; score of player (set ingame, needed in highscore-table)
 c_om_sizeof:                rs.b       0
 
                             endif                                         ; ifnd GLOBALS_I
