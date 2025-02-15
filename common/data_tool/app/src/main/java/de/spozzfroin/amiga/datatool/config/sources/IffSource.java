@@ -276,7 +276,7 @@ class IffSource extends AbstractSource {
 			src.skip(4); // left and top not needed
 			uow.bitplanes = BINARY_VALUE_CONVERTER.readByte(src);
 			int masking = BINARY_VALUE_CONVERTER.readByte(src);
-			if (masking != 0) {
+			if (masking == 1) {
 				throw new UnsupportedOperationException("Masking not yet supported!");
 			}
 			int compress = BINARY_VALUE_CONVERTER.readByte(src);
