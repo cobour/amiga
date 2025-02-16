@@ -3,6 +3,8 @@
   include    "../a100/src/ingame/screen.i"
   include    "../common/src/system/custom.i"
 
+; MUST MATCH STRUCT ig_cm_cl_*
+
 ; sprite pointer
   dc.w       SPR0PTH,$0000
   dc.w       SPR0PTL,$0000
@@ -43,8 +45,6 @@
   dc.w       DDFSTOP,(IgScreenStartX/2-DdfResolution)+(8*((IgScreenWidth/16)-1))
   dc.w       DIWSTRT,(IgScreenStartY<<8)|IgScreenStartX
   dc.w       DIWSTOP,((IgScreenStopY-256)<<8)|(IgScreenStopX-256)
-; trigger Copper-IRQ after all bitplane and sprite registers are set => irq routine can safely modify copperlist for next frame
-  dc.w       INTREQ,%1000000000010000
 ; colors
   dc.w       COLOR00,$0000
   dc.w       COLOR01,$0000
@@ -78,5 +78,10 @@
   dc.w       COLOR29,$0000
   dc.w       COLOR30,$0000
   dc.w       COLOR31,$0000
+; wait till raster beam is directly behind visible area
+  dc.w       $ffdf,$fffe
+  dc.w       $2bd1,$fffe
+; trigger Copper-IRQ after all is shown => irq routine can safely modify copperlist for next frame
+  dc.w       INTREQ,%1000000000010000
 ; end
   dc.w       $ffff,$fffe

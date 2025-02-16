@@ -9,8 +9,9 @@ INGAME_I     equ 1
 ig_cm_cl_sprites:          rs.l       16
 ig_cm_cl_bitplanes:        rs.l       12
 ig_cm_cl_bpl_config:       rs.l       9
-ig_cm_cl_irq:              rs.l       1
 ig_cm_cl_colors:           rs.l       32
+ig_cm_cl_wait_for_eof:     rs.l       2
+ig_cm_cl_irq:              rs.l       1
 ig_cm_cl_end:              rs.l       1
 ig_cm_cl_sizeof:           rs.b       0
 
