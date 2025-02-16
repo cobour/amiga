@@ -25,6 +25,18 @@ bs_init:
   move.l      d0,(a2)+
   move.l      d1,(a2)
 
+  ; get active selector left - gfx and mask pointers
+  move.l      #f000_gfx_active_selector_left,d0
+  bsr         datafiles_get_pointer
+  lea.l       df_idx_metadata(a0),a1
+  move.l      df_idx_ptr_rawdata(a0),d0                          ; source gfx data
+  move.l      d0,d1
+  add.l       df_iff_rawsize(a1),d1                              ; source mask data
+  lea.l       bs_active_selector_left_metadata(pc),a2
+  move.l      a1,(a2)+
+  move.l      d0,(a2)+
+  move.l      d1,(a2)
+
   ; get empty brick - gfx and mask pointers
   move.l      #f000_gfx_bricks_small,d0
   bsr         datafiles_get_pointer
@@ -499,6 +511,18 @@ bs_draw:
 
 .restore_not_necessary:
 
+  ; draw only in selection mode
+  cmp.b       #IgModeSelect,ig_om_act_mode(a4)
+  ;bne         .asm_next
+  beq.s       .asm_right
+  move.l      bs_active_selector_left_mask(pc),d6
+  move.l      bs_active_selector_left_gfx(pc),d7
+  bra.s       .asm_calc_pos
+.asm_right:
+  move.l      bs_active_selector_mask(pc),d6
+  move.l      bs_active_selector_gfx(pc),d7
+
+.asm_calc_pos:
   ; calc position
   lea.l       .active_selector_mark_offsets(pc),a1
   move.w      bs_active_selection(pc),d0
@@ -545,13 +569,14 @@ bs_draw:
   clr.w       BLTBMOD(a6)
   move.w      #IgScreenWidthBytes-2,BLTCMOD(a6)
   move.w      #IgScreenWidthBytes-2,BLTDMOD(a6)
-  move.l      bs_active_selector_mask(pc),BLTAPTH(a6)            ; pointers
-  move.l      bs_active_selector_gfx(pc),BLTBPTH(a6)
+  move.l      d6,BLTAPTH(a6)                                     ; pointers
+  move.l      d7,BLTBPTH(a6)
   move.l      d1,BLTCPTH(a6)
   move.l      d1,BLTDPTH(a6)
   move.w      #(16*IgScreenBitPlanes<<6)+1,BLTSIZE(a6)           ; start blit
  
   ; switch pointers for next frame
+.asm_next:
   lea.l       bs_active_selector_mark_backups(pc),a0
   move.l      (a0),d0
   move.l      4(a0),d1
@@ -690,6 +715,9 @@ bs_clear_vars:
   move.l      d0,(a0)+
   move.l      d0,(a0)+
   move.l      d0,(a0)+
+  move.l      d0,(a0)+
+  move.l      d0,(a0)+
+  move.l      d0,(a0)+
   ; redraw all three selectors
   move.w      d0,(a0)+
   move.l      d0,(a0)+
@@ -726,6 +754,12 @@ bs_active_selector_metadata: ; marker
 bs_active_selector_gfx: ; marker
   dc.l        0
 bs_active_selector_mask: ; marker
+  dc.l        0
+bs_active_selector_left_metadata: ; marker left
+  dc.l        0
+bs_active_selector_left_gfx: ; marker left
+  dc.l        0
+bs_active_selector_left_mask: ; marker left
   dc.l        0
 
 ; redraw all three selectors
