@@ -8,7 +8,7 @@ SCREEN_I equ 1
 .1\@:  
   move.l     VPOSR(a6),d0
   and.l      #$1ff00,d0
-  cmp.l      #303<<8,d0
+  cmp.l      #299<<8,d0
   bne.s      .1\@
   movem.l    (sp)+,d0/a6
   endm
@@ -20,12 +20,12 @@ SCREEN_I equ 1
 .1\@:  
   move.l     VPOSR(a6),d0
   and.l      #$1ff00,d0
-  cmp.l      #304<<8,d0
+  cmp.l      #300<<8,d0
   bne.s      .1\@
 .2\@:  
   move.l     VPOSR(a6),d0
   and.l      #$1ff00,d0
-  cmp.l      #303<<8,d0
+  cmp.l      #299<<8,d0
   bne.s      .2\@
   movem.l    (sp)+,d0/a6
   endm
