@@ -59,9 +59,9 @@
 		{
 			"label": "Run data-tool",
 			"type": "shell",
-			"command": "../gradlew run --args='config.file=../../../a100/data/data_files_config.yml vasm=/Users/frank/.vscode/extensions/prb28.amiga-assembly-1.8.12/resources/bin/darwin/vasmm68k_mot'",
+			"command": "../gradlew run --args='config.file=../../../a100/data/data_files_config.yml vasm=/Users/frank/.vscode/extensions/prb28.amiga-assembly-1.8.13/resources/bin/darwin/vasmm68k_mot'",
 			"windows": {
-				"command": "..\\gradlew.bat run --args='config.file=..\\..\\..\\a100\\data\\data_files_config.yml vasm=C:\\Users\\frank\\.vscode\\extensions\\prb28.amiga-assembly-1.8.12\\resources\\bin\\win32\\vasmm68k_mot.exe'",
+				"command": "..\\gradlew.bat run --args='config.file=..\\..\\..\\a100\\data\\data_files_config.yml vasm=C:\\Users\\frank\\.vscode\\extensions\\prb28.amiga-assembly-1.8.13\\resources\\bin\\win32\\vasmm68k_mot.exe'",
 			},
 			"options": {
 				"cwd": "../common/data_tool/app/"
