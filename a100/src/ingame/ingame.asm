@@ -21,6 +21,7 @@ ig_start:
   clr.l      ig_om_framecounter(a4)
   move.b     #IgModeSelect,ig_om_act_mode(a4)
 
+  bsr        .init_fade
   bsr        sfx_ingame_init
   bsr        .init_screen_buffer_pointers
   bsr        pf_init
@@ -43,6 +44,7 @@ ig_start:
   ;
 
 .ig_loop:
+  bsr        .update_fade
   bsr        ev_ingame_check
   bsr        bs_process_events
   bsr        pf_process_events
@@ -85,6 +87,12 @@ ig_start:
   add.l      #IgScreenWidthBytes,d0
   addq.l     #8,a0
   dbf        d7,.icl
+  rts
+
+.update_fade:
+  move.l     ig_om_copperlist(a4),a0
+  add.l      #ig_cm_cl_colors,a0
+  bsr        fade_next_step
   rts
 
 .load_and_inflate_files:
@@ -139,21 +147,6 @@ ig_start:
   add.l      #IgScreenWidthBytes,d0
   addq.l     #8,a0
   dbf        d7,.icl1
-
-; set colors
-  move.l     #f001_gfx_ingame_screen_colors,d0
-  bsr        datafiles_get_pointer
-  lea.l      df_idx_metadata(a0),a2
-  moveq.l    #0,d7
-  move.w     (a2),d7
-  lsr.w      #1,d7
-  subq.w     #1,d7
-  move.l     df_idx_ptr_rawdata(a0),a0
-  lea.l      ig_cm_cl_colors+2(a1),a1
-.icl2:
-  move.w     (a0)+,(a1)
-  addq.l     #4,a1
-  dbf        d7,.icl2
   rts
 
 .set_copper_list
@@ -179,6 +172,15 @@ ig_start:
   lea.l      _mt_Enable(pc),a0
   move.b     #1,(a0)
   rts
+
+.init_fade:
+  move.l     #f001_gfx_ingame_screen_colors,d0
+  bsr        datafiles_get_pointer
+  move.l     df_idx_ptr_rawdata(a0),a1
+  lea.l      ig_om_fade_color_tab(a4),a0
+  moveq.l    #32,d0
+  moveq.l    #0,d1
+  bra        fade_init                                                          ; indirect rts
 
 ig_switch_mode_select:
   move.b     #IgModeSelect,ig_om_act_mode(a4)

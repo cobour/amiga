@@ -84,6 +84,7 @@ main:
   include    "../common/src/system/control.asm"
   include    "../common/src/system/keyboard.asm"
   include    "../common/src/system/joystick.asm"
+  include    "../common/src/system/fade.asm"
   include    "../a100/src/ingame/ingame.asm"
   include    "../a100/src/ingame/playfield.asm"
   include    "../a100/src/ingame/brick_selectors.asm"

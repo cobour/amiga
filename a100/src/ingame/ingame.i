@@ -18,7 +18,6 @@ ig_cm_cl_sizeof:           rs.b       0
 ; chip mem struct
                            rsreset
 ig_cm_common:              rs.b       c_cm_sizeof
-ig_cm_copperlist:          rs.b       ig_cm_cl_sizeof
 ig_cm_screenbuffer:        rs.b       IgScreenWidthBytes*IgScreenHeight*IgScreenBitPlanes    ; double-buffering with this buffer and screen-gfx loaded with file
 ig_cm_asm_backup_0:        rs.b       IgScreenBitPlanes*2*16                                 ; size of active selector mark gfx - MUST be adjusted when marker size is changed from currently 16x16 px
 ig_cm_asm_backup_1:        rs.b       IgScreenBitPlanes*2*16                                 ; size of active selector mark gfx - MUST be adjusted when marker size is changed from currently 16x16 px
@@ -40,6 +39,7 @@ ig_om_backbuffer:          rs.l       1                                         
 ig_om_copperlist:          rs.l       1                                                      ; points to copperlist in chip mem
 ig_om_act_mode:            rs.b       1                                                      ; IgModeSelect or IgModePlace
 ig_om_score_draw_counter:  rs.b       1
+ig_om_fade_color_tab:      rs.b       32*2*16
 ig_om_datfile:             rs.b       f001_unzipped_filesize
 ig_om_sizeof:              rs.b       0
 
