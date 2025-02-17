@@ -37,8 +37,6 @@ targetFiles:
         invertMask: true
       - filename: gfx/active_selector.iff
         id: ASEL
-      - filename: gfx/active_selector_left.iff
-        id: ASLL
       - filename: music/peace_of_mind.mod
         id: MS01
       - filename: sfx/select.wav
