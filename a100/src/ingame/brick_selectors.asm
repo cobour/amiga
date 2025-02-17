@@ -117,20 +117,85 @@ bs_reset_selector:
 
 ; called when switched to selection-mode
 bs_gained_mode:
-  ; refill when all three selectors are empty
+
+  ; count empty selectors
   lea.l       bs_selectors(pc),a0
   moveq.l     #bs_sizeof,d0
+  moveq.l     #0,d1                                              ; d1 = number of empty selectors
+  
   tst.b       bs_empty(a0)
-  beq.s       .exit
+  beq.s       .empty_0
+  addq.l      #1,d1
+.empty_0:
   add.l       d0,a0
   tst.b       bs_empty(a0)
-  beq.s       .exit
+  beq.s       .empty_1
+  addq.l      #1,d1
+.empty_1:
   add.l       d0,a0
   tst.b       bs_empty(a0)
-  beq.s       .exit
-  bra.s       bs_refill
+  beq.s       .empty_2
+  addq.l      #1,d1
+.empty_2:
+
+  ; find first filled selector
+  lea.l       bs_selectors(pc),a0
+  moveq.l     #-1,d2                                             ; d2 = index of first filled selector
+
+  tst.b       bs_empty(a0)
+  bne.s       .first_filled_0
+  moveq.l     #0,d2
+  bra.s       .check_refill
+.first_filled_0:
+  add.l       d0,a0
+  tst.b       bs_empty(a0)
+  bne.s       .first_filled_1
+  moveq.l     #1,d2
+  bra.s       .check_refill
+.first_filled_1:
+  add.l       d0,a0
+  tst.b       bs_empty(a0)
+  bne.s       .check_refill
+  moveq.l     #2,d2
+
+.check_refill:
+  ; refill when all three selectors are empty
+  cmp.b       #3,d1
+  bne.s       .check_single
+  bra.s       bs_refill                                          ; implicit rts
+
+.check_single:
+  ; set marker to selector, when exactly one selector is filled
+  cmp.b       #2,d1
+  bne.s       .exit
+  lea.l       bs_active_selection(pc),a0
+  move.w      (a0),d1                                            ; old pos
+  move.w      d2,(a0)
+  sub.w       d2,d1                                              ; TODO: set add-value
+  lea.l       bs_active_selector_mark_add(pc),a0
+  tst.w       d1
+  blt.s       .pos_add
+  move.l      #ActiveSelectorMarkAddUp,(a0)
+  bra.s       .fill_sel_struct
+.pos_add:
+  move.l      #ActiveSelectorMarkAddDown,(a0)
+.fill_sel_struct:
+  add.w       d2,d2
+  add.w       d2,d2
+  lea.l       .struct_positions(pc),a1
+  move.l      (a1,d2.w),d2
+  lea.l       bs_selectors(pc),a1
+  add.l       d2,a1
+  lea.l       bs_active_selection_struct(pc),a0
+  move.l      a1,(a0)
+
 .exit:
   rts
+
+.struct_positions:
+  dc.l        0
+  dc.l        bs_sizeof
+  dc.l        bs_sizeof+bs_sizeof
 
 ; fills data structures of all three selectors with new random bricks
 bs_refill:
