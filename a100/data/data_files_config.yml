@@ -64,7 +64,7 @@ targetFiles:
         volume: 64
         priority: 64
       - filename: sfx/gameover.wav
-        id: SYLO
+        id: SGOV
         volume: 64
         priority: 64
       - filename: ../src/ingame/copperlist.asm
