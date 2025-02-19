@@ -41,6 +41,7 @@ ig_om_act_mode:            rs.b       1                                         
 ig_om_score_draw_counter:  rs.b       1
 ig_om_gameover:            rs.b       1                                                      ; 0 = game may proceed, 1 = game is over
 ig_om_end_countdown:       rs.b       1                                                      ; 0 = nothing to do; >0 = decrement by 1 and exit when reaching 0
+ig_om_music_volume:        rs.w       1
 ig_om_fade_color_tab:      rs.b       32*2*16
 ig_om_datfile:             rs.b       f001_unzipped_filesize
 ig_om_sizeof:              rs.b       0

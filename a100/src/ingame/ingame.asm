@@ -57,6 +57,7 @@ ig_start:
 
   tst.b      ig_om_gameover(a4)
   beq.s      .ig_loop
+  bsr.s      .fade_out_music
   sub.b      #1,ig_om_end_countdown(a4)
   tst.b      ig_om_end_countdown(a4)
   bne.s      .ig_loop
@@ -67,7 +68,7 @@ ig_start:
 
   bsr        _mt_end
   bsr        keyboard_cleanup
-  ; TODO: remove LVL3 handler or call ctrl_free_system
+  bsr        ctrl_free_system
 
 .error:
   rts
@@ -91,6 +92,16 @@ ig_start:
   add.l      #IgScreenWidthBytes,d0
   addq.l     #8,a0
   dbf        d7,.icl
+  rts
+
+.fade_out_music:
+  sub.w      #1,ig_om_music_volume(a4)
+  move.w     ig_om_music_volume(a4),d0
+  tst.w      d0
+  bge.s      .fom_0
+  moveq.l    #0,d0
+.fom_0:
+  bsr        _mt_mastervol
   rts
 
 .init_global_vars:
@@ -179,6 +190,7 @@ ig_start:
   moveq.l    #0,d0
   bsr        _mt_init
   move.w     #32,d0
+  move.w     d0,ig_om_music_volume(a4)
   bsr        _mt_mastervol
   lea.l      _mt_Enable(pc),a0
   move.b     #1,(a0)
