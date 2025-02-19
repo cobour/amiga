@@ -220,7 +220,38 @@ bs_refill:
   move.w      #BsDrawCountdown,(a0)+
   clr.l       (a0)
 
+  bsr         game_over_detection
+
   rts
+
+; gets pointer list (null-terminated) to selectable bricks
+; out:
+;   a0 - pointer to pointerlist
+bs_get_selectable_bricks:
+  movem.l     d6-d7/a1,-(sp)
+
+  lea         .pointerlist(pc),a0
+  lea         bs_selectors(pc),a1
+  moveq.l     #bs_sizeof,d6
+  moveq.l     #2,d7
+.loop:
+  tst.b       bs_empty(a1)
+  bne.s       .next
+  move.l      bs_big(a1),(a0)+
+.next:
+  add.l       d6,a1
+  dbf         d7,.loop
+
+  ; TODO: check for redundant pointers in pointerlist and remove them
+
+  clr.l       (a0)
+  lea         .pointerlist(pc),a0
+
+  movem.l     (sp)+,d6-d7/a1
+  rts
+
+.pointerlist:
+  dcb.l       4
 
 ; fills bs_area of bs-struct with brick from metadata (bs_small)
 ; in:

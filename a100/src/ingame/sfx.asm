@@ -15,7 +15,7 @@ sfx_ingame_init:
   rts
 
 sfx_ingame_play:
-  movem.l    d1/a1,-(sp)
+  movem.l    d1/a0-a1,-(sp)
   lea.l      sfx_ingame-8(pc),a1
 .next:
   addq.l     #8,a1
@@ -27,7 +27,7 @@ sfx_ingame_play:
   move.l     4(a1),a0
   bsr        _mt_playfx
 .exit:
-  movem.l    (sp)+,d1/a1
+  movem.l    (sp)+,d1/a0-a1
   rts
 
 sfx_ingame:
@@ -42,6 +42,8 @@ sfx_ingame:
   dc.l       f000_sfx_clear_row_column
   dc.l       0
   dc.l       f000_sfx_placed
+  dc.l       0
+  dc.l       f000_sfx_gameover
   dc.l       0
   dc.l       -1                           ; end of list
 

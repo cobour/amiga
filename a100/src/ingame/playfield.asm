@@ -227,6 +227,7 @@ pf_process_events:
   bsr         ig_switch_mode_select
   bsr         ev_ingame_clear_event_queue
   SFX         f000_sfx_placed
+  bsr         game_over_detection
   bra         .process_event
 .pe_process_select__not_placable:
   SFX         f000_sfx_error

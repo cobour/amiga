@@ -18,9 +18,9 @@ ig_start:
   bne        .error
 
   SETPTRS
-  clr.l      ig_om_framecounter(a4)
-  move.b     #IgModeSelect,ig_om_act_mode(a4)
 
+  bsr        .init_global_vars
+  bsr        god_init
   bsr        .init_fade
   bsr        sfx_ingame_init
   bsr        .init_screen_buffer_pointers
@@ -54,7 +54,11 @@ ig_start:
 
   WAITVB
   bsr.s      .swap_buffers
-  btst       #6,CIAA                                                            ; REMOVE - other exit-option needed (game-over recognition)
+
+  tst.b      ig_om_gameover(a4)
+  beq.s      .ig_loop
+  sub.b      #1,ig_om_end_countdown(a4)
+  tst.b      ig_om_end_countdown(a4)
   bne.s      .ig_loop
 
   ;
@@ -87,6 +91,13 @@ ig_start:
   add.l      #IgScreenWidthBytes,d0
   addq.l     #8,a0
   dbf        d7,.icl
+  rts
+
+.init_global_vars:
+  clr.l      ig_om_framecounter(a4)
+  clr.b      ig_om_gameover(a4)
+  clr.b      ig_om_end_countdown(a4)
+  move.b     #IgModeSelect,ig_om_act_mode(a4)
   rts
 
 .update_fade:

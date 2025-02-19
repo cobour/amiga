@@ -34,7 +34,7 @@ main:
   bsr        disk_begin_io
   tst.l      d0
   bne.s      .error
-  move.l     chip_mem_ptr(pc),a3                         ; at this point in program flow there is nothing in chip mem area, so just use its beginning
+  move.l     chip_mem_ptr(pc),a3                             ; at this point in program flow there is nothing in chip mem area, so just use its beginning
   bsr        disk_read_file_list
   tst.l      d0
   bne.s      .error
@@ -92,5 +92,6 @@ main:
   include    "../a100/src/ingame/events.asm"
   include    "../a100/src/ingame/sfx.asm"
   include    "../a100/src/ingame/score.asm"
+  include    "../a100/src/ingame/game_over_detection.asm"
   include    "../common/src/3rdparty/inflate.asm"
   include    "../common/src/3rdparty/ptplayer.asm"
