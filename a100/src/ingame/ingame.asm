@@ -48,6 +48,7 @@ ig_start:
   bsr        ev_ingame_check
   bsr        bs_process_events
   bsr        pf_process_events
+  bsr        game_over_detection
   bsr        bs_draw
   bsr        pf_draw
   bsr        sc_draw
@@ -108,6 +109,8 @@ ig_start:
   clr.l      ig_om_framecounter(a4)
   clr.b      ig_om_gameover(a4)
   clr.b      ig_om_end_countdown(a4)
+  clr.b      ig_om_god_request(a4)
+  clr.b      ig_om_clearance_in_progress(a4)
   move.b     #IgModeSelect,ig_om_act_mode(a4)
   rts
 

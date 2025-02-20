@@ -1,105 +1,51 @@
   ifnd       GAME_OVER_DETECTION_ASM
 GAME_OVER_DETECTION_ASM equ 1
 
+  ifnd       UNITTEST
+
   include    "../a100/src/globals.i"
   include    "../a100/src/ingame/sfx.i"
 
 god_init:
-  lea.l      god_last_check(pc),a0
-  clr.l      (a0)
+  clr.b      ig_om_god_request(a4)
   rts
 
-; must be called when brick selectors are refilled 
-; and when one brick is placed on the playfield
+; must be triggered with ig_om_god_request when brick selectors are refilled 
+; and when a brick is placed on the playfield
 game_over_detection:
 
-  ; check if necessary
-  move.l     god_last_check(pc),d0
-  cmp.l      ig_om_framecounter(a4),d0
+  ; check if necessary/allowed
+  tst.b      ig_om_god_request(a4)
   beq        .god_exit
+  tst.b      ig_om_clearance_in_progress(a4)
+  bne        .god_exit
+  clr.b      ig_om_god_request(a4)
 
+  ; get list of all selectable bricks and set pointer to playfield-data
   bsr        bs_get_selectable_bricks
+  lea.l      pf_data(pc),a2
 
+  ; check if any of the bricks is placable on the playfield
 .bricks_loop:
   tst.l      (a0)
   beq.s      .god_no_brick_is_placable
   move.l     (a0)+,a1
 
-  move.l     df_idx_ptr_rawdata(a1),a2
+  move.l     df_idx_ptr_rawdata(a1),a3
   lea.l      df_idx_metadata(a1),a1
   move.w     df_tld_plf_height(a1),d0
   move.w     df_tld_plf_width(a1),d1
-  move.l     a2,a1
-
-; check one brick
-; a1   - pointer to rawdata of brick
-; d0.w - height of brick
-; d1.w - width of brick
-  lea.l      pf_data(pc),a2
-
-  moveq.l    #10,d7
-  sub.w      d0,d7
-  addq.w     #1,d7                                     ; d7 = max ypos for check for position
-  moveq.l    #10,d6
-  sub.w      d1,d6
-  addq.w     #1,d6                                     ; d6 = max xpos to check for position
-
-  moveq.l    #0,d5                                     ; d5 = ypos for check
-
-.check_brick_row_loop:
-  moveq.l    #0,d4                                     ; d4 = xpos for check
-  move.l     a2,a3                                     ; a3 = pointer to playfield-data, beginning of row for position check
-
-.check_brick_column_loop:
-
-; check one position for one brick
-; a1   - pointer to rawdata of brick
-; a3   - pointer to position in playfield-data
-; d0.w - height of brick
-; d1.w - width of brick
-  sub.l      a5,a5                                     ; a5 = row-counter for position-check
-  move.l     a1,a4                                     ; a4 = pointer to rawdata of brick for position-check
-.check_brick_position_row_loop:
-  moveq.l    #0,d3                                     ; d3 = column-counter for position-check
-.check_brick_position_column_loop:
-  move.w     (a4)+,d2
+  move.l     a3,a1
+  bsr.s      .check_one_brick
   tst.b      d2
-  beq.s      .check_brick_position_column_loop_next    ; brick element empty = okay
-  move.b     (a3,d3.w),d2
-  tst.b      d2
-  bne.s      .check_brick_one_check_failed             ; this one brick cannot be placed at this one position = try next position
-.check_brick_position_column_loop_next:
-  addq.l     #1,d3
-  cmp.b      d3,d1
-  bne.s      .check_brick_position_column_loop
-
-  addq.l     #8,a3
-  addq.l     #2,a3
-  addq.l     #1,a5
-  cmp.l      a5,d0
-  bne.s      .check_brick_position_row_loop
-
-  ; arrived here, brick can be placed at checked position = game may proceed
-  bra.s      .god_exit
-
-.check_brick_one_check_failed:
-  addq.l     #1,d4
-  addq.l     #1,a3
-  cmp.w      d4,d6
-  bne.s      .check_brick_column_loop
-
-  addq.l     #8,a2
-  addq.l     #2,a2
-  addq.l     #1,d5
-  cmp.w      d5,d7
-  bne.s      .check_brick_row_loop
+  bne.s      .god_exit
 
   bra.s      .bricks_loop
 
+  ; no brick can be placed on the playfield => game over
 .god_no_brick_is_placable:
-  SETPTRS                                              ; because a4-a5 are used here
-
-  move.b     #1,ig_om_gameover(a4)                     ; signal game over
+  SETPTRS                                         ; restore a4-a6
+  move.b     #1,ig_om_gameover(a4)                ; signal game over
   move.b     #50,ig_om_end_countdown(a4)
 
   ; play sfx
@@ -112,18 +58,80 @@ game_over_detection:
   lea.l      ig_om_fade_color_tab(a4),a0
   moveq.l    #32,d0
   moveq.l    #1,d1
-  bra        fade_init                                 ; indirect rts
+  bra        fade_init                            ; indirect rts
   
+  ; any of the bricks can be placed on the playfield => all fine
 .god_exit:
-  SETPTRS                                              ; because a4-a5 are used here
-  lea.l      god_last_check(pc),a0
-  move.l     ig_om_framecounter(a4),(a0)
+  SETPTRS                                         ; restore a4-a6
   rts
 
-;
-; vars
-;
-god_last_check:
-  dc.l       0                                         ; frame number when last check was performed
+  endif                                           ; ifnd UNITTEST
 
-  endif                                                ; ifnd GAME_OVER_DETECTION_ASM
+  ifd        UNITTEST
+unittest_check_one_brick:
+  endif                                           ; ifd UNITTEST
+
+; checks all possible positions on the playfield for one brick
+; in:
+;   a1 - rawdata of brick
+;   a2 - playfield-data
+;   d0 - height of brick
+;   d1 - width of brick
+; out:
+;   d2 - boolean: is brick placable?
+.check_one_brick:
+  moveq.l    #0,d2
+  moveq.l    #10,d7
+  sub.b      d0,d7
+  move.l     a2,a3
+.cob_rows_loop:
+  moveq.l    #10,d6
+  sub.b      d1,d6
+  move.l     a3,a4
+.cob_columns_loop:
+  bsr.s      .check_one_brick_one_position
+  tst.b      d2
+  bne.s      .cob_exit
+  addq.l     #1,a4
+  dbf        d6,.cob_columns_loop
+  add.l      #10,a3
+  dbf        d7,.cob_rows_loop
+.cob_exit:
+  rts
+
+; checks one possible position on the playfield for one brick
+; in:
+;   a1 - rawdata of brick
+;   a4 - playfield-data
+;   d0 - height of brick
+;   d1 - width of brick
+; out:
+;   d2 - boolean: is brick placable?
+.check_one_brick_one_position:
+  move.w     d0,d5
+  subq.w     #1,d5
+  move.l     a4,a5
+  moveq.l    #0,d2
+.cobop_rows_loop:
+  move.w     d1,d4
+  subq.w     #1,d4
+  move.l     a5,a6
+.cobop_columns_loop:
+  move.w     (a1,d2.w),d3
+  tst.b      d3
+  beq.s      .cobop_columns_loop_next             ; brick element empty => next
+  move.b     (a6),d3
+  tst.b      d3
+  beq.s      .cobop_columns_loop_next
+  moveq.l    #0,d2                                ; brick element not empty and playfield element not empty => brick not placable at this position
+  rts
+.cobop_columns_loop_next:
+  addq.w     #2,d2
+  addq.l     #1,a6
+  dbf        d4,.cobop_columns_loop
+  add.l      #10,a5
+  dbf        d5,.cobop_rows_loop
+  moveq.l    #1,d2
+  rts
+
+  endif                                           ; ifnd GAME_OVER_DETECTION_ASM

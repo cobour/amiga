@@ -227,7 +227,7 @@ pf_process_events:
   bsr         ig_switch_mode_select
   bsr         ev_ingame_clear_event_queue
   SFX         f000_sfx_placed
-  bsr         game_over_detection
+  move.b      #1,ig_om_god_request(a4)
   bra         .process_event
 .pe_process_select__not_placable:
   SFX         f000_sfx_error
@@ -293,7 +293,7 @@ pf_draw:
   bsr.s       .restore_background
 
 .check_clearance_in_progress:
-  move.b      pf_clearance_in_progress(pc),d0
+  move.b      ig_om_clearance_in_progress(a4),d0
   tst.b       d0
   beq.s       .check_draw_brick
   bsr.s       .clearance_of_completed_rows_columns
@@ -346,7 +346,7 @@ pf_draw:
 .clearance_of_completed_rows_columns:
   lea.l       pf_clearance_frame_counter(pc),a0
   moveq.l     #0,d0
-  move.b      (a0),d0                                              ; d0 = frames since pf_clearance_in_progress was set
+  move.b      (a0),d0                                              ; d0 = frames since ig_om_clearance_in_progress was set
   cmp.b       #3,d0
   blt         .clearance_update_vars
 
@@ -432,8 +432,7 @@ pf_draw:
   ; clearance is done - reset all relevant values
   bne.s       .clearance_exit
   clr.b       (a0)
-  lea.l       pf_clearance_in_progress(pc),a0
-  clr.b       (a0)
+  clr.b       ig_om_clearance_in_progress(a4)
   lea.l       pf_rows_to_clear(pc),a0
   moveq.l     #-1,d0
   move.l      d0,(a0)+
@@ -667,9 +666,9 @@ pf_get_pointer_for_pos:
   move.l      (sp)+,d2
   rts
 
-; checks for completed rows and/or columns and updates pf_rows_to_clear, pf_columns_to_clear and pf_clearance_in_progress
+; checks for completed rows and/or columns and updates pf_rows_to_clear, pf_columns_to_clear and ig_om_clearance_in_progress
 pf_check_completed:
-  lea.l       pf_clearance_in_progress(pc),a1
+  lea.l       pf_clearance_frame_counter(pc),a1
   moveq.l     #10,d0
   moveq.l     #1,d1
   moveq.l     #0,d2
@@ -702,8 +701,8 @@ pf_check_completed:
   tst.b       9(a3)
   beq.s       .next_row
   move.b      d2,(a0)
-  move.b      d1,(a1)
-  move.b      d2,1(a1)
+  move.b      d1,ig_om_clearance_in_progress(a4)
+  move.b      d2,(a1)
   move.l      #(IgScreenWidthBytes*IgScreenBitPlanes*16)+2,(a2)
   moveq.l     #1,d6
   SCORE_C     $10
@@ -739,8 +738,8 @@ pf_check_completed:
   tst.b       90(a3)
   beq.s       .next_column
   move.b      d2,(a0)
-  move.b      d1,(a1)
-  move.b      d2,1(a1)
+  move.b      d1,ig_om_clearance_in_progress(a4)
+  move.b      d2,(a1)
   move.l      #(IgScreenWidthBytes*IgScreenBitPlanes*16)+2,(a2)
   moveq.l     #1,d6
   SCORE_C     $10
@@ -818,10 +817,10 @@ pf_rows_to_clear:
   dcb.b       10,-1                                                ; -1 = false; 0-9 intervall to be cleared
 pf_columns_to_clear:
   dcb.b       10,-1                                                ; -1 = false; 0-9 intervall to be cleared
-pf_clearance_in_progress:
-  dc.b        0                                                    ; 0 = false; any other value = true
 pf_clearance_frame_counter:
-  dc.b        0                                                    ; framecount since pf_clearance_in_progress was set
+  dc.b        0                                                    ; framecount since ig_om_clearance_in_progress was set
+.padding_byte:
+  dc.b        0
 pf_clearance_row_offset_framebuffer:
   dc.l        0                                                    ; offset in framebuffer for next row clearance
 pf_clearance_column_offset_framebuffer:

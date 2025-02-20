@@ -220,7 +220,7 @@ bs_refill:
   move.w      #BsDrawCountdown,(a0)+
   clr.l       (a0)
 
-  bsr         game_over_detection
+  move.b      #1,ig_om_god_request(a4)
 
   rts
 
