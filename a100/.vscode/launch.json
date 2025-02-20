@@ -31,6 +31,27 @@
         {
             "type": "amiga-assembly",
             "request": "launch",
+            "name": "Run UNITTEST",
+            "stopOnEntry": false,
+            "trace": false,
+            "program": "${workspaceFolder}/uae/dh0test/A100UnitTest",
+            "remoteProgram": "SYS:A100UnitTest",
+            "emulatorType": "fs-uae",
+            "emulatorArgs": [
+                "--chip_memory=512",
+                "--slow_memory=0",
+                "--hard_drive_0=${workspaceFolder}/uae/dh0test",
+                "--joystick_port_1=keyboard",
+                "--amiga_model=A500",
+                "--automatic_input_grab=0",
+                "--video_sync=0",
+                "--fullscreen=0"
+            ],
+            "preLaunchTask": "Build UNITTEST"
+        },
+        {
+            "type": "amiga-assembly",
+            "request": "launch",
             "name": "Run RELEASE",
             "program": "",
             "noDebug": true,
