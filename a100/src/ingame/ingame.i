@@ -22,6 +22,7 @@ ig_cm_screenbuffer:           rs.b       IgScreenWidthBytes*IgScreenHeight*IgScr
 ig_cm_asm_backup_0:           rs.b       IgScreenBitPlanes*2*16                                 ; size of active selector mark gfx - MUST be adjusted when marker size is changed from currently 16x16 px
 ig_cm_asm_backup_1:           rs.b       IgScreenBitPlanes*2*16                                 ; size of active selector mark gfx - MUST be adjusted when marker size is changed from currently 16x16 px
 ig_cm_score_backup:           rs.b       IgScreenBitPlanes*16*16                                ; size of score panel - 16 bytes wide (8 numbers * 2 bytes each), 16 rows, all bitplanes
+ig_cm_timer_backup:           rs.b       IgScreenBitPlanes*4*16                                 ; size of score panel -  4 bytes wide (2 numbers * 2 bytes each), 16 rows, all bitplanes
 ig_cm_datfile:                rs.b       f000_unzipped_filesize
 ig_cm_sizeof:                 rs.b       0
 

@@ -11,6 +11,7 @@ main:
   bsr        ctrl_set_black_screen
 
   SETPTRS
+  move.b     #GameModeInfinite,c_om_gamemode(a4)             ; TODO: must be set by mainmenu
   bsr        ig_start
   bsr        ctrl_free_system
 
@@ -93,5 +94,6 @@ main:
   include    "../a100/src/ingame/sfx.asm"
   include    "../a100/src/ingame/score.asm"
   include    "../a100/src/ingame/game_over_detection.asm"
+  include    "../a100/src/ingame/timer.asm"
   include    "../common/src/3rdparty/inflate.asm"
   include    "../common/src/3rdparty/ptplayer.asm"

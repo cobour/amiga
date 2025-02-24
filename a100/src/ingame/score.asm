@@ -15,28 +15,28 @@ sc_init:
   move.l      #f000_gfx_font16,d0
   bsr         datafiles_get_pointer
   lea.l       df_idx_metadata(a0),a1
-  move.l      a1,(a3)+                                            ; metadata
+  move.l      a1,(a3)+                                             ; metadata
   move.l      df_idx_ptr_rawdata(a0),d0
-  move.l      d0,(a3)+                                            ; gfx
+  move.l      d0,(a3)+                                             ; gfx
   add.l       df_iff_rawsize(a1),d0
-  move.l      d0,(a3)                                             ; mask
+  move.l      d0,(a3)                                              ; mask
 
   ; save background for restore
   WAIT_BLT
-  move.w      #%0000100111110000,BLTCON0(a6)                      ; simple A -> D copy, no shifting
+  move.w      #%0000100111110000,BLTCON0(a6)                       ; simple A -> D copy, no shifting
   clr.w       BLTCON1(a6)
-  move.w      #$ffff,d0                                           ; no first/last word mask
+  move.w      #$ffff,d0                                            ; no first/last word mask
   move.w      d0,BLTAFWM(a6)
   move.w      d0,BLTALWM(a6)
-  move.w      #IgScreenWidthBytes-16,BLTAMOD(a6)                  ; modulos for source and target
+  move.w      #IgScreenWidthBytes-16,BLTAMOD(a6)                   ; modulos for source and target
   clr.w       BLTDMOD(a6)
   move.l      a5,a0
   add.l       #ig_cm_score_backup,a0
-  move.l      a0,BLTDPTH(a6)                                      ; pointers
+  move.l      a0,BLTDPTH(a6)                                       ; pointers
   move.l      ig_om_frontbuffer(a4),d7
-  add.l       #(IgScreenWidthBytes*IgScreenBitPlanes*208)+8,d7
+  add.l       #(IgScreenWidthBytes*IgScreenBitPlanes*208)+14,d7
   move.l      d7,BLTAPTH(a6)
-  move.w      #(16*IgScreenBitPlanes<<6)+8,BLTSIZE(a6)            ; start blit
+  move.w      #(16*IgScreenBitPlanes<<6)+8,BLTSIZE(a6)             ; start blit
 
   ; initial draw
   move.l      ig_om_frontbuffer(a4),d7
@@ -67,20 +67,20 @@ sc_update:
   ; restore background
   ;
   WAIT_BLT
-  move.w      #%0000100111110000,BLTCON0(a6)                      ; simple A -> D copy, no shifting
+  move.w      #%0000100111110000,BLTCON0(a6)                       ; simple A -> D copy, no shifting
   clr.w       BLTCON1(a6)
-  move.w      #$ffff,d0                                           ; no first/last word mask
+  move.w      #$ffff,d0                                            ; no first/last word mask
   move.w      d0,BLTAFWM(a6)
   move.w      d0,BLTALWM(a6)
-  move.w      #IgScreenWidthBytes-16,BLTDMOD(a6)                  ; modulos for source and target
+  move.w      #IgScreenWidthBytes-16,BLTDMOD(a6)                   ; modulos for source and target
   clr.w       BLTAMOD(a6)
   move.l      a5,a0
   add.l       #ig_cm_score_backup,a0
-  move.l      a0,BLTAPTH(a6)                                      ; pointers
+  move.l      a0,BLTAPTH(a6)                                       ; pointers
   move.l      d7,d0
-  add.l       #(IgScreenWidthBytes*IgScreenBitPlanes*208)+8,d0
+  add.l       #(IgScreenWidthBytes*IgScreenBitPlanes*208)+14,d0
   move.l      d0,BLTDPTH(a6)
-  move.w      #(16*IgScreenBitPlanes<<6)+8,BLTSIZE(a6)            ; start blit
+  move.w      #(16*IgScreenBitPlanes<<6)+8,BLTSIZE(a6)             ; start blit
 
   ;
   ; score to string
@@ -93,7 +93,7 @@ sc_update:
   ;
   move.l      sc_font_metadata_ptr(pc),a1
   move.l      d7,d4
-  add.l       #(IgScreenWidthBytes*IgScreenBitPlanes*208)+8,d4    ; target pointer
+  add.l       #(IgScreenWidthBytes*IgScreenBitPlanes*208)+14,d4    ; target pointer
 
   WAIT_BLT
 
@@ -114,7 +114,7 @@ sc_update:
   move.w      d7,BLTCMOD(a6)
   move.w      d7,BLTDMOD(a6)
 
-  moveq.l     #32,d0                                              ; offset zero char
+  moveq.l     #32,d0                                               ; offset zero char
   move.l      sc_font_gfx_ptr(pc),d7
   add.l       d0,d7
   move.l      sc_font_mask_ptr(pc),d6
@@ -128,9 +128,9 @@ sc_update:
   sub.b       #$30,d5
   add.b       d5,d5
   move.l      d7,d0
-  add.l       d5,d0                                               ; gfx ptr
+  add.l       d5,d0                                                ; gfx ptr
   move.l      d6,d1
-  add.l       d5,d1                                               ; mask ptr
+  add.l       d5,d1                                                ; mask ptr
 
   WAIT_BLT
 
@@ -163,4 +163,4 @@ sc_font_gfx_ptr:
 sc_font_mask_ptr:
   dc.l        0
 
-  endif                                                           ; ifnd INGAME_SCORE_ASM
+  endif                                                            ; ifnd INGAME_SCORE_ASM

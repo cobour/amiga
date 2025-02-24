@@ -1,5 +1,5 @@
                             ifnd       GLOBALS_I
-GLOBALS_I equ 1
+GLOBALS_I        equ 1
                             include    "../a100/src/mem.i"
                             include    "../common/src/system/custom.i"
                             include    "../common/src/system/disk.i"
@@ -13,7 +13,11 @@ SETPTRS                     macro
                             endm
 
 ; Select Memory Scheme
-MemScheme equ MemCustom
+MemScheme        equ MemCustom
+
+; Game-Modes
+GameModeInfinite equ 1
+GameModeSpeedRun equ 2
 
 ; *********************
 ; common memory structs
@@ -28,6 +32,8 @@ c_cm_sizeof:                rs.b       0
                             rsreset
 c_om_disk:                  rs.b       disk_sizeof
 c_om_score:                 rs.l       1                                  ; score of player (set ingame, needed in highscore-table)
+c_om_gamemode:              rs.b       1                                  ; GameModeInfinite or GameModeSpeedRun - set by mainmenu, used by ingame
+c_om_padding_byte:          rs.b       1
 c_om_sizeof:                rs.b       0
 
                             endif                                         ; ifnd GLOBALS_I
