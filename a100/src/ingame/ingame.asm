@@ -108,7 +108,7 @@ ig_start:
   rts
 
 .init_global_vars:
-  clr.l      ig_om_framecounter(a4)
+  clr.l      c_om_framecounter(a4)
   clr.b      ig_om_gameover(a4)
   clr.b      ig_om_end_countdown(a4)
   clr.b      ig_om_god_request(a4)
@@ -227,7 +227,7 @@ ig_lvl3_irq_handler:
 
   ; increment frame counter
   moveq.l    #1,d0
-  add.l      d0,ig_om_framecounter(a4)
+  add.l      d0,c_om_framecounter(a4)
 
   ; clear Copper-IRQ-Bit
   move.w     #%0000000000010000,INTREQ(a6)

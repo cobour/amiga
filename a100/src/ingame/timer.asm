@@ -15,7 +15,7 @@ t_init:
 
   ; init vars
   lea.l       t_framenumber_last_update(pc),a0
-  move.l      ig_om_framecounter(a4),(a0)
+  move.l      c_om_framecounter(a4),(a0)
   ; use font-metadata from score.asm
 
   ; save background for restore
@@ -57,7 +57,7 @@ t_update:
   ; speedrun: decrement timer (once every 50 frames), check end-of-game
   ;
   lea.l       t_framenumber_last_update(pc),a0
-  move.l      ig_om_framecounter(a4),d0
+  move.l      c_om_framecounter(a4),d0
   move.l      d0,d2
   sub.l       (a0),d0
   moveq.l     #50,d1

@@ -129,7 +129,7 @@ ev_ingame_check:
   add.l      d2,d2
   lea.l      (.events_last_issued,pc,d2.w),a1
   move.l     (a1),d2
-  move.l     ig_om_framecounter(a4),d3
+  move.l     c_om_framecounter(a4),d3
 
   add.l      ev_ingame_delay(pc),d2
   cmp.l      d2,d3

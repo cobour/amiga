@@ -81,7 +81,7 @@ b_get_random_brick:
   lea.l      b_random(pc),a0
   move.l     (a0),d0
   move.l     4(a0),d1
-  move.l     ig_om_framecounter(a4),d7
+  move.l     c_om_framecounter(a4),d7
   add.w      VHPOSR(a6),d7
   and.w      #$f,d7
 .grb_loop

@@ -34,7 +34,6 @@ IgModePlace  equ 2
 ; other mem struct
                               rsreset
 ig_om_common:                 rs.b       c_om_sizeof
-ig_om_framecounter:           rs.l       1                                                      ; incremented by copper irq - WARNING: this counts "real" frames aka 50Hz, not the actually drawn frames which may be less when drawing a frame takes more time than 1/50th of a second
 ig_om_frontbuffer:            rs.l       1                                                      ; points to currently shown buffer
 ig_om_backbuffer:             rs.l       1                                                      ; points to buffer that is currently drawn to
 ig_om_copperlist:             rs.l       1                                                      ; points to copperlist in chip mem
