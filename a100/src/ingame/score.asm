@@ -34,7 +34,7 @@ sc_init:
   add.l       #ig_cm_score_backup,a0
   move.l      a0,BLTDPTH(a6)                                       ; pointers
   move.l      ig_om_frontbuffer(a4),d7
-  add.l       #(IgScreenWidthBytes*IgScreenBitPlanes*208)+14,d7
+  add.l       #(IgScreenWidthBytes*IgScreenBitPlanes*208)+18,d7
   move.l      d7,BLTAPTH(a6)
   move.w      #(16*IgScreenBitPlanes<<6)+8,BLTSIZE(a6)             ; start blit
 
@@ -78,7 +78,7 @@ sc_update:
   add.l       #ig_cm_score_backup,a0
   move.l      a0,BLTAPTH(a6)                                       ; pointers
   move.l      d7,d0
-  add.l       #(IgScreenWidthBytes*IgScreenBitPlanes*208)+14,d0
+  add.l       #(IgScreenWidthBytes*IgScreenBitPlanes*208)+18,d0
   move.l      d0,BLTDPTH(a6)
   move.w      #(16*IgScreenBitPlanes<<6)+8,BLTSIZE(a6)             ; start blit
 
@@ -93,7 +93,7 @@ sc_update:
   ;
   move.l      sc_font_metadata_ptr(pc),a1
   move.l      d7,d4
-  add.l       #(IgScreenWidthBytes*IgScreenBitPlanes*208)+14,d4    ; target pointer
+  add.l       #(IgScreenWidthBytes*IgScreenBitPlanes*208)+18,d4    ; target pointer
 
   WAIT_BLT
 

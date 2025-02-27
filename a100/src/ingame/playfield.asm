@@ -46,7 +46,7 @@ pf_init:
 
   ; get target pointer for first brick
   move.l      ig_om_frontbuffer(a4),d2
-  add.l       #(IgScreenWidthBytes*IgScreenBitPlanes*16)+2,d2
+  add.l       #(IgScreenWidthBytes*IgScreenBitPlanes*16)+6,d2
 
   WAIT_BLT
 
@@ -498,16 +498,16 @@ pf_draw:
   movem.l     (sp)+,a0/d4
   rts
 .row_offsets:
-  dc.l        (IgScreenWidthBytes*IgScreenBitPlanes*16)+2
-  dc.l        (IgScreenWidthBytes*IgScreenBitPlanes*32)+2
-  dc.l        (IgScreenWidthBytes*IgScreenBitPlanes*48)+2
-  dc.l        (IgScreenWidthBytes*IgScreenBitPlanes*64)+2
-  dc.l        (IgScreenWidthBytes*IgScreenBitPlanes*80)+2
-  dc.l        (IgScreenWidthBytes*IgScreenBitPlanes*96)+2
-  dc.l        (IgScreenWidthBytes*IgScreenBitPlanes*112)+2
-  dc.l        (IgScreenWidthBytes*IgScreenBitPlanes*128)+2
-  dc.l        (IgScreenWidthBytes*IgScreenBitPlanes*144)+2
-  dc.l        (IgScreenWidthBytes*IgScreenBitPlanes*160)+2
+  dc.l        (IgScreenWidthBytes*IgScreenBitPlanes*16)+6
+  dc.l        (IgScreenWidthBytes*IgScreenBitPlanes*32)+6
+  dc.l        (IgScreenWidthBytes*IgScreenBitPlanes*48)+6
+  dc.l        (IgScreenWidthBytes*IgScreenBitPlanes*64)+6
+  dc.l        (IgScreenWidthBytes*IgScreenBitPlanes*80)+6
+  dc.l        (IgScreenWidthBytes*IgScreenBitPlanes*96)+6
+  dc.l        (IgScreenWidthBytes*IgScreenBitPlanes*112)+6
+  dc.l        (IgScreenWidthBytes*IgScreenBitPlanes*128)+6
+  dc.l        (IgScreenWidthBytes*IgScreenBitPlanes*144)+6
+  dc.l        (IgScreenWidthBytes*IgScreenBitPlanes*160)+6
 
 ; draws a single field in the playfield
 ; in:
@@ -703,7 +703,7 @@ pf_check_completed:
   move.b      d2,(a0)
   move.b      d1,ig_om_clearance_in_progress(a4)
   move.b      d2,(a1)
-  move.l      #(IgScreenWidthBytes*IgScreenBitPlanes*16)+2,(a2)
+  move.l      #(IgScreenWidthBytes*IgScreenBitPlanes*16)+6,(a2)
   moveq.l     #1,d6
   SCORE_C     $10
 .next_row:
@@ -740,7 +740,7 @@ pf_check_completed:
   move.b      d2,(a0)
   move.b      d1,ig_om_clearance_in_progress(a4)
   move.b      d2,(a1)
-  move.l      #(IgScreenWidthBytes*IgScreenBitPlanes*16)+2,(a2)
+  move.l      #(IgScreenWidthBytes*IgScreenBitPlanes*16)+6,(a2)
   moveq.l     #1,d6
   SCORE_C     $10
 .next_column:

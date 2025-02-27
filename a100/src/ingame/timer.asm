@@ -31,7 +31,7 @@ t_init:
   add.l       #ig_cm_timer_backup,a0
   move.l      a0,BLTDPTH(a6)                                      ; pointers
   move.l      ig_om_frontbuffer(a4),d7
-  add.l       #(IgScreenWidthBytes*IgScreenBitPlanes*208)+2,d7
+  add.l       #(IgScreenWidthBytes*IgScreenBitPlanes*208)+6,d7
   move.l      d7,BLTAPTH(a6)
   move.w      #(16*IgScreenBitPlanes<<6)+2,BLTSIZE(a6)            ; start blit
 
@@ -115,7 +115,7 @@ t_update:
   add.l       #ig_cm_timer_backup,a0
   move.l      a0,BLTAPTH(a6)                                      ; pointers
   move.l      d7,d0
-  add.l       #(IgScreenWidthBytes*IgScreenBitPlanes*208)+2,d0
+  add.l       #(IgScreenWidthBytes*IgScreenBitPlanes*208)+6,d0
   move.l      d0,BLTDPTH(a6)
   move.w      #(16*IgScreenBitPlanes<<6)+2,BLTSIZE(a6)            ; start blit
 
@@ -128,7 +128,7 @@ t_draw:
   ; init pointer
   move.l      sc_font_metadata_ptr(pc),a1
   move.l      d7,d3
-  add.l       #(IgScreenWidthBytes*IgScreenBitPlanes*208)+2,d3    ; d3 = target pointer
+  add.l       #(IgScreenWidthBytes*IgScreenBitPlanes*208)+6,d3    ; d3 = target pointer
   move.l      sc_font_gfx_ptr(pc),d1                              ; d1 = gfx pointer
   move.l      sc_font_mask_ptr(pc),d2                             ; d2 = mask pointer
 
