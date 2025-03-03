@@ -156,3 +156,43 @@ targetFiles:
         id: B19B
       - filename: tiled/brick_3x3_a4_small.tmx
         id: B19S
+
+  - filename: F002
+    description: highscores_chip
+    memoryType: CHIP
+    sources:
+      - filename: gfx/highscores_screen.iff
+        id: SCRN
+        withMask: false
+      - filename: music/spearhead.mod
+        id: MS02
+      - filename: ../src/highscores/hs_copperlist.asm
+        id: HSCL
+
+  - filename: F003
+    description: highscores_other
+    memoryType: OTHER
+    relatedFile: F002
+    sources:
+      - filename: gfx/highscores_screen.iff
+        id: COLS
+        colorsOnly: true
+      - filename: music/spearhead.mod
+        id: MP02
+
+  - filename: F004
+    description: mainmenu_chip
+    memoryType: CHIP
+    sources:
+      - filename: music/space_odyssey.mod
+        id: MS03
+      - filename: ../src/mainmenu/mm_copperlist.asm
+        id: MMCL
+
+  - filename: F005
+    description: mainmenu_other
+    memoryType: OTHER
+    relatedFile: F004
+    sources:
+      - filename: music/space_odyssey.mod
+        id: MP03

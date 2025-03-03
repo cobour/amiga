@@ -57,7 +57,7 @@ b_init:
   move.l     280(a0),d7                    ; exec IdleCount
   move.l     #$deadbeef,d0
   move.l     #$12345678,d1
-  add.w      JOY0DAT(a6),d7
+  add.w      c_om_framecounter+2(a4),d7
 .ir_loop:
   swap       d0
   add.l      d1,d0

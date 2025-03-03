@@ -69,11 +69,14 @@ ig_start:
   ; cleanup
   ;
 
+  move.b     #NextPartHighscores,c_om_next_part(a4)
   bsr        _mt_end
   bsr        keyboard_cleanup
   bsr        ctrl_free_system
+  rts
 
 .error:
+  move.b     #NextPartExit,c_om_next_part(a4)
   rts
 
 .swap_buffers:
@@ -108,7 +111,6 @@ ig_start:
   rts
 
 .init_global_vars:
-  clr.l      c_om_framecounter(a4)
   clr.b      ig_om_gameover(a4)
   clr.b      ig_om_end_countdown(a4)
   clr.b      ig_om_god_request(a4)
