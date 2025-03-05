@@ -29,6 +29,9 @@ hs_om_frontbuffer:      rs.l       1                                            
 hs_om_backbuffer:       rs.l       1                                                      ; points to buffer that is currently drawn to
 hs_om_copperlist:       rs.l       1                                                      ; points to copperlist in chip mem
 hs_om_fade_color_tab:   rs.b       32*2*16
+hs_om_music_volume:     rs.w       1
+hs_om_end_countdown:    rs.b       1                                                      ; < 0 when not ending
+hs_om_padding_byte:     rs.b       1
 hs_om_datfile:          rs.b       f003_unzipped_filesize
 hs_om_sizeof:           rs.b       0
 

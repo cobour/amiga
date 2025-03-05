@@ -11,6 +11,7 @@ hs_start:
 
   SETPTRS
 
+  bsr        .init_vars
   bsr        .init_fade
   bsr        .init_screen_buffer_pointers
   bsr        .init_copper_list
@@ -25,13 +26,31 @@ hs_start:
 .loop:
   bsr        .update_fade
 
+  ; REMOVE HERE - MOVE TO EVENT-HANDLING
+  tst.b      hs_om_end_countdown(a4)
+  bge.s      .0
+  btst       #6,$bfe001
+  bne.s      .0
+  move.b     #35,hs_om_end_countdown(a4)
+  move.l     #f003_gfx_highscores_screen_colors,d0
+  bsr        datafiles_get_pointer
+  move.l     df_idx_ptr_rawdata(a0),a1
+  lea.l      hs_om_fade_color_tab(a4),a0
+  moveq.l    #32,d0
+  moveq.l    #1,d1
+  bsr        fade_init
+.0:
+  ; REMOVE HERE - MOVE TO EVENT-HANDLING
+
   WAITVB
 
-  btst       #6,$bfe001
-  bne.s      .loop
+  tst.b      hs_om_end_countdown(a4)
+  blt.s      .loop
+  bsr        .fade_out_music
+  sub.b      #1,hs_om_end_countdown(a4)
+  tst.b      hs_om_end_countdown(a4)
+  bgt.s      .loop
 
-  ; TODO: fade out music
-  ; TODO: fade out colors
   bsr        _mt_end
   bsr        ctrl_free_system
   move.b     #NextPartMainmenu,c_om_next_part(a4)
@@ -53,6 +72,10 @@ hs_start:
   move.l     chip_mem_ptr(pc),a1
   add.l      #hs_cm_datfile,a1
   bsr        datafiles_load_and_unzip
+  rts
+
+.init_vars:
+  move.b     #-1,hs_om_end_countdown(a4)
   rts
 
 .init_screen_buffer_pointers:
@@ -118,10 +141,20 @@ hs_start:
   moveq.l    #0,d0
   bsr        _mt_init
   move.w     #32,d0
-  move.w     d0,ig_om_music_volume(a4)
+  move.w     d0,hs_om_music_volume(a4)
   bsr        _mt_mastervol
   lea.l      _mt_Enable(pc),a0
   move.b     #1,(a0)
+  rts
+
+.fade_out_music:
+  sub.w      #1,hs_om_music_volume(a4)
+  move.w     hs_om_music_volume(a4),d0
+  tst.w      d0
+  bge.s      .fom_0
+  moveq.l    #0,d0
+.fom_0:
+  bsr        _mt_mastervol
   rts
 
 hs_lvl3_irq_handler:
