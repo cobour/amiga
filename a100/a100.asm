@@ -32,14 +32,11 @@ main:
   bsr        ig_start                                        ; MUST call ctrl_take_system and ctrl_free_system
   bra.s      .loop
 .0:
-  nop
   cmp.b      #NextPartHighscores,c_om_next_part(a4)
   bne.s      .1
   bsr        hs_start                                        ; MUST call ctrl_take_system and ctrl_free_system
   bra.s      .loop
 .1:
-  nop
-  nop
   cmp.b      #NextPartMainmenu,c_om_next_part(a4)
   bne.s      .2
   bsr        mm_start                                        ; MUST call ctrl_take_system and ctrl_free_system
