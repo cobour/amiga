@@ -10,3 +10,4 @@ rm -rf uae/dh0test/A100UnitTest
 rm -rf uae/dh0/*.dat
 rm -rf asm_files_index.i
 rm -rf files_index.i
+rm -f ~/Documents/FS-UAE/Save\ States/Default/A100.sdf

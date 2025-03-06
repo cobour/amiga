@@ -29,7 +29,7 @@ class TargetFileFactory {
 			targetFile.setDoZip(true);
 		}
 		//
-		if (parameter.containsKey("doZip")) {
+		if (parameter.containsKey("codeFile")) {
 			var codeFile = ((Boolean) parameter.get("codeFile")).booleanValue();
 			targetFile.setCodeFile(codeFile);
 		} else {
@@ -43,6 +43,13 @@ class TargetFileFactory {
 			targetFile.setRelatedFile(relatedFile);
 		} else {
 			targetFile.setRelatedFile(null);
+		}
+		//
+		if (parameter.containsKey("skipIndex")) {
+			var skipIndex = ((Boolean) parameter.get("skipIndex")).booleanValue();
+			targetFile.setSkipIndex(skipIndex);
+		} else {
+			targetFile.setSkipIndex(false);
 		}
 		//
 		var sourceParameters = (List<LinkedHashMap<String, Object>>) parameter.get("sources");

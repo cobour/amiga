@@ -1,6 +1,7 @@
 package de.spozzfroin.amiga.datatool.config;
 
 import java.io.FileOutputStream;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -36,6 +37,8 @@ class TargetFileIndex {
 					.map(s -> s.getIndex()) //
 					.flatMap(Collection::stream) //
 					.collect(Collectors.toList());
+		} else {
+			this.cmEntries = new ArrayList<IndexEntry>();
 		}
 	}
 

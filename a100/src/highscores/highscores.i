@@ -4,6 +4,16 @@ HIGHSCORES_I equ 1
                         include    "src/globals.i"
                         include    "src/highscores/screen.i"
 
+; highscores data struct
+                        rsreset
+hs_data_entry_name:     rs.b       6
+hs_data_entry_score:    rs.b       4
+hs_data_entry_sizeof:   rs.b       0
+                        rsreset
+hs_data_speedrun:       rs.b       hs_data_entry_sizeof*5
+hs_data_infinite:       rs.b       hs_data_entry_sizeof*5
+hs_data_sizeof:         rs.b       0
+
 ; copperlist struct
                         rsreset
 hs_cm_cl_sprites:       rs.l       16
@@ -29,6 +39,7 @@ hs_om_frontbuffer:      rs.l       1                                            
 hs_om_backbuffer:       rs.l       1                                                      ; points to buffer that is currently drawn to
 hs_om_copperlist:       rs.l       1                                                      ; points to copperlist in chip mem
 hs_om_fade_color_tab:   rs.b       32*2*16
+hs_om_highscore_data:   rs.b       h000_unzipped_filesize
 hs_om_music_volume:     rs.w       1
 hs_om_end_countdown:    rs.b       1                                                      ; < 0 when not ending
 hs_om_padding_byte:     rs.b       1

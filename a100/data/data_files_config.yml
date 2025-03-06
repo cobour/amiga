@@ -196,3 +196,12 @@ targetFiles:
     sources:
       - filename: music/space_odyssey.mod
         id: MP03
+
+  - filename: H000
+    description: highscores
+    memoryType: OTHER
+    doZip: false
+    skipIndex: true
+    sources:
+      - filename: ../src/highscores/hs_data.asm
+        id: HIGH

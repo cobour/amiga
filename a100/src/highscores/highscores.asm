@@ -8,6 +8,9 @@ hs_start:
   bsr        .load_and_inflate_files
   tst.l      d0
   bne        .error
+  bsr        .load_highscores
+  tst.l      d0
+  bne        .error
 
   SETPTRS
 
@@ -53,6 +56,7 @@ hs_start:
 
   bsr        _mt_end
   bsr        ctrl_free_system
+  bsr        .save_highscores
   move.b     #NextPartMainmenu,c_om_next_part(a4)
   rts
 
@@ -72,6 +76,45 @@ hs_start:
   move.l     chip_mem_ptr(pc),a1
   add.l      #hs_cm_datfile,a1
   bsr        datafiles_load_and_unzip
+  rts
+
+.load_highscores:
+  move.l     other_mem_ptr(pc),a4
+  bsr        disk_begin_io
+  tst.l      d0
+  bne.s      .lh_exit
+
+  move.l     other_mem_ptr(pc),a2
+  add.l      #hs_om_highscore_data,a2
+  move.l     chip_mem_ptr(pc),a3
+  add.l      #hs_cm_screenbuffer,a3
+  move.l     #fn_highscores,d4
+  bsr        disk_read_file
+  tst.l      d0
+  bne.s      .lh_exit
+
+  bsr        disk_end_io
+.lh_exit
+  rts
+
+.save_highscores:
+  move.l     other_mem_ptr(pc),a4
+  bsr        disk_begin_io
+  tst.l      d0
+  bne.s      .sh_exit
+
+  moveq.l    #h000_unzipped_filesize,d7
+  move.l     #fn_highscores,d4
+  move.l     other_mem_ptr(pc),a2
+  add.l      #hs_om_highscore_data,a2
+  move.l     chip_mem_ptr(pc),a3
+  add.l      #hs_cm_screenbuffer,a3
+  bsr        disk_write_file
+  tst.l      d0
+  bne.s      .sh_exit
+
+  bsr        disk_end_io
+.sh_exit
   rts
 
 .init_vars:

@@ -24,6 +24,7 @@ public class TargetFile {
 	private MemoryType memoryType;
 	private boolean doZip;
 	private boolean codeFile;
+	private boolean skipIndex;
 	private TargetFile relatedFile;
 	private List<Source> sources;
 
@@ -50,7 +51,7 @@ public class TargetFile {
 		LOG.divider();
 		LOG.print(String.format("writing all rawdata from target file \"%s\"", this.filename));
 		try (FileOutputStream data = new FileOutputStream(this.getDataFile(config, true).toFile())) {
-			if (!this.isCodeFile() && this.memoryType == MemoryType.OTHER) {
+			if (!this.isCodeFile() && this.memoryType == MemoryType.OTHER && !this.skipIndex) {
 				var index = new TargetFileIndex(this);
 				index.write(data);
 			}
@@ -178,5 +179,13 @@ public class TargetFile {
 
 	void setSources(List<Source> sources) {
 		this.sources = sources;
+	}
+
+	boolean isSkipIndex() {
+		return this.skipIndex;
+	}
+
+	void setSkipIndex(boolean skipIndex) {
+		this.skipIndex = skipIndex;
 	}
 }
