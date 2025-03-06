@@ -302,4 +302,71 @@ disk_internal_read_block:
   moveq.l    #1,d0
   rts
 
+  ifnd       BOOTBLOCK
+
+; writes data to a single-block file
+; in:
+;   d4 - filename (first 4 chars before dot)
+;   d7 - length of data in bytes (must not be more than 488 bytes!!)
+;   a2 - pointer to data to be written
+;   a3 - pointer to 512 byte buffer (must be in chip mem)
+;   a4 - pointer to disk-struct
+; out:
+;   d0 - zero for success, other for error
+disk_write_file:
+  movem.l    d1-d7/a0-a6,-(sp)
+
+  ; find data block of file
+  lea.l      disk_dat_files(a4),a1
+.find_first_block_loop:
+  move.l     (a1),d0
+  tst.l      d0
+  beq.s      .error                                   ; file not found
+  cmp.l      d0,d4
+  beq.s      .file_found
+  addq.l     #8,a1
+  bra.s      .find_first_block_loop
+.file_found:
+  move.l     4(a1),d6                                 ; data block
+
+  ; read block from disk
+  bsr.s      disk_internal_read_block
+  tst.l      d0
+  bne.s      .error
+
+  ; copy data to block buffer
+  subq.l     #1,d7
+  move.l     a2,a0
+  move.l     a3,a1
+  lea.l      24(a1),a1                                ; 24 bytes = size of data block header
+.copy_loop:
+  move.b     (a0)+,(a1)+
+  dbf        d7,.copy_loop
+
+  ; DoIO - write block to trackdisk buffer
+  move.l     ExecBaseD,a6
+  lea.l      disk_io_std_req(a4),a1
+  move.w     #IoCmdWrite,IoSrCommand(a1)
+  jsr        DoIO(a6)
+  tst.l      d0
+  bne.s      .error
+
+  ; DoIO - write trackdisk buffer to disk
+  move.w     #IoCmdUpdate,IoSrCommand(a1)
+  jsr        DoIO(a6)
+  tst.l      d0
+  bne.s      .error
+
+.success:
+  movem.l    (sp)+,d1-d7/a0-a6
+  moveq.l    #0,d0
+  rts
+
+.error:
+  movem.l    (sp)+,d1-d7/a0-a6
+  moveq.l    #1,d0
+  rts
+
+  endif                                               ; ifnd BOOTBLOCK
+
   endif                                               ; ifnd DISK_ASM

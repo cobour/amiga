@@ -43,6 +43,8 @@ NodeTypeMessagePort             equ 5
 
 ; IO Commands
 IoCmdRead                       equ 2
+IoCmdWrite                      equ 3
+IoCmdUpdate                     equ 4
 IoCmdNonStandard                equ 9
 
 ; Exec
