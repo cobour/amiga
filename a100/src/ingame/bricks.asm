@@ -58,6 +58,7 @@ b_init:
   move.l     #$deadbeef,d0
   move.l     #$12345678,d1
   add.w      c_om_framecounter+2(a4),d7
+  and.w      #$1ff,d7
 .ir_loop:
   swap       d0
   add.l      d1,d0
