@@ -17,8 +17,9 @@ hs_start:
   bsr        .init_vars
   bsr        .init_fade
   bsr        .init_screen_buffer_pointers
+  bsr        .init_screen_buffers
   bsr        .init_copper_list
-  ; TODO copy front- to backbuffer
+  bsr        hs_view_init
   bsr        ctrl_take_system
   bsr        .set_copper_list
 
@@ -28,6 +29,7 @@ hs_start:
 
 .loop:
   bsr        .update_fade
+  bsr        hs_view_draw
 
   ; REMOVE HERE - MOVE TO EVENT-HANDLING
   tst.b      hs_om_end_countdown(a4)
@@ -46,6 +48,7 @@ hs_start:
   ; REMOVE HERE - MOVE TO EVENT-HANDLING
 
   WAITVB
+  bsr        .swap_buffers
 
   tst.b      hs_om_end_countdown(a4)
   blt.s      .loop
@@ -98,6 +101,9 @@ hs_start:
   rts
 
 .save_highscores:
+  tst.b      hs_om_save_on_exit(a4)
+  beq.s      .sh_exit
+
   move.l     other_mem_ptr(pc),a4
   bsr        disk_begin_io
   tst.l      d0
@@ -119,6 +125,17 @@ hs_start:
 
 .init_vars:
   move.b     #-1,hs_om_end_countdown(a4)
+  clr.b      hs_om_save_on_exit(a4)
+  rts
+
+.init_screen_buffers:
+  ; copy screen-image from buffer in loaded file to empty buffer
+  move.l     hs_om_frontbuffer(a4),a0
+  move.l     hs_om_backbuffer(a4),a1
+  move.w     #((HsScreenWidthBytes*HsScreenHeight*HsScreenBitPlanes)/2)-1,d7
+.isb_loop:
+  move.w     (a0)+,(a1)+
+  dbf        d7,.isb_loop
   rts
 
 .init_screen_buffer_pointers:
@@ -130,6 +147,28 @@ hs_start:
   move.l     a0,hs_om_frontbuffer(a4)
   move.l     a1,hs_om_backbuffer(a4)
   rts
+
+.swap_buffers:
+  ; swap pointers
+  move.l     hs_om_backbuffer(a4),d0
+  move.l     hs_om_frontbuffer(a4),d1
+  move.l     d0,hs_om_frontbuffer(a4)
+  move.l     d1,hs_om_backbuffer(a4)
+
+  ; update copperlist
+  move.l     hs_om_copperlist(a4),a0
+  lea.l      hs_cm_cl_bitplanes(a0),a0
+  moveq.l    #HsScreenBitPlanes-1,d7
+.sb_loop:
+  move.w     d0,6(a0)
+  swap       d0
+  move.w     d0,2(a0)
+  swap       d0
+  add.l      #HsScreenWidthBytes,d0
+  addq.l     #8,a0
+  dbf        d7,.sb_loop
+  rts
+
 
 .init_copper_list:
 ; set bitplane pointers
@@ -167,12 +206,12 @@ hs_start:
   lea.l      hs_om_fade_color_tab(a4),a0
   moveq.l    #32,d0
   moveq.l    #0,d1
-  bra        fade_init                                ; indirect rts
+  bra        fade_init                                                          ; indirect rts
 
 .update_fade:
   move.l     hs_om_copperlist(a4),a0
   add.l      #hs_cm_cl_colors,a0
-  bra        fade_next_step                           ; indirect rts
+  bra        fade_next_step                                                     ; indirect rts
 
 .init_music:
   move.l     #f002_music_spearhead_samples,d0
@@ -215,4 +254,4 @@ hs_lvl3_irq_handler:
   movem.l    (sp)+,d0/a4-a6
   rte
 
-  endif                                               ; ifnd HIGHSCORES_ASM
+  endif                                                                         ; ifnd HIGHSCORES_ASM

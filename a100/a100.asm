@@ -24,7 +24,12 @@ main:
   SETPTRS
   clr.l      c_om_framecounter(a4)                           ; global framecounter for all parts
   move.b     #NextPartMainmenu,c_om_next_part(a4)
-  ;move.b     #NextPartHighscores,c_om_next_part(a4)          ; for testing
+  
+  ; REMOVE ME - for testing
+  ;move.b     #NextPartHighscores,c_om_next_part(a4)
+  ;move.b     #GameModeSpeedRun,c_om_gamemode(a4)
+  ;move.b     #GameModeInfinite,c_om_gamemode(a4)
+  ; REMOVE ME - for testing
 
 .loop:
   cmp.b      #NextPartIngame,c_om_next_part(a4)
@@ -124,6 +129,7 @@ main:
   include    "../a100/src/ingame/game_over_detection.asm"
   include    "../a100/src/ingame/timer.asm"
   include    "../a100/src/highscores/highscores.asm"
+  include    "../a100/src/highscores/view.asm"
   include    "../a100/src/mainmenu/mainmenu.asm"
   include    "../common/src/3rdparty/inflate.asm"
   include    "../common/src/3rdparty/ptplayer.asm"

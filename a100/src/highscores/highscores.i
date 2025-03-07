@@ -1,10 +1,10 @@
                         ifnd       HIGHSCORES_I
-HIGHSCORES_I equ 1
+HIGHSCORES_I     equ 1
 
                         include    "src/globals.i"
                         include    "src/highscores/screen.i"
 
-; highscores data struct
+; highscores data struct (file)
                         rsreset
 hs_data_entry_name:     rs.b       6
 hs_data_entry_score:    rs.b       4
@@ -13,6 +13,8 @@ hs_data_entry_sizeof:   rs.b       0
 hs_data_speedrun:       rs.b       hs_data_entry_sizeof*5
 hs_data_infinite:       rs.b       hs_data_entry_sizeof*5
 hs_data_sizeof:         rs.b       0
+
+HsDataNameLength equ hs_data_entry_score-hs_data_entry_name
 
 ; copperlist struct
                         rsreset
@@ -42,7 +44,7 @@ hs_om_fade_color_tab:   rs.b       32*2*16
 hs_om_highscore_data:   rs.b       h000_unzipped_filesize
 hs_om_music_volume:     rs.w       1
 hs_om_end_countdown:    rs.b       1                                                      ; < 0 when not ending
-hs_om_padding_byte:     rs.b       1
+hs_om_save_on_exit:     rs.b       1                                                      ; 0 = no; any other value = yes
 hs_om_datfile:          rs.b       f003_unzipped_filesize
 hs_om_sizeof:           rs.b       0
 

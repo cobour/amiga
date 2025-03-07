@@ -168,6 +168,10 @@ targetFiles:
         id: MS02
       - filename: ../src/highscores/hs_copperlist.asm
         id: HSCL
+      - filename: gfx/font16.iff
+        id: FONT
+        flattenedTileFormat: 16x16
+        flattenedReducedTileCount: 59
 
   - filename: F003
     description: highscores_other
