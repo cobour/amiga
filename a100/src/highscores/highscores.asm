@@ -20,6 +20,7 @@ hs_start:
   bsr        .init_screen_buffers
   bsr        .init_copper_list
   bsr        hs_view_init
+  bsr        sfx_highscores_init
   bsr        ctrl_take_system
   bsr        .set_copper_list
 

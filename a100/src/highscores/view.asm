@@ -2,6 +2,7 @@
 VIEW_HIGHSCORES_ASM equ 1
 
   include     "../a100/src/highscores/highscores.i"
+  include     "../a100/src/highscores/sfx.i"
   include     "../common/src/system/blitter.i"
   include     "../a100/src/highscores/screen.i"
 
@@ -48,22 +49,140 @@ hs_view_init:
   move.l      a0,(a1)+                                               ; hsv_scores_next_char
   move.l      #(HsScreenBitPlanes*HsScreenWidthBytes*127)+4,(a1)+    ; hsv_draw_row_start_offset
   move.l      d0,(a1)+                                               ; hsv_draw_inner_row_offset
-  move.w      d0,(a1)+                                               ; hsv_draw_buffer_counter
+  move.b      d0,(a1)+                                               ; hsv_draw_buffer_counter
+  move.b      #CursorWait,(a1)+                                      ; hsv_draw_cursor_wait
+  move.b      #CursorUpdateDelay,(a1)+                               ; hsv_cursor_blink_delay
+  move.b      #1,(a1)+                                               ; hsv_cursor_show
+  move.l      d0,(a1)+                                               ; hsv_cursor_last_pos
+  move.l      d0,(a1)+                                               ; hsv_cursor_last_pos (twice)
+  move.l      #(HsScreenBitPlanes*HsScreenWidthBytes*127)+4,(a1)     ; hsv_cursor_offset_in_buffer
+
+  move.l      hsv_font_gfx_ptr(pc),d0
+  moveq.l     #118,d1
+  add.l       d1,d0
+  lea.l       hsv_draw_cursor_gfx(pc),a0
+  move.l      d0,(a0)+                                               ; hsv_draw_cursor_gfx
+  move.l      hsv_font_mask_ptr(pc),d0
+  add.l       d1,d0
+  move.l      d0,(a0)                                                ; hsv_draw_cursor_mask
 
   rts
 
 hs_view_draw:
+  ; is everything drawn?
   move.l      hsv_scores_next_char(pc),a0
   tst.b       (a0)
   beq         .exit
 
+  ; restore cursor background at old position
+  move.l      hsv_cursor_last_pos+4(pc),d0
+  tst.l       d0
+  beq.s       .no_cursor_restore
+  WAIT_BLT
+  move.w      #%0000100111110000,BLTCON0(a6)                         ; simple A -> D copy, no shifting
+  clr.w       BLTCON1(a6)
+  move.w      #$ffff,d0                                              ; no first/last word mask
+  move.w      d0,BLTAFWM(a6)
+  move.w      d0,BLTALWM(a6)
+  move.w      #HsScreenWidthBytes-2,BLTDMOD(a6)                      ; modulos for source and target
+  clr.w       BLTAMOD(a6)
+  lea.l       hs_cm_cursor_restore_buffer(a5),a2                     ; pointers
+  move.l      a2,BLTAPTH(a6)
+  move.l      hsv_cursor_last_pos+4(pc),BLTDPTH(a6)
+  move.w      #(16*HsScreenBitPlanes<<6)+1,BLTSIZE(a6)               ; start blit
+  lea.l       hsv_cursor_last_pos+4(pc),a1
+  clr.l       (a1)
+
+.no_cursor_restore:
+  ; cursor or char draw?
+  lea.l       hsv_draw_cursor_wait(pc),a1
+  tst.b       (a1)
+  beq         .draw_char
+  sub.b       #1,(a1)
+
+  ; save cursor background
+  WAIT_BLT
+  move.w      #%0000100111110000,BLTCON0(a6)                         ; simple A -> D copy, no shifting
+  clr.w       BLTCON1(a6)
+  move.w      #$ffff,d0                                              ; no first/last word mask
+  move.w      d0,BLTAFWM(a6)
+  move.w      d0,BLTALWM(a6)
+  move.w      #HsScreenWidthBytes-2,BLTAMOD(a6)                      ; modulos for source and target
+  clr.w       BLTDMOD(a6)
+  lea.l       hs_cm_cursor_restore_buffer(a5),a2                     ; pointers
+  move.l      a2,BLTDPTH(a6)
+  move.l      hs_om_backbuffer(a4),d1
+  add.l       hsv_cursor_offset_in_buffer(pc),d1
+  move.l      d1,BLTAPTH(a6)
+  move.w      #(16*HsScreenBitPlanes<<6)+1,BLTSIZE(a6)               ; start blit
+  lea.l       hsv_cursor_last_pos(pc),a3
+  move.l      (a3),4(a3)
+  move.l      d1,(a3)
+
+  ; use CursorUpdateDelay to decide whether to draw cursor or not (make it blink)
+  lea.l       hsv_cursor_blink_delay(pc),a3
+  tst.b       (a3)
+  bne.s       .show_cursor_or_not
+  ; switch between show and not show (blink)
+  move.b      #CursorUpdateDelay,(a3)
+  move.b      1(a3),d1
+  bchg        #0,d1
+  move.b      d1,1(a3)
+  tst.b       d1
+  beq.s       .show_cursor_or_not
+  SFX         f002_sfx_tick
+.show_cursor_or_not:
+  sub.b       #1,(a3)
+  tst.b       1(a3)
+  beq         .exit
+
+  ; draw_cursor
+  WAIT_BLT
+
+  ; no pixel shift; masked copy
+  moveq.l     #-1,d7
+  move.w      d7,BLTAFWM(a6)
+  move.w      d7,BLTALWM(a6)
+  move.w      #%0000111111001010,BLTCON0(a6)
+  clr.w       BLTCON1(a6)
+
+  ; modulos
+  move.l      hsv_font_metadata(pc),a1
+  move.w      df_iff_width(a1),d7
+  lsr.w       #3,d7
+  subq.w      #2,d7
+  move.w      d7,BLTAMOD(a6)
+  move.w      d7,BLTBMOD(a6)
+  move.w      #HsScreenWidthBytes-2,d7
+  move.w      d7,BLTCMOD(a6)
+  move.w      d7,BLTDMOD(a6)
+
+  ; source pointers
+  move.l      hsv_draw_cursor_mask(pc),BLTAPTH(a6)
+  move.l      hsv_draw_cursor_gfx(pc),BLTBPTH(a6)
+
+  ; destination pointers
+  move.l      hs_om_backbuffer(a4),d1
+  add.l       hsv_cursor_offset_in_buffer(pc),d1
+  move.l      d1,BLTCPTH(a6)
+  move.l      d1,BLTDPTH(a6)
+
+  ; start blit
+  move.w      #(16*HsScreenBitPlanes<<6)+1,BLTSIZE(a6)
+
+  bra         .exit
+
+.draw_char:
   moveq.l     #0,d0
   move.b      (a0),d0
 
   ; calc offset for char
   sub.b       #$20,d0
   add.w       d0,d0
-
+  tst.w       d0
+  beq.s       .no_print_sfx
+  SFX         f002_sfx_print
+.no_print_sfx:
   move.l      hsv_font_metadata(pc),a1
   move.l      hsv_font_gfx_ptr(pc),d1
   add.l       d0,d1                                                  ; d1 = gfx pointer
@@ -123,8 +242,16 @@ hs_view_draw:
   cmp.l       #MaxInnerRowOffset,(a1)
   blt.s       .exit
   ; new row
-  clr.w       2(a1)
+  moveq.l     #0,d0
+  move.w      d0,2(a1)
   add.l       #HsScreenBitPlanes*HsScreenWidthBytes*20,(a0)
+  lea.l       hsv_draw_cursor_wait(pc),a1
+  move.b      #CursorWait,(a1)
+  lea.l       hsv_cursor_offset_in_buffer(pc),a2
+  add.l       #(HsScreenBitPlanes*HsScreenWidthBytes*20),(a2)
+  lea.l       hsv_cursor_last_pos(pc),a2
+  move.l      d0,(a2)+
+  move.l      d0,(a2)
 
 .exit:
   rts
@@ -135,6 +262,8 @@ hs_view_draw:
 
 RowLength           equ 6+2+8                                        ; 6 chars = name ; 2 spaces ; 8 chars = score
 MaxInnerRowOffset   equ RowLength*2                                  ; max value for hsv_draw_inner_row_offset
+CursorWait          equ 90
+CursorUpdateDelay   equ CursorWait/6
 
 hsv_font_metadata:
   dc.l        0
@@ -160,7 +289,27 @@ hsv_draw_inner_row_offset:
 
 hsv_draw_buffer_counter:
   dc.b        0                                                      ; draw when this is 0 or 1; then reset to 0 and draw next char
-.padding_byte:
+
+hsv_draw_cursor_wait:
   dc.b        0
+
+hsv_cursor_blink_delay:
+  dc.b        0
+
+hsv_cursor_show:
+  dc.b        0
+
+hsv_cursor_last_pos:
+  dc.l        0                                                      ; for both framebuffers, absolute pointers (no offsets)
+  dc.l        0
+
+hsv_cursor_offset_in_buffer:
+  dc.l        0
+
+hsv_draw_cursor_gfx:
+  dc.l        0
+
+hsv_draw_cursor_mask:
+  dc.l        0
 
   endif                                                              ; ifnd VIEW_HIGHSCORES_ASM

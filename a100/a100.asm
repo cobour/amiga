@@ -130,6 +130,7 @@ main:
   include    "../a100/src/ingame/timer.asm"
   include    "../a100/src/highscores/highscores.asm"
   include    "../a100/src/highscores/view.asm"
+  include    "../a100/src/highscores/sfx.asm"
   include    "../a100/src/mainmenu/mainmenu.asm"
   include    "../common/src/3rdparty/inflate.asm"
   include    "../common/src/3rdparty/ptplayer.asm"

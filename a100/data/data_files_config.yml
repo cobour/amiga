@@ -171,7 +171,14 @@ targetFiles:
       - filename: gfx/font16.iff
         id: FONT
         flattenedTileFormat: 16x16
-        flattenedReducedTileCount: 59
+      - filename: sfx/tick.wav
+        id: STIC
+        volume: 64
+        priority: 48
+      - filename: sfx/print.wav
+        id: SPRN
+        volume: 64
+        priority: 48
 
   - filename: F003
     description: highscores_other
