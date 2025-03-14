@@ -151,7 +151,7 @@ pf_process_events:
   bne.s       .exit
 
 .process_event:
-  bsr         ev_ingame_get_next_event
+  bsr         ev_get_next_event
   tst.b       d0
   blt.s       .exit
 
@@ -225,7 +225,7 @@ pf_process_events:
 
   bsr         pf_check_completed
   bsr         ig_switch_mode_select
-  bsr         ev_ingame_clear_event_queue
+  bsr         ev_clear_event_queue
   SFX         f000_sfx_placed
   move.b      #1,ig_om_god_request(a4)
   bra         .process_event
@@ -236,7 +236,7 @@ pf_process_events:
 .pe_process_unselect:
   bsr         bs_refill_selected_brick_selector                    ; before mode switch - otherwise selectors get refilled when unselected brick was the last one
   bsr         ig_switch_mode_select
-  bsr         ev_ingame_clear_event_queue
+  bsr         ev_clear_event_queue
   SFX         f000_sfx_unselect
   bra         .process_event
 

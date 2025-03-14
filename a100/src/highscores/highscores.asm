@@ -21,32 +21,19 @@ hs_start:
   bsr        .init_copper_list
   bsr        hs_view_init
   bsr        sfx_highscores_init
+  bsr        ev_init
   bsr        ctrl_take_system
-  bsr        .set_copper_list
-
   lea.l      hs_lvl3_irq_handler(pc),a0
   bsr        ctrl_set_handler
+  bsr        keyboard_init
+  bsr        .set_copper_list
   bsr        .init_music
 
 .loop:
   bsr        .update_fade
   bsr        hs_view_draw
-
-  ; REMOVE HERE - MOVE TO EVENT-HANDLING
-  tst.b      hs_om_end_countdown(a4)
-  bge.s      .0
-  btst       #6,$bfe001
-  bne.s      .0
-  move.b     #35,hs_om_end_countdown(a4)
-  move.l     #f003_gfx_highscores_screen_colors,d0
-  bsr        datafiles_get_pointer
-  move.l     df_idx_ptr_rawdata(a0),a1
-  lea.l      hs_om_fade_color_tab(a4),a0
-  moveq.l    #32,d0
-  moveq.l    #1,d1
-  bsr        fade_init
-.0:
-  ; REMOVE HERE - MOVE TO EVENT-HANDLING
+  bsr        ev_check
+  bsr        hs_process_events
 
   WAITVB
   bsr        .swap_buffers
@@ -58,6 +45,7 @@ hs_start:
   tst.b      hs_om_end_countdown(a4)
   bgt.s      .loop
 
+  bsr        keyboard_cleanup
   bsr        _mt_end
   bsr        ctrl_free_system
   bsr        .save_highscores
@@ -238,6 +226,35 @@ hs_start:
   moveq.l    #0,d0
 .fom_0:
   bsr        _mt_mastervol
+  rts
+
+hs_process_events:
+  tst.b      hs_om_end_countdown(a4)
+  bge.s      .exit
+
+.process_event:
+  bsr        ev_get_next_event
+  tst.b      d0
+  blt        .exit
+
+.pe_select:
+  cmp.b      #EventSelect,d0
+  bne.s      .pe_other
+
+  move.b     #35,hs_om_end_countdown(a4)
+  move.l     #f003_gfx_highscores_screen_colors,d0
+  bsr        datafiles_get_pointer
+  move.l     df_idx_ptr_rawdata(a0),a1
+  lea.l      hs_om_fade_color_tab(a4),a0
+  moveq.l    #32,d0
+  moveq.l    #1,d1
+  bsr        fade_init
+
+.pe_other:
+  ; ignore all other events
+  bra.s      .process_event
+
+.exit:
   rts
 
 hs_lvl3_irq_handler:

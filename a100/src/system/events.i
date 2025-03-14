@@ -8,7 +8,8 @@ EventRight     equ 4
 EventSelect    equ 5
 EventUnselect  equ 6
 
-EventsCount    equ 6                             ; count of possible events
+; characters and space use their raw key code as event-ID, so $40 (space) ist the highest ID and thus the EventCount
+EventsCount    equ $40                           ; count of possible events
 
 EventDelay     equ 10                            ; time in 1/50th of a second that must at least be between two identical events
 

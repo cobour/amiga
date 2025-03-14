@@ -28,7 +28,7 @@ ig_start:
   bsr        bs_init
   bsr        b_init
   bsr        bs_refill
-  bsr        ev_ingame_init
+  bsr        ev_init
   bsr        sc_init
   bsr        t_init
   bsr        .init_screen_buffers
@@ -46,7 +46,7 @@ ig_start:
 
 .ig_loop:
   bsr        .update_fade
-  bsr        ev_ingame_check
+  bsr        ev_check
   bsr        bs_process_events
   bsr        pf_process_events
   bsr        game_over_detection
