@@ -26,8 +26,10 @@ main:
   move.b     #NextPartMainmenu,c_om_next_part(a4)
   
   ; REMOVE ME - for testing
+  ;move.l     #$00000123,c_om_score(a4)
+  ;move.b     #NextPartIngame,c_om_next_part(a4)
   ;move.b     #NextPartHighscores,c_om_next_part(a4)
-  ;move.b     #GameModeSpeedRun,c_om_gamemode(a4)
+  move.b     #GameModeSpeedRun,c_om_gamemode(a4)
   ;move.b     #GameModeInfinite,c_om_gamemode(a4)
   ; REMOVE ME - for testing
 

@@ -6,7 +6,25 @@ VIEW_HIGHSCORES_ASM equ 1
   include     "../common/src/system/blitter.i"
   include     "../a100/src/highscores/screen.i"
 
+hs_view_save_background:
+  WAIT_BLT
+  move.w      #%0000100111110000,BLTCON0(a6)                         ; simple A -> D copy, no shifting
+  clr.w       BLTCON1(a6)
+  move.w      #$ffff,d0                                              ; no first/last word mask
+  move.w      d0,BLTAFWM(a6)
+  move.w      d0,BLTALWM(a6)
+  move.w      #HsScreenWidthBytes-32,BLTAMOD(a6)                     ; modulos for source and target
+  clr.w       BLTDMOD(a6)
+  lea.l       hs_cm_textarea_restore_buffer(a5),a2                   ; pointers
+  move.l      a2,BLTDPTH(a6)
+  move.l      ig_om_backbuffer(a4),a2
+  add.l       #(HsScreenBitPlanes*HsScreenWidthBytes*127)+4,a2
+  move.l      a2,BLTAPTH(a6)
+  move.w      #(98*HsScreenBitPlanes<<6)+16,BLTSIZE(a6)              ; start blit
+  rts
 
+; in:
+;   d1.b - zero = do not restore background ; any other value = restore background
 hs_view_init:
   ; init gfx and mask pointers
   lea.l       hsv_font_metadata(pc),a3
@@ -17,18 +35,38 @@ hs_view_init:
   move.l      df_idx_ptr_rawdata(a0),d0
   move.l      d0,(a3)+                                               ; gfx
   add.l       df_iff_rawsize(a1),d0
-  move.l      d0,(a3)+                                               ; mask
-  
-  ; init scores-string
+  move.l      d0,(a3)                                                ; mask
+
+  lea.l       hsv_restore_background_countdown(pc),a0
+  tst.b       d1
+  beq.s       .no_restore
+  move.b      #2,(a0)
+  bra.s       .go_on
+.no_restore:
+  clr.b       (a0)
+.go_on:  
+  cmp.b       #HsViewScreenYourScore,hs_om_view_screen(a4)
+  beq.s       .show_your_score
+  bsr.s       .init_score_table_string
+  bra.s       .iv
+.show_your_score
+  bsr.s       .init_your_score
+.iv:
+  bsr.s       .init_values
+
+  rts
+
+.init_score_table_string:
+  lea.l       hsv_scores_string(pc),a3
   lea.l       hs_om_highscore_data(a4),a2
   move.b      c_om_gamemode(a4),d0
   cmp.b       #GameModeSpeedRun,d0
-  beq.s       .0
+  beq.s       .ists_speed_run
   ; step to infinite-mode-highscores
   lea.l       hs_data_entry_sizeof*5(a2),a2
-.0:
+.ists_speed_run:
   moveq.l     #4,d7
-.create_string_loop:
+.ists_create_string_loop:
   ; copy name
   move.l      (a2)+,(a3)+
   move.w      (a2)+,(a3)+
@@ -40,9 +78,29 @@ hs_view_init:
   move.l      (a0)+,(a3)+
   move.l      (a0),(a3)+
   ; next row
-  dbf         d7,.create_string_loop
+  dbf         d7,.ists_create_string_loop
+  rts
 
-  ; init values
+.init_your_score:
+  move.l      c_om_score(a4),d0
+  bsr         bcd_to_string_of_8
+  lea.l       hsv_your_score+20(pc),a2
+  move.l      (a0)+,(a2)+
+  move.l      (a0),(a2)
+
+  lea.l       hsv_your_score_end(pc),a2
+  move.l      a2,d7
+  lea.l       hsv_your_score(pc),a2
+  sub.l       a2,d7
+  subq.w      #1,d7
+  lea.l       hsv_scores_string(pc),a3
+.iys_loop:
+  move.b      (a2)+,(a3)+
+  dbf         d7,.iys_loop
+
+  rts
+
+.init_values:
   lea.l       hsv_scores_string(pc),a0
   lea.l       hsv_scores_next_char(pc),a1
   moveq.l     #0,d0
@@ -74,6 +132,30 @@ hs_view_draw:
   tst.b       (a0)
   beq         .exit
 
+  ; is restore necessary?
+  lea.l       hsv_restore_background_countdown(pc),a1
+  tst.b       (a1)
+  beq.s       .go_on
+
+  ; restore background of printing area
+  WAIT_BLT
+  move.w      #%0000100111110000,BLTCON0(a6)                         ; simple A -> D copy, no shifting
+  clr.w       BLTCON1(a6)
+  move.w      #$ffff,d0                                              ; no first/last word mask
+  move.w      d0,BLTAFWM(a6)
+  move.w      d0,BLTALWM(a6)
+  move.w      #HsScreenWidthBytes-32,BLTDMOD(a6)                     ; modulos for source and target
+  clr.w       BLTAMOD(a6)
+  lea.l       hs_cm_textarea_restore_buffer(a5),a2                   ; pointers
+  move.l      a2,BLTAPTH(a6)
+  move.l      ig_om_backbuffer(a4),a2
+  add.l       #(HsScreenBitPlanes*HsScreenWidthBytes*127)+4,a2
+  move.l      a2,BLTDPTH(a6)
+  move.w      #(98*HsScreenBitPlanes<<6)+16,BLTSIZE(a6)              ; start blit
+
+  sub.b       #1,(a1)
+  bra         .exit
+.go_on:
   ; restore cursor background at old position
   move.l      hsv_cursor_last_pos+4(pc),d0
   tst.l       d0
@@ -257,6 +339,16 @@ hs_view_draw:
   rts
 
 ;
+; constant values
+;
+
+hsv_your_score:
+  dc.b        " YOUR SCORE WAS "
+  dc.b        "    XXXXXXXX    "
+  dc.b        0,0
+hsv_your_score_end:
+
+;
 ; vars (initialized by hs_view_init)
 ;
 
@@ -311,5 +403,10 @@ hsv_draw_cursor_gfx:
 
 hsv_draw_cursor_mask:
   dc.l        0
+
+hsv_restore_background_countdown:
+  dc.b        0
+.padding_byte:
+  dc.b        0
 
   endif                                                              ; ifnd VIEW_HIGHSCORES_ASM

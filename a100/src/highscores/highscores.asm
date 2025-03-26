@@ -19,7 +19,7 @@ hs_start:
   bsr        .init_screen_buffer_pointers
   bsr        .init_screen_buffers
   bsr        .init_copper_list
-  bsr        hs_view_init
+  bsr        .init_viewed_data
   bsr        sfx_highscores_init
   bsr        ev_init
   bsr        ctrl_take_system
@@ -115,6 +115,18 @@ hs_start:
 .init_vars:
   move.b     #-1,hs_om_end_countdown(a4)
   clr.b      hs_om_save_on_exit(a4)
+  rts
+
+.init_viewed_data:
+  bsr        hs_view_save_background
+
+  ; TODO: decide if players score is in highscore table or not
+  ;       here - it's not
+  ; is score is to be added to table, move the lower scores and insert players score with empty name => in hs_om_highscore_data(a4)
+  ; also set the save-flag => hs_om_save_on_exit(a4)
+  move.b     #HsViewScreenYourScore,hs_om_view_screen(a4)
+  moveq.l    #0,d1
+  bsr        hs_view_init
   rts
 
 .init_screen_buffers:
@@ -240,15 +252,7 @@ hs_process_events:
 .pe_select:
   cmp.b      #EventSelect,d0
   bne.s      .pe_other
-
-  move.b     #35,hs_om_end_countdown(a4)
-  move.l     #f003_gfx_highscores_screen_colors,d0
-  bsr        datafiles_get_pointer
-  move.l     df_idx_ptr_rawdata(a0),a1
-  lea.l      hs_om_fade_color_tab(a4),a0
-  moveq.l    #32,d0
-  moveq.l    #1,d1
-  bsr        fade_init
+  bsr.s      .pe_handle_select
 
 .pe_other:
   ; ignore all other events
@@ -256,6 +260,22 @@ hs_process_events:
 
 .exit:
   rts
+
+.pe_handle_select:
+  cmp.b      #HsViewScreenYourScore,hs_om_view_screen(a4)
+  beq.s      .pehs_switch_to_table
+  move.b     #35,hs_om_end_countdown(a4)
+  move.l     #f003_gfx_highscores_screen_colors,d0
+  bsr        datafiles_get_pointer
+  move.l     df_idx_ptr_rawdata(a0),a1
+  lea.l      hs_om_fade_color_tab(a4),a0
+  moveq.l    #32,d0
+  moveq.l    #1,d1
+  bra        fade_init                                                          ; implicit rts
+.pehs_switch_to_table:
+  move.b     #HsViewScreenHighScoreTable,hs_om_view_screen(a4)
+  moveq.l    #1,d1
+  bra        hs_view_init                                                       ; implicit rts
 
 hs_lvl3_irq_handler:
   movem.l    d0/a4-a6,-(sp)

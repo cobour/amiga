@@ -25,7 +25,6 @@ mm_start:
   ; TODO: fade out music
   bsr        _mt_end
   bsr        ctrl_free_system
-  move.b     #GameModeSpeedRun,c_om_gamemode(a4)     ; for testing
   move.b     #NextPartIngame,c_om_next_part(a4)      ; or NextPartExit
   rts
 
