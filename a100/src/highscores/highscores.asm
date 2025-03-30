@@ -3,6 +3,7 @@ HIGHSCORES_ASM equ 1
 
   include    "../a100/src/highscores/highscores.i"
   include    "../common/src/system/screen.i"
+  include    "../a100/src/highscores/sfx.i"
 
 hs_start:
   bsr        .load_and_inflate_files
@@ -22,6 +23,7 @@ hs_start:
   bsr        .init_viewed_data
   bsr        sfx_highscores_init
   bsr        ev_init
+  bsr        hse_init
   bsr        ctrl_take_system
   lea.l      hs_lvl3_irq_handler(pc),a0
   bsr        ctrl_set_handler
@@ -29,11 +31,14 @@ hs_start:
   bsr        .set_copper_list
   bsr        .init_music
 
+  SFX        f002_sfx_tick
 .loop:
   bsr        .update_fade
   bsr        hs_view_draw
+  bsr        hse_update
   bsr        ev_check
   bsr        hs_process_events
+  bsr        hse_process_events
 
   WAITVB
   bsr        .swap_buffers
@@ -86,7 +91,15 @@ hs_start:
   bne.s      .lh_exit
 
   bsr        disk_end_io
-.lh_exit
+.lh_exit:
+  ; set hs_om_highscore_data_pointer(a4) depending on game-mode
+  move.b     c_om_gamemode(a4),d1
+  cmp.b      #GameModeSpeedRun,d1
+  beq.s      .lh_speed_run
+  ; step to infinite-mode-highscores
+  lea.l      hs_data_entry_sizeof*5(a2),a2
+.lh_speed_run:
+  move.l     a2,hs_om_highscore_data_pointer(a4)
   rts
 
 .save_highscores:
@@ -113,8 +126,11 @@ hs_start:
   rts
 
 .init_vars:
+  moveq.l    #0,d0
   move.b     #-1,hs_om_end_countdown(a4)
-  clr.b      hs_om_save_on_exit(a4)
+  move.b     d0,hs_om_save_on_exit(a4)
+  move.b     d0,hs_om_new_entry_index(a4)
+  move.l     d0,hs_om_new_entry_pointer(a4)
   rts
 
 .init_viewed_data:
@@ -124,10 +140,56 @@ hs_start:
   ;       here - it's not
   ; is score is to be added to table, move the lower scores and insert players score with empty name => in hs_om_highscore_data(a4)
   ; also set the save-flag => hs_om_save_on_exit(a4)
+  move.l     hs_om_highscore_data_pointer(a4),a0
+  move.l     a0,a1
+  add.l      #hs_data_entry_sizeof*4,a1
+  moveq.l    #0,d2
+  move.l     c_om_score(a4),d0
+  moveq.l    #5,d3
+.ivd_find_loop:
+  move.l     hs_data_entry_score(a1),d1
+  cmp.l      d0,d1
+  bgt.s      .ivd_go_on
+  move.l     a1,d2
+  sub.l      #hs_data_entry_sizeof,a1
+  subq.b     #1,d3
+  cmp.l      a0,a1
+  bge.s      .ivd_find_loop
+.ivd_go_on:
+
+  tst.l      d2
+  bne.s      .ivd_add_entry
+  ; do not add score to table, just view
   move.b     #HsViewScreenYourScore,hs_om_view_screen(a4)
   moveq.l    #0,d1
-  bsr        hs_view_init
-  rts
+  bra        hs_view_init                                                       ; implicit rts
+.ivd_add_entry:
+  ; copy elements down
+  move.l     d2,a0
+  moveq.l    #hs_data_entry_sizeof,d0
+  move.l     hs_om_highscore_data_pointer(a4),a1
+  add.l      #hs_data_entry_sizeof*3,a1
+  move.l     hs_om_highscore_data_pointer(a4),a2
+  add.l      #hs_data_entry_sizeof*4,a2
+.ivd_copy_loop:
+  move.l     (a1),(a2)
+  move.l     4(a1),4(a2)
+  move.w     8(a1),8(a2)
+  sub.l      d0,a1
+  sub.l      d0,a2
+  cmp.l      a0,a2
+  bgt.s      .ivd_copy_loop
+
+  ; insert new entry (empty name and new score)
+  move.l     a0,hs_om_new_entry_pointer(a4)
+  move.b     d3,hs_om_new_entry_index(a4)
+  move.l     #"....",(a0)+
+  move.w     #"..",(a0)+
+  move.l     c_om_score(a4),(a0)
+
+  move.b     #HsViewScreenHighScoreTable,hs_om_view_screen(a4)
+  moveq.l    #0,d1
+  bra        hs_view_init                                                       ; implicit rts
 
 .init_screen_buffers:
   ; copy screen-image from buffer in loaded file to empty buffer
@@ -247,7 +309,13 @@ hs_process_events:
 .process_event:
   bsr        ev_get_next_event
   tst.b      d0
-  blt        .exit
+  blt.s      .exit
+
+  cmp.b      #HsViewScreenEditEntry,hs_om_view_screen(a4)
+  bne.s      .hspe_go_on
+  ; TODO: let edit.asm handle events - for now: exit on any event
+  bra.s      .pehs_end_of_part
+.hspe_go_on:
 
 .pe_select:
   cmp.b      #EventSelect,d0
@@ -264,6 +332,12 @@ hs_process_events:
 .pe_handle_select:
   cmp.b      #HsViewScreenYourScore,hs_om_view_screen(a4)
   beq.s      .pehs_switch_to_table
+  tst.l      hs_om_new_entry_pointer(a4)
+  beq.s      .pehs_end_of_part
+  ; player must input his name, so do not exit right now
+  rts
+  ; end of this highscores part
+.pehs_end_of_part:
   move.b     #35,hs_om_end_countdown(a4)
   move.l     #f003_gfx_highscores_screen_colors,d0
   bsr        datafiles_get_pointer
@@ -275,6 +349,7 @@ hs_process_events:
 .pehs_switch_to_table:
   move.b     #HsViewScreenHighScoreTable,hs_om_view_screen(a4)
   moveq.l    #1,d1
+  SFX        f002_sfx_tick
   bra        hs_view_init                                                       ; implicit rts
 
 hs_lvl3_irq_handler:

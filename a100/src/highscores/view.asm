@@ -58,13 +58,7 @@ hs_view_init:
 
 .init_score_table_string:
   lea.l       hsv_scores_string(pc),a3
-  lea.l       hs_om_highscore_data(a4),a2
-  move.b      c_om_gamemode(a4),d0
-  cmp.b       #GameModeSpeedRun,d0
-  beq.s       .ists_speed_run
-  ; step to infinite-mode-highscores
-  lea.l       hs_data_entry_sizeof*5(a2),a2
-.ists_speed_run:
+  move.l      hs_om_highscore_data_pointer(a4),a2
   moveq.l     #4,d7
 .ists_create_string_loop:
   ; copy name
@@ -130,8 +124,17 @@ hs_view_draw:
   ; is everything drawn?
   move.l      hsv_scores_next_char(pc),a0
   tst.b       (a0)
-  beq         .exit
+  bne.s       .check_restore
 
+  ; check if HsViewScreenEditEntry must be set
+  cmp.b       #HsViewScreenHighScoreTable,hs_om_view_screen(a4)
+  bne         .exit
+  tst.l       hs_om_new_entry_pointer(a4)
+  beq         .exit
+  move.b      #HsViewScreenEditEntry,hs_om_view_screen(a4)
+  bra         .exit
+
+.check_restore:
   ; is restore necessary?
   lea.l       hsv_restore_background_countdown(pc),a1
   tst.b       (a1)

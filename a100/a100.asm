@@ -26,11 +26,18 @@ main:
   move.b     #NextPartMainmenu,c_om_next_part(a4)
   
   ; REMOVE ME - for testing
+  ;move.l     #$00000099,c_om_score(a4)
   ;move.l     #$00000123,c_om_score(a4)
+  ;move.l     #$00000200,c_om_score(a4)
+  ;move.l     #$00000234,c_om_score(a4)
+  ;move.l     #$00000345,c_om_score(a4)
+  ;move.l     #$00000456,c_om_score(a4)
+  ;move.l     #$00000567,c_om_score(a4)
+  ;move.l     #$000004567,c_om_score(a4)
   ;move.b     #NextPartIngame,c_om_next_part(a4)
   ;move.b     #NextPartHighscores,c_om_next_part(a4)
-  move.b     #GameModeSpeedRun,c_om_gamemode(a4)
-  ;move.b     #GameModeInfinite,c_om_gamemode(a4)
+  ;move.b     #GameModeSpeedRun,c_om_gamemode(a4)
+  move.b     #GameModeInfinite,c_om_gamemode(a4)
   ; REMOVE ME - for testing
 
 .loop:
@@ -133,6 +140,7 @@ main:
   include    "../a100/src/highscores/highscores.asm"
   include    "../a100/src/highscores/view.asm"
   include    "../a100/src/highscores/sfx.asm"
+  include    "../a100/src/highscores/edit.asm"
   include    "../a100/src/mainmenu/mainmenu.asm"
   include    "../common/src/3rdparty/inflate.asm"
   include    "../common/src/3rdparty/ptplayer.asm"
