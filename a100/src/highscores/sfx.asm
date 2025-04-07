@@ -35,6 +35,12 @@ sfx_highscores:
   dc.l       0
   dc.l       f002_sfx_print
   dc.l       0
+  dc.l       f002_sfx_delete
+  dc.l       0
+  dc.l       f002_sfx_enter
+  dc.l       0
+  dc.l       f002_sfx_error
+  dc.l       0
   dc.l       -1                         ; end of list
 
   endif                                 ; ifnd HIGHSCORES_SFX_ASM
