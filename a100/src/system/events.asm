@@ -166,6 +166,9 @@ ev_check:
 ; in:
 ;   d1 - Event-ID (see events.i)
 .add_event_to_queue:
+  ; chars and space without delay 
+  cmp.b      #$10,d1
+  bge.s      .new_event
 
   ; check if event may be issued again
   move.l     d1,d2
@@ -183,6 +186,7 @@ ev_check:
   ; update last issued
   move.l     d3,(a1)
 
+.new_event:
   ; add event to queue
   lea.l      ev_struct(pc),a1
   move.w     (a1),d2                              ; event_write_index
