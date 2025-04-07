@@ -306,16 +306,13 @@ hs_process_events:
   tst.b      hs_om_end_countdown(a4)
   bge.s      .exit
 
+  cmp.b      #HsViewScreenEditEntry,hs_om_view_screen(a4)
+  beq.s      .exit
+
 .process_event:
   bsr        ev_get_next_event
   tst.b      d0
   blt.s      .exit
-
-  cmp.b      #HsViewScreenEditEntry,hs_om_view_screen(a4)
-  bne.s      .hspe_go_on
-  ; TODO: let edit.asm handle events - for now: exit on any event
-  bra.s      .pehs_end_of_part
-.hspe_go_on:
 
 .pe_select:
   cmp.b      #EventSelect,d0
