@@ -58,4 +58,7 @@ HsViewScreenYourScore      equ 0
 HsViewScreenHighScoreTable equ 1
 HsViewScreenEditEntry      equ 2
 
+HsOffsetOfTextArea         equ (HsScreenBitPlanes*HsScreenWidthBytes*127)+4
+HsTextAreaLineAdd          equ HsScreenBitPlanes*HsScreenWidthBytes*20
+
                                 endif                                                             ; ifnd HIGHSCORES_I
