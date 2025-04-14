@@ -309,6 +309,9 @@ hs_process_events:
   cmp.b      #HsViewScreenEditEntry,hs_om_view_screen(a4)
   beq.s      .exit
 
+  tst.b      hs_om_save_on_exit(a4)
+  bne.s      .pehs_end_of_part
+
 .process_event:
   bsr        ev_get_next_event
   tst.b      d0
