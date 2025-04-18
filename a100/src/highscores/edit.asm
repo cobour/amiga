@@ -18,6 +18,9 @@ hse_update:
   moveq.l     #0,d0
   moveq.l     #0,d1
   bsr         hse_print_char
+
+  bsr         hse_print_cursor
+
   rts
 
 hse_process_events:
@@ -85,6 +88,8 @@ hse_process_events:
   move.b      #'.',d0
   bsr         hse_print_char
   SFX         f002_sfx_delete
+  lea.l       hse_cursor_back_restore_count(pc),a0
+  move.b      #2,(a0)
   bra         .process_event
 
 .pe_handle_char:
@@ -151,6 +156,44 @@ hse_process_events:
   dc.b        $40,' '
   dc.w        $ffff                                                ; end of list
 
+hse_print_cursor:
+  cmp.b       #HsViewScreenEditEntry,hs_om_view_screen(a4)
+  bne.s       .exit
+
+  moveq.l     #0,d0
+  moveq.l     #0,d1
+
+  lea.l       hse_cursor_back_restore_count(pc),a0
+  tst.b       (a0)
+  beq.s       .no_cursor_restore
+  sub.b       #1,(a0)
+  move.b      hse_char_count(pc),d1
+  add.b       #1,d1
+  cmp.b       #5,d1
+  bgt.s       .no_cursor_restore
+  move.b      #'.',d0
+  bsr.s       hse_print_char_do
+    
+.no_cursor_restore:
+
+  move.b      hse_char_count(pc),d1
+  cmp.b       #6,d1
+  bge.s       .exit
+
+  move.l      c_om_framecounter(a4),d2
+  btst        #0,d2
+  bne.s       .0
+  move.b      #' ',d0
+  bra.s       .1
+.0:
+  move.b      #'.',d0
+.1:
+  
+  bra.s       hse_print_char_do                                    ; implicit rts
+
+.exit:
+  rts
+
 ; in:
 ;   d0 - char to print (ascii)
 ;   d1 - index of char to print (NOT same as hse_char_count(pc), because that is already incremented od decremented)
@@ -168,14 +211,19 @@ hse_print_char:
   moveq.l     #0,d4
   move.l      d4,(a0)
   move.l      d4,4(a0)
-  bra.s       .do
+  bra.s       hse_print_char_do
 
 .1st_run:
   ; save params for 2nd run
   move.l      d0,(a0)+
   move.l      d1,(a0)
+  bra.s       hse_print_char_do
+.exit:
+  rts
 
-.do:
+; in:
+;   d0 - char to print (ascii)
+hse_print_char_do:
   moveq.l     #0,d4
   move.b      hs_om_new_entry_index(a4),d4
   add.w       d4,d4
@@ -235,7 +283,6 @@ hse_print_char:
   move.l      d2,BLTDPTH(a6)
   move.w      #(16*HsScreenBitPlanes<<6)+1,BLTSIZE(a6)             ; start blit
 
-.exit:
   rts
 
 .pc_line_offset_tab_screenbuffer:
@@ -257,8 +304,8 @@ hse_print_char:
   ; DONE  switch to HsViewScreenEditEntry when drawing of table is done
   ; DONE  when HsViewScreenEditEntry is set, edit.asm takes control of the users input
   ; DONE  set hs_om_save_on_exit(a4) to save
+  ; DONE  let dot blink as cursor, stop blinking when switching back to view-mode
   ;       after editing is finished remove trailing dots from name in screenbuffer
-  ;       let dot blink as cursor, stop blinking when switching back to view-mode
 
 ;
 ; vars
@@ -266,7 +313,7 @@ hse_print_char:
 
 hse_char_count:
   dc.b        0
-.filler:
+hse_cursor_back_restore_count:
   dc.b        0
 
 hse_reprint_char_params:
