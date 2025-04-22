@@ -66,7 +66,7 @@ hse_process_events:
   ; clear vars
   moveq.l     #0,d0
   move.l      d0,hs_om_new_entry_pointer(a4)
-  move.b      d0,hs_om_new_entry_index(a4)
+  ; do not clear hs_om_new_entry_index(a4) - still needed for clearance of dots
   SFX         f002_sfx_enter
   bra.s       .exit
 
@@ -157,6 +157,23 @@ hse_process_events:
   dc.w        $ffff                                                ; end of list
 
 hse_print_cursor:
+  tst.b       hs_om_save_on_exit(a4)
+  beq.s       .not_exiting
+
+  ; clearing dots when exiting
+  move.b      hse_char_count(pc),d6
+.clear_dots_loop:
+  moveq.l     #0,d0
+  moveq.l     #0,d1
+  move.b      #' ',d0
+  move.b      d6,d1
+  bsr.s       hse_print_char_do
+  add.b       #1,d6
+  cmp.b       #6,d6
+  blt.s       .clear_dots_loop
+  rts
+
+.not_exiting:
   cmp.b       #HsViewScreenEditEntry,hs_om_view_screen(a4)
   bne.s       .exit
 
@@ -223,6 +240,7 @@ hse_print_char:
 
 ; in:
 ;   d0 - char to print (ascii)
+;   d1 - index of char to print
 hse_print_char_do:
   moveq.l     #0,d4
   move.b      hs_om_new_entry_index(a4),d4
@@ -298,14 +316,6 @@ hse_print_char_do:
   dc.l        32*HsScreenBitPlanes*20*2
   dc.l        32*HsScreenBitPlanes*20*3
   dc.l        32*HsScreenBitPlanes*20*4
-
-  ; TODO: using hs_om_new_entry_index(a4) and hs_om_new_entry_pointer(a4)
-  ; DONE  let the user enter his name
-  ; DONE  switch to HsViewScreenEditEntry when drawing of table is done
-  ; DONE  when HsViewScreenEditEntry is set, edit.asm takes control of the users input
-  ; DONE  set hs_om_save_on_exit(a4) to save
-  ; DONE  let dot blink as cursor, stop blinking when switching back to view-mode
-  ;       after editing is finished remove trailing dots from name in screenbuffer
 
 ;
 ; vars
