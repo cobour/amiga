@@ -562,7 +562,7 @@ pf_draw:
   move.w      (a0,d7.w),d7
   add.w       d2,d7
   lea.l       pf_data(pc),a0
-  clr.w       d4
+  moveq.l     #0,d4
   move.b      (a0,d7.w),d4
   movem.l     (sp)+,d7/a0
   rts
