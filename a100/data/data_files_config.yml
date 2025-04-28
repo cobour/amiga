@@ -207,6 +207,12 @@ targetFiles:
     description: mainmenu_chip
     memoryType: CHIP
     sources:
+      - filename: gfx/mainmenu_screen.iff
+        id: SCRN
+        withMask: false
+      - filename: gfx/font16.iff
+        id: FONT
+        flattenedTileFormat: 16x16
       - filename: music/space_odyssey.mod
         id: MS03
       - filename: ../src/mainmenu/mm_copperlist.asm
@@ -217,6 +223,9 @@ targetFiles:
     memoryType: OTHER
     relatedFile: F004
     sources:
+      - filename: gfx/mainmenu_screen.iff
+        id: COLS
+        colorsOnly: true
       - filename: music/space_odyssey.mod
         id: MP03
 

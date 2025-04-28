@@ -11,18 +11,28 @@ mm_start:
 
   SETPTRS
 
+  bsr.s      .init_vars
   bsr        ctrl_take_system
   bsr        .set_copper_list
 
   lea.l      mm_lvl3_irq_handler(pc),a0
   bsr        ctrl_set_handler
+  bsr        keyboard_init
   bsr        .init_music
 
 .loop:
-  btst       #6,$bfe001
-  bne.s      .loop
+  bsr        mm_process_events
 
-  ; TODO: fade out music
+  WAITVB
+
+  tst.b      mm_om_end_countdown(a4)
+  blt.s      .loop
+  bsr        .fade_out_music
+  sub.b      #1,mm_om_end_countdown(a4)
+  tst.b      mm_om_end_countdown(a4)
+  bgt.s      .loop
+
+  bsr        keyboard_cleanup
   bsr        _mt_end
   bsr        ctrl_free_system
   move.b     #NextPartIngame,c_om_next_part(a4)      ; or NextPartExit
@@ -30,6 +40,10 @@ mm_start:
 
 .error:
   move.b     #NextPartExit,c_om_next_part(a4)
+  rts
+
+.init_vars:
+  move.b     #-1,mm_om_end_countdown(a4)
   rts
 
 .load_and_inflate_files:
@@ -65,10 +79,31 @@ mm_start:
   moveq.l    #0,d0
   bsr        _mt_init
   move.w     #32,d0
-  move.w     d0,ig_om_music_volume(a4)
+  move.w     d0,mm_om_music_volume(a4)
   bsr        _mt_mastervol
   lea.l      _mt_Enable(pc),a0
   move.b     #1,(a0)
+  rts
+
+.fade_out_music:
+  sub.w      #1,mm_om_music_volume(a4)
+  move.w     mm_om_music_volume(a4),d0
+  tst.w      d0
+  bge.s      .fom_0
+  moveq.l    #0,d0
+.fom_0:
+  bsr        _mt_mastervol
+  rts
+
+mm_process_events:
+  tst.b      mm_om_end_countdown(a4)
+  bge.s      .exit
+
+  btst       #6,$bfe001
+  bne.s      .exit
+  move.b     #35,mm_om_end_countdown(a4)
+
+.exit:
   rts
 
 mm_lvl3_irq_handler:
