@@ -25,6 +25,10 @@ mm_cm_sizeof:           rs.b       0
 ; other mem struct
                         rsreset
 mm_om_common:           rs.b       c_om_sizeof
+mm_om_frontbuffer:      rs.l       1                                                      ; points to currently shown buffer
+mm_om_backbuffer:       rs.l       1                                                      ; points to buffer that is currently drawn to
+mm_om_copperlist:       rs.l       1                                                      ; points to copperlist in chip mem
+mm_om_fade_color_tab:   rs.b       32*2*16
 mm_om_music_volume:     rs.w       1
 mm_om_end_countdown:    rs.b       1                                                      ; < 0 when not ending
 mm_om_padding_byte:     rs.b       1

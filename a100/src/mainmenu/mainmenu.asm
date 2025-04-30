@@ -11,7 +11,11 @@ mm_start:
 
   SETPTRS
 
-  bsr.s      .init_vars
+  bsr        .init_vars
+  bsr        .init_fade
+  bsr        .init_screen_buffer_pointers
+  bsr        .init_screen_buffers
+  bsr        .init_copper_list
   bsr        ctrl_take_system
   bsr        .set_copper_list
 
@@ -21,6 +25,7 @@ mm_start:
   bsr        .init_music
 
 .loop:
+  bsr        .update_fade
   bsr        mm_process_events
 
   WAITVB
@@ -35,7 +40,7 @@ mm_start:
   bsr        keyboard_cleanup
   bsr        _mt_end
   bsr        ctrl_free_system
-  move.b     #NextPartIngame,c_om_next_part(a4)      ; or NextPartExit
+  move.b     #NextPartIngame,c_om_next_part(a4)                                 ; or NextPartExit
   rts
 
 .error:
@@ -60,11 +65,48 @@ mm_start:
   bsr        datafiles_load_and_unzip
   rts
 
-.set_copper_list
+.init_screen_buffer_pointers:
+  ; init pointers for both buffers
+  move.l     #f004_gfx_mainmenu_screen,d0
+  bsr        datafiles_get_pointer
+  move.l     df_idx_ptr_rawdata(a0),a0
+  lea.l      mm_cm_screenbuffer(a5),a1
+  move.l     a0,mm_om_frontbuffer(a4)
+  move.l     a1,mm_om_backbuffer(a4)
+  rts
+
+.init_screen_buffers:
+  ; copy screen-image from buffer in loaded file to empty buffer
+  move.l     mm_om_frontbuffer(a4),a0
+  move.l     mm_om_backbuffer(a4),a1
+  move.w     #((MmScreenWidthBytes*MmScreenHeight*MmScreenBitPlanes)/2)-1,d7
+.isb_loop:
+  move.w     (a0)+,(a1)+
+  dbf        d7,.isb_loop
+  rts
+
+.init_copper_list:
+; set bitplane pointers
   move.l     #f004_src_mainmenu_mm_copperlist,d0
   bsr        datafiles_get_pointer
   move.l     df_idx_ptr_rawdata(a0),a0
-  lea.l      CustomBase,a6
+  move.l     a0,mm_om_copperlist(a4)
+  move.l     a0,a1
+  lea.l      mm_cm_cl_bitplanes(a0),a0
+  move.l     mm_om_frontbuffer(a4),d0
+  moveq.l    #MmScreenBitPlanes-1,d7
+.icl1
+  move.w     d0,6(a0)
+  swap       d0
+  move.w     d0,2(a0)
+  swap       d0
+  add.l      #MmScreenWidthBytes,d0
+  addq.l     #8,a0
+  dbf        d7,.icl1
+  rts
+
+.set_copper_list
+  move.l     mm_om_copperlist(a4),a0
   move.l     a0,COP1LC(a6)
   move.w     #$0000,COPJMP1(a6)
   rts
@@ -85,6 +127,20 @@ mm_start:
   move.b     #1,(a0)
   rts
 
+.init_fade:
+  move.l     #f005_gfx_mainmenu_screen_colors,d0
+  bsr        datafiles_get_pointer
+  move.l     df_idx_ptr_rawdata(a0),a1
+  lea.l      mm_om_fade_color_tab(a4),a0
+  moveq.l    #32,d0
+  moveq.l    #0,d1
+  bra        fade_init                                                          ; indirect rts
+
+.update_fade:
+  move.l     mm_om_copperlist(a4),a0
+  add.l      #mm_cm_cl_colors,a0
+  bra        fade_next_step                                                     ; indirect rts
+
 .fade_out_music:
   sub.w      #1,mm_om_music_volume(a4)
   move.w     mm_om_music_volume(a4),d0
@@ -101,7 +157,18 @@ mm_process_events:
 
   btst       #6,$bfe001
   bne.s      .exit
+
+  ; --== exit mainmenu ==--
+  ; set end countdown
   move.b     #35,mm_om_end_countdown(a4)
+  ; trigger fade out
+  move.l     #f005_gfx_mainmenu_screen_colors,d0
+  bsr        datafiles_get_pointer
+  move.l     df_idx_ptr_rawdata(a0),a1
+  lea.l      mm_om_fade_color_tab(a4),a0
+  moveq.l    #32,d0
+  moveq.l    #1,d1
+  bra        fade_init                                                          ; implicit rts
 
 .exit:
   rts
@@ -121,4 +188,4 @@ mm_lvl3_irq_handler:
   movem.l    (sp)+,d0/a4-a6
   rte
 
-  endif                                              ; ifnd MAINMENU_ASM
+  endif                                                                         ; ifnd MAINMENU_ASM
