@@ -17,7 +17,7 @@ hs_view_save_background:
   clr.w       BLTDMOD(a6)
   lea.l       hs_cm_textarea_restore_buffer(a5),a2                 ; pointers
   move.l      a2,BLTDPTH(a6)
-  move.l      ig_om_backbuffer(a4),a2
+  move.l      hs_om_backbuffer(a4),a2
   add.l       #HsOffsetOfTextArea,a2
   move.l      a2,BLTAPTH(a6)
   move.w      #(98*HsScreenBitPlanes<<6)+16,BLTSIZE(a6)            ; start blit
@@ -151,7 +151,7 @@ hs_view_draw:
   clr.w       BLTAMOD(a6)
   lea.l       hs_cm_textarea_restore_buffer(a5),a2                 ; pointers
   move.l      a2,BLTAPTH(a6)
-  move.l      ig_om_backbuffer(a4),a2
+  move.l      hs_om_backbuffer(a4),a2
   add.l       #HsOffsetOfTextArea,a2
   move.l      a2,BLTDPTH(a6)
   move.w      #(98*HsScreenBitPlanes<<6)+16,BLTSIZE(a6)            ; start blit
