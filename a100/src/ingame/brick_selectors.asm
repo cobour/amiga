@@ -171,7 +171,9 @@ bs_gained_mode:
   lea.l       bs_active_selection(pc),a0
   move.w      (a0),d1                                            ; old pos
   move.w      d2,(a0)
-  sub.w       d2,d1                                              ; TODO: set add-value
+  sub.w       d2,d1
+  tst.w       d1
+  beq.s       .fill_sel_struct                                   ; no need to move selector makr
   lea.l       bs_active_selector_mark_add(pc),a0
   tst.w       d1
   blt.s       .pos_add
