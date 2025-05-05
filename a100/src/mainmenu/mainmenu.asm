@@ -1,191 +1,234 @@
-  ifnd       MAINMENU_ASM
+  ifnd        MAINMENU_ASM
 MAINMENU_ASM equ 1
 
-  include    "../a100/src/mainmenu/mainmenu.i"
-  include    "../common/src/system/screen.i"
+  include     "../a100/src/mainmenu/mainmenu.i"
+  include     "../common/src/system/screen.i"
+  include     "../common/src/system/blitter.i"
 
 mm_start:
-  bsr        .load_and_inflate_files
-  tst.l      d0
-  bne        .error
+  bsr         .load_and_inflate_files
+  tst.l       d0
+  bne         .error
 
   SETPTRS
 
-  bsr        .init_vars
-  bsr        .init_fade
-  bsr        .init_screen_buffer_pointers
-  bsr        .init_screen_buffers
-  bsr        .init_copper_list
-  bsr        ctrl_take_system
-  bsr        .set_copper_list
-
-  lea.l      mm_lvl3_irq_handler(pc),a0
-  bsr        ctrl_set_handler
-  bsr        keyboard_init
-  bsr        .init_music
+  bsr         .init_vars
+  bsr         .init_fade
+  bsr         .init_screen_buffer_pointers
+  bsr         .init_screen_buffers
+  bsr         .init_restore_buffer
+  bsr         mm_clear_text_print_buffer                                                               ; must be called after .init_restore_buffer
+  bsr         mp_init                                                                                  ; must be called after .init_screen_buffer_pointers, .init_screen_buffers, .init_restore_buffer and mm_clear_text_print_buffer (because draws to printbuffer and screenbuffer)
+  bsr         .init_copper_list
+  bsr         sfx_mm_init
+  bsr         ev_init
+  bsr         ctrl_take_system
+  lea.l       mm_lvl3_irq_handler(pc),a0
+  bsr         ctrl_set_handler
+  bsr         keyboard_init
+  bsr         .set_copper_list
+  bsr         .init_music
 
 .loop:
-  bsr        .update_fade
-  bsr        mm_process_events
+  bsr         .update_fade
+  bsr         mp_update
+  bsr         ev_check
+  bsr         mp_process_events
 
   WAITVB
+  bsr         .swap_buffers
 
-  tst.b      mm_om_end_countdown(a4)
-  blt.s      .loop
-  bsr        .fade_out_music
-  sub.b      #1,mm_om_end_countdown(a4)
-  tst.b      mm_om_end_countdown(a4)
-  bgt.s      .loop
+  tst.b       mm_om_end_countdown(a4)
+  blt.s       .loop
+  bsr         .fade_out_music
+  sub.b       #1,mm_om_end_countdown(a4)
+  tst.b       mm_om_end_countdown(a4)
+  bgt.s       .loop
 
-  bsr        keyboard_cleanup
-  bsr        _mt_end
-  bsr        ctrl_free_system
-  move.b     #NextPartIngame,c_om_next_part(a4)                                 ; or NextPartExit
+  bsr         keyboard_cleanup
+  bsr         _mt_end
+  bsr         ctrl_free_system
   rts
 
 .error:
-  move.b     #NextPartExit,c_om_next_part(a4)
-  rts
-
-.init_vars:
-  move.b     #-1,mm_om_end_countdown(a4)
+  move.b      #NextPartExit,c_om_next_part(a4)
   rts
 
 .load_and_inflate_files:
-  move.l     #fn_mainmenu_other,d1
-  move.l     #fn_mainmenu_chip,d2
-  move.l     chip_mem_ptr(pc),d5
-  add.l      #mm_cm_screenbuffer,d5
-  move.l     d5,d6
-  add.l      #512,d6
-  move.l     other_mem_ptr(pc),a0
-  add.l      #mm_om_datfile,a0
-  move.l     chip_mem_ptr(pc),a1
-  add.l      #mm_cm_datfile,a1
-  bsr        datafiles_load_and_unzip
+  move.l      #fn_mainmenu_other,d1
+  move.l      #fn_mainmenu_chip,d2
+  move.l      chip_mem_ptr(pc),d5
+  add.l       #mm_cm_screenbuffer,d5
+  move.l      d5,d6
+  add.l       #512,d6
+  move.l      other_mem_ptr(pc),a0
+  add.l       #mm_om_datfile,a0
+  move.l      chip_mem_ptr(pc),a1
+  add.l       #mm_cm_datfile,a1
+  bsr         datafiles_load_and_unzip
+  rts
+
+.init_vars:
+  move.b      #-1,mm_om_end_countdown(a4)
   rts
 
 .init_screen_buffer_pointers:
   ; init pointers for both buffers
-  move.l     #f004_gfx_mainmenu_screen,d0
-  bsr        datafiles_get_pointer
-  move.l     df_idx_ptr_rawdata(a0),a0
-  lea.l      mm_cm_screenbuffer(a5),a1
-  move.l     a0,mm_om_frontbuffer(a4)
-  move.l     a1,mm_om_backbuffer(a4)
+  move.l      #f004_gfx_mainmenu_screen,d0
+  bsr         datafiles_get_pointer
+  move.l      df_idx_ptr_rawdata(a0),a0
+  lea.l       mm_cm_screenbuffer(a5),a1
+  move.l      a0,mm_om_frontbuffer(a4)
+  move.l      a1,mm_om_backbuffer(a4)
   rts
 
 .init_screen_buffers:
   ; copy screen-image from buffer in loaded file to empty buffer
-  move.l     mm_om_frontbuffer(a4),a0
-  move.l     mm_om_backbuffer(a4),a1
-  move.w     #((MmScreenWidthBytes*MmScreenHeight*MmScreenBitPlanes)/2)-1,d7
+  move.l      mm_om_frontbuffer(a4),a0
+  move.l      mm_om_backbuffer(a4),a1
+  move.w      #((MmScreenWidthBytes*MmScreenHeight*MmScreenBitPlanes)/2)-1,d7
 .isb_loop:
-  move.w     (a0)+,(a1)+
-  dbf        d7,.isb_loop
+  move.w      (a0)+,(a1)+
+  dbf         d7,.isb_loop
   rts
 
 .init_copper_list:
 ; set bitplane pointers
-  move.l     #f004_src_mainmenu_mm_copperlist,d0
-  bsr        datafiles_get_pointer
-  move.l     df_idx_ptr_rawdata(a0),a0
-  move.l     a0,mm_om_copperlist(a4)
-  move.l     a0,a1
-  lea.l      mm_cm_cl_bitplanes(a0),a0
-  move.l     mm_om_frontbuffer(a4),d0
-  moveq.l    #MmScreenBitPlanes-1,d7
+  move.l      #f004_src_mainmenu_mm_copperlist,d0
+  bsr         datafiles_get_pointer
+  move.l      df_idx_ptr_rawdata(a0),a0
+  move.l      a0,mm_om_copperlist(a4)
+  move.l      a0,a1
+  lea.l       mm_cm_cl_bitplanes(a0),a0
+  move.l      mm_om_frontbuffer(a4),d0
+  moveq.l     #MmScreenBitPlanes-1,d7
 .icl1
-  move.w     d0,6(a0)
-  swap       d0
-  move.w     d0,2(a0)
-  swap       d0
-  add.l      #MmScreenWidthBytes,d0
-  addq.l     #8,a0
-  dbf        d7,.icl1
+  move.w      d0,6(a0)
+  swap        d0
+  move.w      d0,2(a0)
+  swap        d0
+  add.l       #MmScreenWidthBytes,d0
+  addq.l      #8,a0
+  dbf         d7,.icl1
   rts
 
 .set_copper_list
-  move.l     mm_om_copperlist(a4),a0
-  move.l     a0,COP1LC(a6)
-  move.w     #$0000,COPJMP1(a6)
+  move.l      mm_om_copperlist(a4),a0
+  move.l      a0,COP1LC(a6)
+  move.w      #$0000,COPJMP1(a6)
   rts
 
 .init_music:
-  move.l     #f004_music_space_odyssey_samples,d0
-  bsr        datafiles_get_pointer
-  move.l     df_idx_ptr_rawdata(a0),a1
-  move.l     #f005_music_space_odyssey_mod,d0
-  bsr        datafiles_get_pointer
-  move.l     df_idx_ptr_rawdata(a0),a0
-  moveq.l    #0,d0
-  bsr        _mt_init
-  move.w     #32,d0
-  move.w     d0,mm_om_music_volume(a4)
-  bsr        _mt_mastervol
-  lea.l      _mt_Enable(pc),a0
-  move.b     #1,(a0)
+  move.l      #f004_music_space_odyssey_samples,d0
+  bsr         datafiles_get_pointer
+  move.l      df_idx_ptr_rawdata(a0),a1
+  move.l      #f005_music_space_odyssey_mod,d0
+  bsr         datafiles_get_pointer
+  move.l      df_idx_ptr_rawdata(a0),a0
+  moveq.l     #0,d0
+  bsr         _mt_init
+  move.w      #32,d0
+  move.w      d0,mm_om_music_volume(a4)
+  bsr         _mt_mastervol
+  lea.l       _mt_Enable(pc),a0
+  move.b      #1,(a0)
   rts
 
 .init_fade:
-  move.l     #f005_gfx_mainmenu_screen_colors,d0
-  bsr        datafiles_get_pointer
-  move.l     df_idx_ptr_rawdata(a0),a1
-  lea.l      mm_om_fade_color_tab(a4),a0
-  moveq.l    #32,d0
-  moveq.l    #0,d1
-  bra        fade_init                                                          ; indirect rts
+  move.l      #f005_gfx_mainmenu_screen_colors,d0
+  bsr         datafiles_get_pointer
+  move.l      df_idx_ptr_rawdata(a0),a1
+  lea.l       mm_om_fade_color_tab(a4),a0
+  moveq.l     #32,d0
+  moveq.l     #0,d1
+  bra         fade_init                                                                                ; indirect rts
 
 .update_fade:
-  move.l     mm_om_copperlist(a4),a0
-  add.l      #mm_cm_cl_colors,a0
-  bra        fade_next_step                                                     ; indirect rts
+  move.l      mm_om_copperlist(a4),a0
+  add.l       #mm_cm_cl_colors,a0
+  bra         fade_next_step                                                                           ; indirect rts
 
-.fade_out_music:
-  sub.w      #1,mm_om_music_volume(a4)
-  move.w     mm_om_music_volume(a4),d0
-  tst.w      d0
-  bge.s      .fom_0
-  moveq.l    #0,d0
-.fom_0:
-  bsr        _mt_mastervol
+.swap_buffers:
+  ; swap pointers
+  move.l      mm_om_backbuffer(a4),d0
+  move.l      mm_om_frontbuffer(a4),d1
+  move.l      d0,mm_om_frontbuffer(a4)
+  move.l      d1,mm_om_backbuffer(a4)
+
+  ; update copperlist
+  move.l      mm_om_copperlist(a4),a0
+  lea.l       mm_cm_cl_bitplanes(a0),a0
+  moveq.l     #MmScreenBitPlanes-1,d7
+.sb_loop:
+  move.w      d0,6(a0)
+  swap        d0
+  move.w      d0,2(a0)
+  swap        d0
+  add.l       #MmScreenWidthBytes,d0
+  addq.l      #8,a0
+  dbf         d7,.sb_loop
   rts
 
-mm_process_events:
-  tst.b      mm_om_end_countdown(a4)
-  bge.s      .exit
+.fade_out_music:
+  sub.w       #1,mm_om_music_volume(a4)
+  move.w      mm_om_music_volume(a4),d0
+  tst.w       d0
+  bge.s       .fom_0
+  moveq.l     #0,d0
+.fom_0:
+  bsr         _mt_mastervol
+  rts
 
-  btst       #6,$bfe001
-  bne.s      .exit
+.init_restore_buffer:
+  WAIT_BLT
+  move.w      #%0000100111110000,BLTCON0(a6)                                                           ; simple A -> D copy, no shifting
+  clr.w       BLTCON1(a6)
+  move.w      #$ffff,d0                                                                                ; no first/last word mask
+  move.w      d0,BLTAFWM(a6)
+  move.w      d0,BLTALWM(a6)
+  move.w      #MmScreenWidthBytes-32,BLTAMOD(a6)                                                       ; modulos for source and target
+  clr.w       BLTDMOD(a6)
+  move.l      a5,a2
+  add.l       #mm_cm_textarea_restore_buffer,a2                                                        ; pointers
+  move.l      a2,BLTDPTH(a6)
+  move.l      mm_om_backbuffer(a4),a2
+  add.l       #MmOffsetOfTextArea,a2
+  move.l      a2,BLTAPTH(a6)
+  move.w      #(MmTextAreaBufferHeight*MmScreenBitPlanes<<6)+MmTextAreaBufferWidthWords,BLTSIZE(a6)    ; start blit
+  rts
 
-  ; --== exit mainmenu ==--
-  ; set end countdown
-  move.b     #35,mm_om_end_countdown(a4)
-  ; trigger fade out
-  move.l     #f005_gfx_mainmenu_screen_colors,d0
-  bsr        datafiles_get_pointer
-  move.l     df_idx_ptr_rawdata(a0),a1
-  lea.l      mm_om_fade_color_tab(a4),a0
-  moveq.l    #32,d0
-  moveq.l    #1,d1
-  bra        fade_init                                                          ; implicit rts
-
-.exit:
+mm_clear_text_print_buffer:
+  WAIT_BLT
+  move.w      #%0000100111110000,BLTCON0(a6)                                                           ; simple A -> D copy, no shifting
+  clr.w       BLTCON1(a6)
+  move.w      #$ffff,d0                                                                                ; no first/last word mask
+  move.w      d0,BLTAFWM(a6)
+  move.w      d0,BLTALWM(a6)
+  moveq.l     #0,d0                                                                                    ; modulos for source and target
+  move.w      d0,BLTAMOD(a6)
+  move.w      d0,BLTDMOD(a6)
+  move.l      a5,a0                                                                                    ; pointers
+  add.l       #mm_cm_textarea_restore_buffer,a0
+  move.l      a0,BLTAPTH(a6)
+  move.l      a5,a0
+  add.l       #mm_cm_textarea_print_buffer,a0
+  move.l      a0,BLTDPTH(a6)
+  move.w      #(MmTextAreaBufferHeight*MmScreenBitPlanes<<6)+MmTextAreaBufferWidthWords,BLTSIZE(a6)    ; start blit
   rts
 
 mm_lvl3_irq_handler:
-  movem.l    d0/a4-a6,-(sp)
+  movem.l     d0/a4-a6,-(sp)
 
   SETPTRS
 
   ; increment frame counter
-  moveq.l    #1,d0
-  add.l      d0,c_om_framecounter(a4)
+  moveq.l     #1,d0
+  add.l       d0,c_om_framecounter(a4)
 
   ; clear Copper-IRQ-Bit
-  move.w     #%0000000000010000,INTREQ(a6)
+  move.w      #%0000000000010000,INTREQ(a6)
 
-  movem.l    (sp)+,d0/a4-a6
+  movem.l     (sp)+,d0/a4-a6
   rte
 
-  endif                                                                         ; ifnd MAINMENU_ASM
+  endif                                                                                                ; ifnd MAINMENU_ASM

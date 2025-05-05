@@ -217,6 +217,18 @@ targetFiles:
         id: MS03
       - filename: ../src/mainmenu/mm_copperlist.asm
         id: MMCL
+      - filename: sfx/select.wav
+        id: SSEL
+        volume: 64
+        priority: 48
+      - filename: sfx/step.wav
+        id: SSTP
+        volume: 64
+        priority: 32
+      - filename: sfx/error.wav
+        id: SERR
+        volume: 64
+        priority: 48
 
   - filename: F005
     description: mainmenu_other

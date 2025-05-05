@@ -17,13 +17,10 @@ main:
   bsr.s      .init_ram_and_file_list
   bsr        ctrl_save_orig_system_state
 
-  move.l     chip_mem_ptr(pc),a0
-  lea.l      c_cm_all_black_copperlist(a0),a0
-  bsr        ctrl_set_black_screen
-
   SETPTRS
   clr.l      c_om_framecounter(a4)                           ; global framecounter for all parts
   move.b     #NextPartMainmenu,c_om_next_part(a4)
+  move.b     #GameModeInfinite,c_om_gamemode(a4)             ; init here (and not init in mainmenu-part, so once the player changes game mode it keeps the same until reboot)
   
   ; REMOVE ME - for testing
   ;move.l     #$00000099,c_om_score(a4)
@@ -37,10 +34,14 @@ main:
   ;move.b     #NextPartIngame,c_om_next_part(a4)
   ;move.b     #NextPartHighscores,c_om_next_part(a4)
   ;move.b     #GameModeSpeedRun,c_om_gamemode(a4)
-  move.b     #GameModeInfinite,c_om_gamemode(a4)
+  ;move.b     #GameModeInfinite,c_om_gamemode(a4)
   ; REMOVE ME - for testing
 
 .loop:
+  move.l     chip_mem_ptr(pc),a0
+  lea.l      c_cm_all_black_copperlist(a0),a0
+  bsr        ctrl_set_black_screen
+
   cmp.b      #NextPartIngame,c_om_next_part(a4)
   bne.s      .0
   bsr        ig_start                                        ; MUST call ctrl_take_system and ctrl_free_system
@@ -142,5 +143,7 @@ main:
   include    "../a100/src/highscores/sfx.asm"
   include    "../a100/src/highscores/edit.asm"
   include    "../a100/src/mainmenu/mainmenu.asm"
+  include    "../a100/src/mainmenu/menupart.asm"
+  include    "../a100/src/mainmenu/sfx.asm"
   include    "../common/src/3rdparty/inflate.asm"
   include    "../common/src/3rdparty/ptplayer.asm"
