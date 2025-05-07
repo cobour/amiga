@@ -22,7 +22,10 @@ mp_init:
   ; init more vars
   clr.l       (a3)+                                                                   ; mp_zoom_in_counter and mp_zoom_out_counter - 12 bytes - MUST BE ADJUSTED WHEN MenuPartRows IS CHANGED
   clr.l       (a3)+
-  clr.l       (a3)+
+  clr.l       (a3)
+  lea.l       mp_current_part(pc),a3
+  clr.w       (a3)+
+  clr.l       (a3)
 
   ; set string for current game mode - must be done before mp_set_part
   bsr.s       mp_set_string_for_game_mode
