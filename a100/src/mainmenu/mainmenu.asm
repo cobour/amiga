@@ -216,6 +216,31 @@ mm_clear_text_print_buffer:
   move.w      #(MmTextAreaBufferHeight*MmScreenBitPlanes<<6)+MmTextAreaBufferWidthWords,BLTSIZE(a6)    ; start blit
   rts
 
+; in:
+;   d1 - offset of line in restore buffer
+mm_clear_text_print_buffer_line:
+  move.l      d0,-(sp)
+  WAIT_BLT
+  move.w      #%0000100111110000,BLTCON0(a6)                                                           ; simple A -> D copy, no shifting
+  clr.w       BLTCON1(a6)
+  move.w      #$ffff,d0                                                                                ; no first/last word mask
+  move.w      d0,BLTAFWM(a6)
+  move.w      d0,BLTALWM(a6)
+  moveq.l     #0,d0                                                                                    ; modulos for source and target
+  move.w      d0,BLTAMOD(a6)
+  move.w      d0,BLTDMOD(a6)
+  move.l      a5,d0                                                                                    ; pointers
+  add.l       #mm_cm_textarea_restore_buffer,d0
+  add.l       d1,d0
+  move.l      d0,BLTAPTH(a6)
+  move.l      a5,d0
+  add.l       #mm_cm_textarea_print_buffer,d0
+  add.l       d1,d0
+  move.l      d0,BLTDPTH(a6)
+  move.w      #(16*MmScreenBitPlanes<<6)+MmTextAreaBufferWidthWords,BLTSIZE(a6)                        ; start blit
+  move.l      (sp)+,d0
+  rts
+
 mm_lvl3_irq_handler:
   movem.l     d0/a4-a6,-(sp)
 
