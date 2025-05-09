@@ -30,8 +30,8 @@ hs_start:
   bsr        keyboard_init
   bsr        .set_copper_list
   bsr        .init_music
-
   SFX        f002_sfx_tick
+  clr.b      c_om_end_of_frame(a4)
 .loop:
   bsr        .update_fade
   bsr        hs_view_draw
@@ -40,7 +40,7 @@ hs_start:
   bsr        hs_process_events
   bsr        hse_process_events
 
-  WAITVB
+  WAITEOF
   bsr        .swap_buffers
 
   tst.b      hs_om_end_countdown(a4)
@@ -360,6 +360,7 @@ hs_lvl3_irq_handler:
   ; increment frame counter
   moveq.l    #1,d0
   add.l      d0,c_om_framecounter(a4)
+  add.b      d0,c_om_end_of_frame(a4)
 
   ; clear Copper-IRQ-Bit
   move.w     #%0000000000010000,INTREQ(a6)

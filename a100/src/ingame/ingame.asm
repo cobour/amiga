@@ -39,6 +39,7 @@ ig_start:
   bsr        keyboard_init
   bsr        .set_copper_list
   bsr        .init_music
+  clr.b      c_om_end_of_frame(a4)
 
   ;
   ; main loop
@@ -55,7 +56,7 @@ ig_start:
   bsr        sc_draw
   bsr        t_update
 
-  WAITVB
+  WAITEOF
   bsr.s      .swap_buffers
 
   tst.b      ig_om_gameover(a4)
@@ -230,6 +231,7 @@ ig_lvl3_irq_handler:
   ; increment frame counter
   moveq.l    #1,d0
   add.l      d0,c_om_framecounter(a4)
+  add.b      d0,c_om_end_of_frame(a4)
 
   ; clear Copper-IRQ-Bit
   move.w     #%0000000000010000,INTREQ(a6)
