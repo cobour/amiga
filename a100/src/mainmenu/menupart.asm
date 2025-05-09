@@ -787,7 +787,7 @@ mp_data_mode:
   dc.w        400
   dc.b        MenuPartRowZoomCounter,MenuPartRowZoomCounter,MenuPartRowZoomCounter
   dc.b        MenuPartRowZoomCounter,MenuPartRowZoomCounter,MenuPartRowZoomCounter
-  dc.b        "    INFINITE    "
+  dc.b        " INFINITE  MODE "
 mp_data_highscores_infinite:
   dc.b        "                "
   dc.b        "                "
@@ -800,7 +800,7 @@ mp_data_highscores_infinite:
   dc.w        400
   dc.b        MenuPartRowZoomCounter,MenuPartRowZoomCounter,MenuPartRowZoomCounter
   dc.b        MenuPartRowZoomCounter,MenuPartRowZoomCounter,MenuPartRowZoomCounter
-  dc.b        "     TIMER      "
+  dc.b        "   TIMER MODE   "
 mp_data_highscores_timer:
   dc.b        "                "
   dc.b        "                "
