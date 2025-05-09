@@ -742,7 +742,7 @@ mp_data_mode:
   dc.b        "                "
   dc.b        "      CODE      "
   dc.b        "                "
-  dc.b        " FRANK NEUMANN  "
+  dc.b        " FRANK  NEUMANN "
   dc.b        "                "
   dc.b        "                "
 
