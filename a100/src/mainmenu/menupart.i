@@ -7,6 +7,14 @@ MenuPartRowZoomCounter equ 16
 
 ; MenuParts
 MpMain                 equ 1
+MpCreditsGfx           equ 2
+MpCreditsMusic         equ 3
+MpCreditsCode          equ 4
+MpInstructions1        equ 5
+MpInstructions2        equ 6
+MpInstructions3        equ 7
+MpHighscoresInfinite   equ 8
+MpHighscoresTimer      equ 9
 
                       rsreset
 mp_id:                rs.w       1                                 ; unique id

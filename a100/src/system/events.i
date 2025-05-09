@@ -7,6 +7,7 @@ EventLeft      equ 3
 EventRight     equ 4
 EventSelect    equ 5
 EventUnselect  equ 6
+EventTimer     equ 7
 
 ; characters and space use their raw key code as event-ID, so $40 (space) ist the highest ID and thus the EventCount
 EventsCount    equ $40                           ; count of possible events

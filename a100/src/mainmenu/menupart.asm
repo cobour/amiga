@@ -4,6 +4,7 @@ MENUPART_ASM equ 1
   include     "../a100/src/mainmenu/mainmenu.i"
   include     "../a100/src/mainmenu/menupart.i"
   include     "../a100/src/mainmenu/sfx.i"
+  include     "../a100/src/system/events.i"
   include     "../common/src/system/screen.i"
   include     "../common/src/system/blitter.i"
 
@@ -25,16 +26,46 @@ mp_init:
   clr.l       (a3)
   lea.l       mp_current_part(pc),a3
   clr.w       (a3)+
-  clr.l       (a3)
+  clr.l       (a3)+
+  clr.w       (a3)+
 
   ; set string for current game mode - must be done before mp_set_part
   bsr.s       mp_set_string_for_game_mode
 
   ; set menupart
   move.w      #MpMain,d0
-  bsr.s       mp_set_part
+  bsr         mp_set_part
+
+  ; init highscore data
+  move.l      a4,a1
+  add.l       #mm_om_highscore_data+50,a1                                             ; magic value, so no need to include files from different game part
+  lea.l       mp_data_highscores_infinite(pc),a2
+  bsr.s       .init_highscore_data
+  move.l      a4,a1
+  add.l       #mm_om_highscore_data,a1
+  lea.l       mp_data_highscores_timer(pc),a2
+  bsr.s       .init_highscore_data
 
 .exit:
+  rts
+
+; in:
+;   a1 - source pointer
+;   a2 - target pointer
+.init_highscore_data:
+  moveq.l     #4,d7
+.ihd_loop:
+  ; copy name
+  move.l      (a1)+,(a2)+
+  move.w      (a1)+,(a2)+
+  ; add spaces
+  move.w      #'  ',(a2)+
+  ; add score
+  move.l      (a1)+,d0
+  bsr         bcd_to_string_of_8
+  move.l      (a0)+,(a2)+
+  move.l      (a0),(a2)+
+  dbf         d7,.ihd_loop
   rts
 
 mp_set_string_for_game_mode:
@@ -76,6 +107,8 @@ mp_set_part:
   cmp.w       d0,d1
   bne.s       .loop_next
   move.l      a0,(a1)
+  lea.l       mp_current_part_timer(pc),a2
+  move.w      mp_timer(a0),(a2)
   bra.s       .set_data_end
 .loop_next:
   lea.l       mp_sizeof(a0),a0
@@ -181,15 +214,25 @@ mp_draw_line_to_print_buffer:
 
 mp_process_events:
   tst.b       mm_om_end_countdown(a4)
-  bge.s       .exit
+  bge         .exit
 
   ; while zoom-counters (in or out) are set, do not process events
   ISZOOM      mp_zoom_out_counter,d0
   tst.w       d0
-  bne.s       .exit
+  bne         .exit
   ISZOOM      mp_zoom_in_counter,d0
   tst.w       d0
-  bne.s       .exit
+  bne         .exit
+
+  lea         mp_current_part_timer(pc),a0
+  tst.w       (a0)
+  ble.s       .pe_update_timer_done
+  sub.w       #1,(a0)
+  tst.w       (a0)
+  bne.s       .pe_update_timer_done
+  moveq.l     #EventTimer,d1
+  bsr         ev_add_event_to_queue
+.pe_update_timer_done:
 
   moveq.l     #0,d0
 .process_event:
@@ -204,6 +247,54 @@ mp_process_events:
   bra.s       .process_event
 
 .0:
+  cmp.w       #MpCreditsGfx,d1
+  bne.s       .1
+  bsr         .mp_credits_gfx
+  bra.s       .process_event
+
+.1:
+  cmp.w       #MpCreditsMusic,d1
+  bne.s       .2
+  bsr         .mp_credits_music
+  bra.s       .process_event
+
+.2:
+  cmp.w       #MpCreditsCode,d1
+  bne.s       .3
+  bsr         .mp_credits_code
+  bra.s       .process_event
+
+.3:
+  cmp.w       #MpInstructions1,d1
+  bne.s       .4
+  bsr         .mp_instructions1
+  bra.s       .process_event
+
+.4:
+  cmp.w       #MpInstructions2,d1
+  bne.s       .5
+  bsr         .mp_instructions2
+  bra.s       .process_event
+
+.5:
+  cmp.w       #MpInstructions3,d1
+  bne.s       .6
+  bsr         .mp_instructions3
+  bra.s       .process_event
+
+.6:
+  cmp.w       #MpHighscoresInfinite,d1
+  bne.s       .7
+  bsr         .mp_highscores_infinite
+  bra.s       .process_event
+
+.7:
+  cmp.w       #MpHighscoresTimer,d1
+  bne.s       .8
+  bsr         .mp_highscores_timer
+  bra.s       .process_event
+
+.8:
   bra.s       .process_event
 
 .exit:
@@ -216,6 +307,12 @@ mp_process_events:
   beq.s       .mp_main_mode
   cmp.b       #$12,d0                                                                 ; E
   beq         .mp_main_exit
+  cmp.b       #$33,d0                                                                 ; C
+  beq         .mp_main_credits
+  cmp.b       #$17,d0                                                                 ; I
+  beq         .mp_main_instructions
+  cmp.b       #$25,d0                                                                 ; H
+  beq         .mp_main_highscores
   SFX         f004_sfx_error
   rts
 
@@ -250,6 +347,24 @@ mp_process_events:
   move.b      #MenuPartRowZoomCounter,(a0)
   rts
 
+.mp_main_credits:
+  moveq.l     #MpCreditsGfx,d0
+  bsr         mp_set_part
+  SFX         f004_sfx_select
+  rts
+
+.mp_main_instructions:
+  moveq.l     #MpInstructions1,d0
+  bsr         mp_set_part
+  SFX         f004_sfx_select
+  rts
+
+.mp_main_highscores:
+  moveq.l     #MpHighscoresInfinite,d0
+  bsr         mp_set_part
+  SFX         f004_sfx_select
+  rts
+
 .mp_main_exit:
   bsr.s       .exit_mainmenu
   move.b      #NextPartExit,c_om_next_part(a4)
@@ -267,6 +382,126 @@ mp_process_events:
   moveq.l     #32,d0
   moveq.l     #1,d1
   bra         fade_init                                                               ; implicit rts
+
+.mp_credits_gfx:
+  cmp.b       #EventTimer,d0
+  beq.s       .mp_credits_gfx_next
+  cmp.b       #EventSelect,d0
+  beq.s       .mp_credits_gfx_select
+  SFX         f004_sfx_error
+  rts
+
+.mp_credits_gfx_select:
+  SFX         f004_sfx_select
+.mp_credits_gfx_next:
+  moveq.l     #MpCreditsMusic,d0
+  bsr         mp_set_part
+  rts
+
+.mp_credits_music:
+  cmp.b       #EventTimer,d0
+  beq.s       .mp_credits_music_next
+  cmp.b       #EventSelect,d0
+  beq.s       .mp_credits_music_select
+  SFX         f004_sfx_error
+  rts
+
+.mp_credits_music_select:
+  SFX         f004_sfx_select
+.mp_credits_music_next:
+  moveq.l     #MpCreditsCode,d0
+  bsr         mp_set_part
+  rts
+
+.mp_credits_code:
+  cmp.b       #EventTimer,d0
+  beq.s       .mp_credits_code_next
+  cmp.b       #EventSelect,d0
+  beq.s       .mp_credits_code_select
+  SFX         f004_sfx_error
+  rts
+
+.mp_credits_code_select:
+  SFX         f004_sfx_select
+.mp_credits_code_next:
+  moveq.l     #MpMain,d0
+  bsr         mp_set_part
+  rts
+
+.mp_instructions1:
+  cmp.b       #EventTimer,d0
+  beq.s       .mp_instructions1_next
+  cmp.b       #EventSelect,d0
+  beq.s       .mp_instructions1_select
+  SFX         f004_sfx_error
+  rts
+
+.mp_instructions1_select:
+  SFX         f004_sfx_select
+.mp_instructions1_next:
+  moveq.l     #MpInstructions2,d0
+  bsr         mp_set_part
+  rts
+
+.mp_instructions2:
+  cmp.b       #EventTimer,d0
+  beq.s       .mp_instructions2_next
+  cmp.b       #EventSelect,d0
+  beq.s       .mp_instructions2_select
+  SFX         f004_sfx_error
+  rts
+
+.mp_instructions2_select:
+  SFX         f004_sfx_select
+.mp_instructions2_next:
+  moveq.l     #MpInstructions3,d0
+  bsr         mp_set_part
+  rts
+
+.mp_instructions3:
+  cmp.b       #EventTimer,d0
+  beq.s       .mp_instructions3_next
+  cmp.b       #EventSelect,d0
+  beq.s       .mp_instructions3_select
+  SFX         f004_sfx_error
+  rts
+
+.mp_instructions3_select:
+  SFX         f004_sfx_select
+.mp_instructions3_next:
+  moveq.l     #MpMain,d0
+  bsr         mp_set_part
+  rts
+
+.mp_highscores_infinite:
+  cmp.b       #EventTimer,d0
+  beq.s       .mp_highscores_infinite_next
+  cmp.b       #EventSelect,d0
+  beq.s       .mp_highscores_infinite_select
+  SFX         f004_sfx_error
+  rts
+
+.mp_highscores_infinite_select:
+  SFX         f004_sfx_select
+.mp_highscores_infinite_next:
+  moveq.l     #MpHighscoresTimer,d0
+  bsr         mp_set_part
+  rts
+
+.mp_highscores_timer:
+  cmp.b       #EventTimer,d0
+  beq.s       .mp_highscores_timer_next
+  cmp.b       #EventSelect,d0
+  beq.s       .mp_highscores_timer_select
+  SFX         f004_sfx_error
+  rts
+
+.mp_highscores_timer_select:
+  SFX         f004_sfx_select
+.mp_highscores_timer_next:
+  moveq.l     #MpMain,d0
+  bsr         mp_set_part
+  rts
 
 mp_update:
 
@@ -442,6 +677,8 @@ mp_current_part:
   dc.w        0                                                                       ; id of current part
 mp_current_part_data:
   dc.l        0
+mp_current_part_timer:
+  dc.w        0
 
 mp_font_metadata_ptr:
   dc.l        0
@@ -475,6 +712,101 @@ mp_data_mode:
   dc.b        "   (C)REDITS    "
   dc.b        "     (E)XIT     "
 
+  ; credits gfx
+  dc.w        MpCreditsGfx
+  dc.w        200
+  dc.b        0,MenuPartRowZoomCounter,0,MenuPartRowZoomCounter,0,0
+  dc.b        "                "
+  dc.b        "    GRAPHICS    "
+  dc.b        "                "
+  dc.b        " KEVIN SAUNDERS "
+  dc.b        "                "
+  dc.b        "                "
+
+  ; credits music
+  dc.w        MpCreditsMusic
+  dc.w        200
+  dc.b        0,MenuPartRowZoomCounter,MenuPartRowZoomCounter
+  dc.b        MenuPartRowZoomCounter,0,0
+  dc.b        "                "
+  dc.b        "     MUSIC      "
+  dc.b        "   KRZYSZTOF    "
+  dc.b        "   ODACHOWSKI   "
+  dc.b        "                "
+  dc.b        "                "
+
+  ; credits code
+  dc.w        MpCreditsCode
+  dc.w        200
+  dc.b        0,MenuPartRowZoomCounter,0,MenuPartRowZoomCounter,0,0
+  dc.b        "                "
+  dc.b        "      CODE      "
+  dc.b        "                "
+  dc.b        " FRANK NEUMANN  "
+  dc.b        "                "
+  dc.b        "                "
+
+  ; instructions 1
+  dc.w        MpInstructions1
+  dc.w        300
+  dc.b        MenuPartRowZoomCounter,MenuPartRowZoomCounter,MenuPartRowZoomCounter
+  dc.b        MenuPartRowZoomCounter,MenuPartRowZoomCounter,MenuPartRowZoomCounter
+  dc.b        "PLACE BRICKS ON "
+  dc.b        "THE PLAYFIELD TO"
+  dc.b        "COMPLETE ROWS OR"
+  dc.b        " COLUMNS. THEY  "
+  dc.b        " WILL DISAPPEAR "
+  dc.b        " WHEN COMPLETED."
+
+  ; instructions 2
+  dc.w        MpInstructions2
+  dc.w        300
+  dc.b        MenuPartRowZoomCounter,MenuPartRowZoomCounter,MenuPartRowZoomCounter
+  dc.b        MenuPartRowZoomCounter,MenuPartRowZoomCounter,MenuPartRowZoomCounter
+  dc.b        "USE JOYSTICK OR "
+  dc.b        "CURSOR KEYS FOR "
+  dc.b        "    MOVEMENT.   "
+  dc.b        "  PRESS ENTER,  "
+  dc.b        " RETURN OR FIRE "
+  dc.b        " FOR SELECTION. "
+
+  ; instructions 3
+  dc.w        MpInstructions3
+  dc.w        300
+  dc.b        MenuPartRowZoomCounter,MenuPartRowZoomCounter,MenuPartRowZoomCounter
+  dc.b        0,MenuPartRowZoomCounter,0
+  dc.b        " PRESS ESC KEY  "
+  dc.b        " TO UNSELECT A  "
+  dc.b        " SELECTED BRICK."
+  dc.b        "                "
+  dc.b        "   GOOD LUCK!   "
+  dc.b        "                "
+
+  ; highscores infinite
+  dc.w        MpHighscoresInfinite
+  dc.w        400
+  dc.b        MenuPartRowZoomCounter,MenuPartRowZoomCounter,MenuPartRowZoomCounter
+  dc.b        MenuPartRowZoomCounter,MenuPartRowZoomCounter,MenuPartRowZoomCounter
+  dc.b        "    INFINITE    "
+mp_data_highscores_infinite:
+  dc.b        "                "
+  dc.b        "                "
+  dc.b        "                "
+  dc.b        "                "
+  dc.b        "                "
+
+  ; highscores timer
+  dc.w        MpHighscoresTimer
+  dc.w        400
+  dc.b        MenuPartRowZoomCounter,MenuPartRowZoomCounter,MenuPartRowZoomCounter
+  dc.b        MenuPartRowZoomCounter,MenuPartRowZoomCounter,MenuPartRowZoomCounter
+  dc.b        "     TIMER      "
+mp_data_highscores_timer:
+  dc.b        "                "
+  dc.b        "                "
+  dc.b        "                "
+  dc.b        "                "
+  dc.b        "                "
 
   dc.w        -1                                                                      ; end of list
 

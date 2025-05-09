@@ -9,6 +9,9 @@ mm_start:
   bsr         .load_and_inflate_files
   tst.l       d0
   bne         .error
+  bsr         .load_highscores
+  tst.l       d0
+  bne         .error
 
   SETPTRS
 
@@ -66,6 +69,25 @@ mm_start:
   move.l      chip_mem_ptr(pc),a1
   add.l       #mm_cm_datfile,a1
   bsr         datafiles_load_and_unzip
+  rts
+
+.load_highscores:
+  move.l      other_mem_ptr(pc),a4
+  bsr         disk_begin_io
+  tst.l       d0
+  bne.s       .lh_exit
+
+  move.l      other_mem_ptr(pc),a2
+  add.l       #mm_om_highscore_data,a2
+  move.l      chip_mem_ptr(pc),a3
+  add.l       #mm_cm_screenbuffer,a3
+  move.l      #fn_highscores,d4
+  bsr         disk_read_file
+  tst.l       d0
+  bne.s       .lh_exit
+
+  bsr         disk_end_io
+.lh_exit:
   rts
 
 .init_vars:
