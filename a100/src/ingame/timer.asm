@@ -97,6 +97,10 @@ t_update:
   moveq.l     #1,d1
   sbcd        d1,d0
   move.b      d0,(a0)
+  ; play sfx on last 5 seconds
+  cmp.w       #$05,d0
+  bgt.s       .restore
+  SFX         f000_sfx_alarm
 
 .restore:
   ;

@@ -45,6 +45,8 @@ sfx_ingame:
   dc.l       0
   dc.l       f000_sfx_gameover
   dc.l       0
+  dc.l       f000_sfx_alarm
+  dc.l       0
   dc.l       -1                           ; end of list
 
   endif                                   ; ifnd INGAME_SFX_ASM

@@ -67,6 +67,10 @@ targetFiles:
         id: SGOV
         volume: 64
         priority: 64
+      - filename: sfx/alarm.wav
+        id: SALM
+        volume: 64
+        priority: 64
       - filename: ../src/ingame/copperlist.asm
         id: IGCL
 
