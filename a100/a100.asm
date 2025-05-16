@@ -134,6 +134,7 @@ main:
   include    "../a100/src/ingame/brick_selectors.asm"
   include    "../a100/src/ingame/bricks.asm"
   include    "../a100/src/system/events.asm"
+  include    "../a100/src/system/savegame.asm"
   include    "../a100/src/ingame/sfx.asm"
   include    "../a100/src/ingame/score.asm"
   include    "../a100/src/ingame/game_over_detection.asm"

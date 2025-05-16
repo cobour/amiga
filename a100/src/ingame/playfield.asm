@@ -67,6 +67,10 @@ pf_init:
   move.w      d7,BLTCMOD(a6)
   move.w      d7,BLTDMOD(a6)
 
+  ; playfield data
+  lea.l       pf_data(pc),a0
+  moveq.l     #0,d5
+
   ; rows loop
   moveq.l     #9,d7
 .ig_rows_loop:
@@ -76,11 +80,17 @@ pf_init:
   move.l      d2,d3
 .ig_columns_loop:
 
+  move.b      (a0)+,d5                                             ; brick offset
+
   WAIT_BLT
 
   ; source pointers
-  move.l      d1,BLTAPTH(a6)
-  move.l      d0,BLTBPTH(a6)
+  move.l      d1,d4
+  add.l       d5,d4
+  move.l      d4,BLTAPTH(a6)
+  move.l      d0,d4
+  add.l       d5,d4
+  move.l      d4,BLTBPTH(a6)
 
   ; destination pointers
   move.l      d3,BLTCPTH(a6)
@@ -101,12 +111,30 @@ pf_init:
 
 ; initializes data structure
 .init_data:
+  ; init from savegame data
+  lea.l       ig_om_savegame(a4),a3
+  bsr         sg_is_used
+  tst.l       d0
+  beq.s       .id_no_savegame
+
+  lea.l       pf_data(pc),a0
+  lea.l       sg_data_playfield(a3),a1
+  moveq.l     #24,d7                                               ; 100 bytes = 25 longs
+.id_sg_array_loop:
+  move.l      (a1)+,(a0)+
+  dbf         d7,.id_sg_array_loop
+
+  bra.s       .id_exit
+.id_no_savegame:
+
   lea.l       pf_data(pc),a0
   moveq.l     #0,d0
   moveq.l     #24,d7                                               ; 100 bytes = 25 longs
 .id_array_loop:
   move.l      d0,(a0)+
   dbf         d7,.id_array_loop
+
+.id_exit:
   bsr         pf_clear_vars
   rts
 
@@ -155,6 +183,12 @@ pf_process_events:
   tst.b       d0
   blt.s       .exit
 
+  cmp.b       #GameModeInfinite,c_om_gamemode(a4)
+  bne.s       .pe_select
+  cmp.b       #$21,d0                                              ; S
+  bne.s       .pe_select
+  bsr         ig_save_game_and_return_to_mm
+  bra.s       .process_event
 .pe_select:
   cmp.b       #EventSelect,d0
   bne.s       .pe_unselect
@@ -766,6 +800,19 @@ pf_row_offsets:
   dc.w        70
   dc.w        80
   dc.w        90
+
+; in:
+;   a0 - pointer to sg_data* struct
+pf_add_to_savegame:
+  movem.l     d7/a0-a1,-(sp)
+  lea.l       sg_data_playfield(a0),a0
+  lea.l       pf_data(pc),a1
+  moveq.l     #99,d7
+.loop:
+  move.b      (a1)+,(a0)+
+  dbf         d7,.loop
+  movem.l     (sp)+,d7/a0-a1
+  rts
 
 ;
 ; vars section

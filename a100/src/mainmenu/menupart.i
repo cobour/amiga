@@ -1,6 +1,8 @@
                       ifnd       MENUPART_I
 MENUPART_I             equ 1
 
+                      include    "src/system/savegame.i"
+
 MenuPartRows           equ 6
 MenuPartRowLength      equ 16
 MenuPartRowZoomCounter equ 16
@@ -52,6 +54,26 @@ mp_sizeof:            rs.b       0
                       move.l     #"ODE:",(a0)+
                       move.l     #"  TI",(a0)+
                       move.l     #"MER ",(a0)
+                      move.l     (sp)+,a0
+                      endm
+
+                      macro      GAME_S
+                      move.l     a0,-(sp)
+                      lea.l      mp_data_start_or_resume(pc),a0
+                      move.l     #"  (S",(a0)+
+                      move.l     #")TAR",(a0)+
+                      move.l     #"T GA",(a0)+
+                      move.l     #"ME  ",(a0)
+                      move.l     (sp)+,a0
+                      endm
+
+                      macro      GAME_R
+                      move.l     a0,-(sp)
+                      lea.l      mp_data_start_or_resume(pc),a0
+                      move.l     #" (R)",(a0)+
+                      move.l     #"ESUM",(a0)+
+                      move.l     #"E  G",(a0)+
+                      move.l     #"AME ",(a0)
                       move.l     (sp)+,a0
                       endm
 

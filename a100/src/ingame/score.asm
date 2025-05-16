@@ -10,6 +10,14 @@ sc_init:
   clr.l       c_om_score(a4)
   clr.b       ig_om_score_draw_counter(a4)
 
+  ; init from savegame data
+  lea.l       ig_om_savegame(a4),a3
+  bsr         sg_is_used
+  tst.l       d0
+  beq.s       .no_savegame
+  move.l      sg_data_score(a3),c_om_score(a4)
+.no_savegame:
+
   ; init vars
   lea.l       sc_font_metadata_ptr(pc),a3
   move.l      #f000_gfx_font16,d0

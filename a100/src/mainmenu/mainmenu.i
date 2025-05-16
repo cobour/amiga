@@ -2,6 +2,7 @@
 MAINMENU_I                 equ 1
 
                                 include    "src/globals.i"
+                                include    "src/system/savegame.i"
                                 include    "src/mainmenu/screen.i"
 
 ; copperlist struct
@@ -40,7 +41,7 @@ mm_om_copperlist:               rs.l       1                                    
 mm_om_fade_color_tab:           rs.b       32*2*16
 mm_om_music_volume:             rs.w       1
 mm_om_end_countdown:            rs.b       1                                                      ; < 0 when not ending
-mm_om_padding_byte:             rs.b       1
+mm_om_savegame_is_used:         rs.b       1                                                      ; boolean
 mm_om_highscore_data:           rs.b       h000_unzipped_filesize
 mm_om_datfile:                  rs.b       f005_unzipped_filesize
 mm_om_sizeof:                   rs.b       0

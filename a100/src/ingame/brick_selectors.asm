@@ -687,6 +687,12 @@ bs_process_events:
   tst.b       d0
   blt         .exit
 
+  cmp.b       #GameModeInfinite,c_om_gamemode(a4)
+  bne.s       .pe_up
+  cmp.b       #$21,d0                                            ; S
+  bne.s       .pe_up
+  bsr         ig_save_game_and_return_to_mm
+  bra.s       .process_event
 .pe_up:
   cmp.b       #EventUp,d0
   bne.s       .pe_down
@@ -783,6 +789,27 @@ bs_redraw_active_selector:
   dc.w        0
   dc.w        bsrd_sizeof
   dc.w        bsrd_sizeof*2
+
+; in:
+;   a0 - pointer to sg_data* struct
+bs_add_to_savegame:
+  movem.l     d7/a0-a2,-(sp)
+  lea.l       bs_selectors(pc),a1
+  lea.l       sg_data_bricks(a0),a0
+  moveq.l     #2,d7
+.loop:
+  tst.b       bs_empty(a1)
+  bne.s       .loop_is_empty
+  move.l      bs_big(a1),a2
+  move.l      (a2),(a0)+
+  bra.s       .loop_next
+.loop_is_empty:
+  clr.l       (a0)+
+.loop_next:
+  lea.l       bs_sizeof(a1),a1
+  dbf         d7,.loop
+  movem.l     (sp)+,d7/a0-a2
+  rts
 
 ;
 ; vars section

@@ -3,6 +3,7 @@ INGAME_I     equ 1
 
                               include    "src/globals.i"
                               include    "src/ingame/screen.i"
+                              include    "src/system/savegame.i"
 
 ; copperlist struct
                               rsreset
@@ -44,7 +45,10 @@ ig_om_end_countdown:          rs.b       1                                      
 ig_om_music_volume:           rs.w       1
 ig_om_god_request:            rs.b       1                                                      ; request for a game-over-detection; 1 = request pending, otherwise 0
 ig_om_clearance_in_progress:  rs.b       1                                                      ; boolean; completed rows/columns waiting for clearance?
+ig_om_save_and_back_to_mm:    rs.b       1                                                      ; boolean
+ig_om_clear_savegame:         rs.b       1                                                      ; boolean
 ig_om_fade_color_tab:         rs.b       32*2*16
+ig_om_savegame:               rs.b       s000_unzipped_filesize
 ig_om_datfile:                rs.b       f001_unzipped_filesize
 ig_om_sizeof:                 rs.b       0
 

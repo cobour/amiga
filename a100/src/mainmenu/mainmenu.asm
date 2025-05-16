@@ -9,13 +9,18 @@ mm_start:
   bsr         .load_and_inflate_files
   tst.l       d0
   bne         .error
+
   bsr         .load_highscores
+  tst.l       d0
+  bne         .error
+
+  bsr         .load_savegame
   tst.l       d0
   bne         .error
 
   SETPTRS
 
-  bsr         .init_vars
+  bsr         .init_vars                                                                               ; must be called first -=> savegame data is loaded at a5+mm_cm_screenbuffer
   bsr         .init_fade
   bsr         .init_screen_buffer_pointers
   bsr         .init_screen_buffers
@@ -91,7 +96,28 @@ mm_start:
 .lh_exit:
   rts
 
+.load_savegame:
+  move.l      chip_mem_ptr(pc),a2
+  add.l       #mm_cm_screenbuffer,a2
+  move.l      chip_mem_ptr(pc),a3
+  add.l       #mm_cm_screenbuffer+sg_data_sizeof,a3
+  bsr         sg_load
+  rts
+
 .init_vars:
+  ; is savegame used?
+  move.l      a5,a3
+  add.l       #mm_cm_screenbuffer,a3
+  bsr         sg_is_used
+  lea.l       mm_om_savegame_is_used(a4),a0
+  tst.l       d0
+  beq.s       .save_not_used
+  move.b      #1,(a0)
+  bra.s       .after_is_savegame_used
+.save_not_used:
+  clr.b       (a0)
+.after_is_savegame_used:
+
   move.b      #-1,mm_om_end_countdown(a4)
   rts
 

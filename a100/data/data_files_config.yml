@@ -253,3 +253,12 @@ targetFiles:
     sources:
       - filename: ../src/highscores/hs_data.asm
         id: HIGH
+
+  - filename: S000
+    description: savegame
+    memoryType: OTHER
+    doZip: false
+    skipIndex: true
+    sources:
+      - filename: ../src/system/savegame_data.asm
+        id: SAVE

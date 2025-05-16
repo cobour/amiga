@@ -2,6 +2,7 @@
 INGAME_ASM equ 1
 
   include    "../a100/src/ingame/ingame.i"
+  include    "../a100/src/ingame/sfx.i"
   include    "../common/src/system/screen.i"
 
 ; called by loader when system is not yet taken
@@ -14,6 +15,10 @@ ig_start:
   ;
 
   bsr        .load_and_inflate_files
+  tst.l      d0
+  bne        .error
+
+  bsr        .load_savegame
   tst.l      d0
   bne        .error
 
@@ -57,11 +62,11 @@ ig_start:
   bsr        t_update
 
   WAITEOF
-  bsr.s      .swap_buffers
+  bsr        .swap_buffers
 
   tst.b      ig_om_gameover(a4)
   beq.s      .ig_loop
-  bsr.s      .fade_out_music
+  bsr        .fade_out_music
   sub.b      #1,ig_om_end_countdown(a4)
   tst.b      ig_om_end_countdown(a4)
   bne.s      .ig_loop
@@ -70,14 +75,48 @@ ig_start:
   ; cleanup
   ;
 
-  move.b     #NextPartHighscores,c_om_next_part(a4)
   bsr        _mt_end
   bsr        keyboard_cleanup
   bsr        ctrl_free_system
+
+  ;
+  ; handle savegame file and set next part
+  ;
+
+  tst.b      ig_om_clear_savegame(a4)
+  beq.s      .check_save
+  bsr        .clear_savegame
+  bra.s      .to_highscores
+.check_save:
+  tst.b      ig_om_save_and_back_to_mm(a4)
+  beq.s      .to_highscores
+  move.b     #NextPartMainmenu,c_om_next_part(a4)
+  bsr        .save_to_savegame
+  bra.s      .end
+.to_highscores:
+  move.b     #NextPartHighscores,c_om_next_part(a4)
+
+.end:
   rts
 
 .error:
   move.b     #NextPartExit,c_om_next_part(a4)
+  rts
+
+.load_savegame:
+  move.l     other_mem_ptr(pc),a2
+  add.l      #ig_om_savegame,a2
+  move.l     other_mem_ptr(pc),a1
+  cmp.b      #GameModeInfinite,c_om_gamemode(a1)
+  bne.s      .ls_clear
+  move.l     chip_mem_ptr(pc),a3
+  add.l      #ig_cm_screenbuffer,a3
+  bra        sg_load                                                            ; implicit rts
+.ls_clear:
+  moveq.l    #s000_unzipped_filesize-1,d7
+.ls_clear_loop:
+  clr.b      (a2)+
+  dbf        d7,.ls_clear_loop
   rts
 
 .swap_buffers:
@@ -116,6 +155,8 @@ ig_start:
   clr.b      ig_om_end_countdown(a4)
   clr.b      ig_om_god_request(a4)
   clr.b      ig_om_clearance_in_progress(a4)
+  clr.b      ig_om_save_and_back_to_mm(a4)
+  clr.b      ig_om_clear_savegame(a4)
   move.b     #IgModeSelect,ig_om_act_mode(a4)
   rts
 
@@ -211,6 +252,53 @@ ig_start:
   lea.l      ig_om_fade_color_tab(a4),a0
   moveq.l    #32,d0
   moveq.l    #0,d1
+  bra        fade_init                                                          ; indirect rts
+
+.save_to_savegame:
+  ; prepare data
+  move.l     a4,a0
+  add.l      #ig_om_savegame,a0
+  move.l     c_om_score(a4),sg_data_score(a0)
+  bsr        bs_add_to_savegame
+  bsr        pf_add_to_savegame
+  
+  ; save data to file
+  lea.l      ig_om_savegame(a4),a2
+  lea.l      ig_cm_screenbuffer(a5),a3
+  bsr        sg_save
+
+  rts
+
+.clear_savegame:
+  ; prepare data
+  lea.l      ig_om_savegame(a4),a0
+  moveq.l    #sg_data_sizeof-1,d7
+.clear_savegame_loop:
+  clr.b      (a0)+
+  dbf        d7,.clear_savegame_loop
+  
+  ; save data to file
+  lea.l      ig_om_savegame(a4),a2
+  lea.l      ig_cm_screenbuffer(a5),a3
+  bsr        sg_save
+
+  rts
+
+ig_save_game_and_return_to_mm:
+  SFX        f000_sfx_select
+
+  ; set vars
+  move.b     #1,ig_om_gameover(a4)
+  move.b     #1,ig_om_save_and_back_to_mm(a4)
+  move.b     #50,ig_om_end_countdown(a4)
+
+  ; init fade-out
+  move.l     #f001_gfx_ingame_screen_colors,d0
+  bsr        datafiles_get_pointer
+  move.l     df_idx_ptr_rawdata(a0),a1
+  lea.l      ig_om_fade_color_tab(a4),a0
+  moveq.l    #32,d0
+  moveq.l    #1,d1
   bra        fade_init                                                          ; indirect rts
 
 ig_switch_mode_select:

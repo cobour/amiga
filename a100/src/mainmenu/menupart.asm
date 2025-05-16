@@ -30,7 +30,18 @@ mp_init:
   clr.w       (a3)+
 
   ; set string for current game mode - must be done before mp_set_part
-  bsr.s       mp_set_string_for_game_mode
+  bsr         mp_set_string_for_game_mode
+
+  ; set string for start or resume   - must be done before mp_set_part
+  cmp.b       #GameModeSpeedRun,c_om_gamemode(a4)
+  beq.s       .start
+  tst.b       mm_om_savegame_is_used(a4)
+  beq.s       .start
+  GAME_R
+  bra.s       .end_of_start_or_resume
+.start
+  GAME_S
+.end_of_start_or_resume:
 
   ; set menupart
   move.w      #MpMain,d0
@@ -301,8 +312,17 @@ mp_process_events:
   rts
 
 .mp_main:
+  cmp.b       #GameModeSpeedRun,c_om_gamemode(a4)
+  beq.s       .check_s
+  tst.b       mm_om_savegame_is_used(a4)
+  beq.s       .check_s
+  cmp.b       #$13,d0                                                                 ; R
+  beq.s       .mp_main_start_or_resume
+  bra.s       .check_other
+.check_s:
   cmp.b       #$21,d0                                                                 ; S
-  beq.s       .mp_main_start
+  beq.s       .mp_main_start_or_resume
+.check_other:
   cmp.b       #$37,d0                                                                 ; M
   beq.s       .mp_main_mode
   cmp.b       #$12,d0                                                                 ; E
@@ -316,7 +336,7 @@ mp_process_events:
   SFX         f004_sfx_error
   rts
 
-.mp_main_start:
+.mp_main_start_or_resume:
   bsr         .exit_mainmenu
   move.b      #NextPartIngame,c_om_next_part(a4)
   SFX         f004_sfx_select
@@ -330,11 +350,29 @@ mp_process_events:
   ; switch to timer mode
   MODE_T
   move.b      #GameModeSpeedRun,c_om_gamemode(a4)
-  bra.s       .mp_main_mode_switch_redraw_second_line
+  ; check if savegame is used then use GAME_S and redraw first line too
+  tst.b       mm_om_savegame_is_used(a4)
+  beq         .mp_main_mode_switch_redraw_second_line
+  GAME_S
+  bra.s       .mp_main_mode_switch_redraw_first_line
 .mp_main_mode_switch_to_infinite:
   ; switch to infinite mode
   MODE_I
   move.b      #GameModeInfinite,c_om_gamemode(a4)
+  ; check if savegame is used then use GAME_R and redraw first line too
+  tst.b       mm_om_savegame_is_used(a4)
+  beq.s       .mp_main_mode_switch_redraw_second_line
+  GAME_R
+.mp_main_mode_switch_redraw_first_line:
+  ; redraw first menu line
+  moveq.l     #0,d0
+  lea.l       mp_data_start_or_resume(pc),a0
+  bsr         mp_draw_line_to_print_buffer
+  ; trigger zoom out and zoom in of first menu line
+  lea.l       mp_zoom_out_counter(pc),a0
+  move.b      #MenuPartRowZoomCounter,(a0)
+  lea.l       mp_zoom_in_counter(pc),a0
+  move.b      #MenuPartRowZoomCounter,(a0)
 .mp_main_mode_switch_redraw_second_line:
   ; redraw second menu line
   moveq.l     #1,d0
@@ -704,7 +742,8 @@ mp_data:
   dc.w        -1
   dc.b        MenuPartRowZoomCounter,MenuPartRowZoomCounter,MenuPartRowZoomCounter
   dc.b        MenuPartRowZoomCounter,MenuPartRowZoomCounter,MenuPartRowZoomCounter
-  dc.b        "  (S)TART GAME  "
+mp_data_start_or_resume:
+  dcb.b       MenuPartRowLength
 mp_data_mode:
   dcb.b       MenuPartRowLength                                                       ; set via macros MODE_I and MODE_T
   dc.b        " (I)NSTRUCTIONS "
@@ -774,13 +813,13 @@ mp_data_mode:
   dc.w        MpInstructions3
   dc.w        300
   dc.b        MenuPartRowZoomCounter,MenuPartRowZoomCounter,MenuPartRowZoomCounter
-  dc.b        0,MenuPartRowZoomCounter,0
+  dc.b        MenuPartRowZoomCounter,MenuPartRowZoomCounter,MenuPartRowZoomCounter
   dc.b        " PRESS ESC KEY  "
   dc.b        " TO UNSELECT A  "
-  dc.b        " SELECTED BRICK."
-  dc.b        "                "
-  dc.b        "   GOOD LUCK!   "
-  dc.b        "                "
+  dc.b        "SELECTED BRICK. "
+  dc.b        " PRESS S KEY IN "
+  dc.b        "INFINITE MODE TO"
+  dc.b        "   SAVE GAME.   "
 
   ; highscores infinite
   dc.w        MpHighscoresInfinite

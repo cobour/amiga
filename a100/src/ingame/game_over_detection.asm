@@ -51,6 +51,9 @@ game_over_detection:
   ; play sfx
   SFX        f000_sfx_gameover
 
+  ; clear savegame
+  move.b     #1,ig_om_clear_savegame(a4)
+
   ; init fade-out
   move.l     #f001_gfx_ingame_screen_colors,d0
   bsr        datafiles_get_pointer
