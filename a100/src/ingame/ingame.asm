@@ -32,7 +32,7 @@ ig_start:
   bsr        pf_init
   bsr        bs_init
   bsr        b_init
-  bsr        bs_refill
+  bsr        bs_init_from_savegame_or_random
   bsr        ev_init
   bsr        sc_init
   bsr        t_init

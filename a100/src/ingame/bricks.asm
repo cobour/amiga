@@ -72,6 +72,23 @@ b_init:
 
   rts
 
+; get specific brick
+; in:
+;   d1 - ID of big brick
+; out:
+;   d2 - pointer to big brick struct
+;   d3 - pointer to corresponding small brick struct
+b_get_brick:
+  movem.l    d0/a0,-(sp)
+  move.l     d1,d0
+  bsr        datafiles_get_pointer
+  move.l     a0,d2
+  move.b     #"S",d0
+  bsr        datafiles_get_pointer
+  move.l     a0,d3  
+  movem.l    (sp)+,d0/a0
+  rts
+
 ; get new random brick
 ; out:
 ;    a0 - pointer to big and small brick index pointers

@@ -162,7 +162,8 @@ bs_gained_mode:
   ; refill when all three selectors are empty
   cmp.b       #3,d1
   bne.s       .check_single
-  bra.s       bs_refill                                          ; implicit rts
+  moveq.l     #0,d6                                              ; random bricks
+  bra         bs_refill                                          ; implicit rts
 
 .check_single:
   ; set marker to selector, when exactly one selector is filled
@@ -173,7 +174,7 @@ bs_gained_mode:
   move.w      d2,(a0)
   sub.w       d2,d1
   tst.w       d1
-  beq.s       .fill_sel_struct                                   ; no need to move selector makr
+  beq.s       .fill_sel_struct                                   ; no need to move selector mark
   lea.l       bs_active_selector_mark_add(pc),a0
   tst.w       d1
   blt.s       .pos_add
@@ -199,20 +200,78 @@ bs_gained_mode:
   dc.l        bs_sizeof
   dc.l        bs_sizeof+bs_sizeof
 
-; fills data structures of all three selectors with new random bricks
+bs_init_from_savegame_or_random:
+  ; init from savegame data
+  lea.l       ig_om_savegame(a4),a3
+  bsr         sg_is_used
+  tst.l       d0
+  beq.s       .no_savegame
+  ; bricks from savegame
+  moveq.l     #1,d6
+  bsr.s       bs_refill
+  ; init active selector mark (set to first filled selector)
+  lea.l       bs_selectors(pc),a0
+  moveq.l     #bs_sizeof,d0
+  moveq.l     #0,d7
+.find_first_filled_loop:
+  tst.b       bs_empty(a0)
+  bne.s       .find_first_filled_loop_next
+  lea.l       bs_active_selection(pc),a1
+  move.w      d7,(a1)+
+  move.l      a0,(a1)
+  ; set bs_active_selector_mark_add (only if second or third selector)
+  tst.b       d7
+  beq.s       .exit
+  lea.l       bs_active_selector_mark_add(pc),a0
+  move.l      #ActiveSelectorMarkAddDown,(a0)
+  bra.s       .exit
+.find_first_filled_loop_next:
+  add.l       d0,a0
+  addq.l      #1,d7
+  cmp.b       #3,d7
+  bne.s       .find_first_filled_loop
+  bra.s       .exit
+.no_savegame:
+  ; random bricks
+  moveq.l     #0,d6
+  bsr.s       bs_refill
+
+.exit:
+  rts
+
+; fills data structures of all three selectors with new bricks
+; in:
+;   d6 - zero => get random bricks; non-zero => get from savegame
 bs_refill:
   lea.l       bs_selectors(pc),a1
+  lea.l       ig_om_savegame(a4),a2
+  lea.l       sg_data_bricks(a3),a2
   moveq.l     #bs_sizeof,d0
   moveq.l     #2,d7
 .bsr_loop: 
 
+  tst.l       d6
+  beq.s       .bsr_loop_random
+  move.l      (a2)+,d1
+  tst.l       d1
+  bne.s       .bsr_loop_from_savegame_not_empty
+  move.b      #1,bs_empty(a1)
+  bra.s       .bsr_loop_next
+.bsr_loop_from_savegame_not_empty:
+  bsr         b_get_brick
+  move.l      d2,bs_big(a1)
+  move.l      d3,bs_small(a1)
+  bra.s       .bsr_loop_init_brick
+.bsr_loop_random:
 ; get random brick
   bsr         b_get_random_brick
   move.l      (a0),bs_big(a1)
   move.l      4(a0),bs_small(a1)
 
+.bsr_loop_init_brick:
   bsr         bs_fill_bs_area
 
+.bsr_loop_next:
 ; next selector
   add.l       d0,a1
   dbf         d7,.bsr_loop
@@ -794,6 +853,15 @@ bs_redraw_active_selector:
 ;   a0 - pointer to sg_data* struct
 bs_add_to_savegame:
   movem.l     d7/a0-a2,-(sp)
+
+  ; when in placement mode, unselect the currently selected brick (so it is saved, too)
+  cmp.b       #IgModePlace,ig_om_act_mode(a4)
+  bne.s       .just_add
+  move.l      bs_active_selection_struct(pc),a1
+  clr.b       bs_empty(a1)
+.just_add:
+
+  ; add to savegame struct
   lea.l       bs_selectors(pc),a1
   lea.l       sg_data_bricks(a0),a0
   moveq.l     #2,d7
