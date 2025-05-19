@@ -316,6 +316,16 @@ disk_internal_read_block:
 disk_write_file:
   movem.l    d1-d7/a0-a6,-(sp)
 
+  ; check for write protection on disk
+  move.l     ExecBaseD,a6
+  lea.l      disk_io_std_req(a4),a1
+  move.w     #IoCmdProtStatus,IoSrCommand(a1)
+  jsr        DoIO(a6)
+  tst.l      d0
+  bne.s      .error
+  tst.l      IoSrActual(a1)                           ; zero = not write-protected ; non-zero = write-protected
+  bne.s      .error
+
   ; find data block of file
   lea.l      disk_dat_files(a4),a1
 .find_first_block_loop:

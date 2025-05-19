@@ -36,6 +36,7 @@ NodeTypeMessage                 equ 4
 IoSrNodeType                    equ 8
 IoSrMessagePort                 equ 14
 IoSrCommand                     equ 28
+IoSrActual                      equ 32
 IoSrLength                      equ 36
 IoSrData                        equ 40
 IoSrOffset                      equ 44
@@ -46,6 +47,7 @@ IoCmdRead                       equ 2
 IoCmdWrite                      equ 3
 IoCmdUpdate                     equ 4
 IoCmdNonStandard                equ 9
+IoCmdProtStatus                 equ 15
 
 ; Exec
 ExecBaseD                       equ 4
