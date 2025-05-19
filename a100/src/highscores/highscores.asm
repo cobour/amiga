@@ -118,8 +118,8 @@ hs_start:
   move.l     chip_mem_ptr(pc),a3
   add.l      #hs_cm_screenbuffer,a3
   bsr        disk_write_file
-  tst.l      d0
-  bne.s      .sh_exit
+  ; ignore possible write error
+  moveq.l    #0,d0
 
   bsr        disk_end_io
 .sh_exit

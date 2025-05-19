@@ -49,8 +49,8 @@ sg_save:
   moveq.l    #s000_unzipped_filesize,d7
   move.l     #fn_savegame,d4
   bsr        disk_write_file
-  tst.l      d0
-  bne.s      .exit
+  ; ignore possible write error
+  moveq.l    #0,d0
 
   bsr        disk_end_io
 .exit
