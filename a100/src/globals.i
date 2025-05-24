@@ -41,7 +41,6 @@ c_cm_sizeof:                rs.b       0
 
 ; common other-mem base struct (MUST be included in any other-mem-struct at the beginning)
                             rsreset
-c_om_disk:                  rs.b       disk_sizeof
 c_om_framecounter:          rs.l       1                                  ; incremented by copper irq - WARNING: this counts "real" frames aka 50Hz, not the actually drawn frames which may be less when drawing a frame takes more time than 1/50th of a second
 c_om_score:                 rs.l       1                                  ; score of player (set ingame, needed in highscore-table)
 c_om_gamemode:              rs.b       1                                  ; GameModeInfinite or GameModeSpeedRun - set by mainmenu, used by ingame

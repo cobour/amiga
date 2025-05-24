@@ -58,7 +58,7 @@ AllocSignal                     equ -330
 FreeSignal                      equ -336
 FindTask                        equ -294
 
-; main disk structure - needed for accessing files
+; main disk structure - needed for accessing files when using trackdisk-device - USE_TRACKDISK
                              rsreset
 disk_dat_files:              rs.l       DatFilesCount*8    ; per ".dat"-file 8 bytes (4 bytes name before dot, 4 bytes number of first data block)
 disk_message_port:           rs.b       34

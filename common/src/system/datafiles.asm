@@ -223,7 +223,11 @@ datafiles_get_pointer:
 datafiles_index:
   dc.l       0
 
+  ifd        USE_TRACKDISK
+
 disk_struct_ptr:
   dc.l       0
+
+  endif                                                            ; ifd USE_TRACKDISK
 
   endif                                                            ; ifnd DATAFILES_ASM

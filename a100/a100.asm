@@ -104,8 +104,6 @@ main:
   move.l     a5,(a0)
   lea.l      other_mem_ptr(pc),a0
   move.l     a4,(a0)
-  lea.l      disk_struct_ptr(pc),a0
-  move.l     a4,(a0)
   rts
 
 ;
