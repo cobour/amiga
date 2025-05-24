@@ -20,9 +20,9 @@ keyboard_init:
   move.b     #$7f,CIAICR(a2)
 
 	; stop TimerB, set to one-shot mode and load with handshake-length
-  move.b     #KBD_HANDSHAKE&$ff,CIATBLO(a2)
-  move.b     #KBD_HANDSHAKE>>8,CIATBHI(a2)
-  move.b     #%00011000,CIACRB(a2)
+  move.b     #KBD_HANDSHAKE&$ff,CIATALO(a2)       ; => SWITCHED from Timer B to Timer A because of problems when file loading on KS 2.x
+  move.b     #KBD_HANDSHAKE>>8,CIATAHI(a2)
+  move.b     #%00011000,CIACRA(a2)
 
   ; set level 2 handler
   lea.l      keyboard_handler(pc),a1
@@ -48,8 +48,8 @@ keyboard_cleanup:
 	; AmigaOS enables TA, TB, ALRM and SP interrupts (still blocked by INTENA at this point).
   lea.l      CIAA,a0
   moveq.l    #-1,d0
-  move.b     d0,CIATBLO(a0)                       ; TB=$ffff
-  move.b     d0,CIATBHI(a0)
+  move.b     d0,CIATALO(a0)                       ; TB=$ffff  => SWITCHED from Timer B to Timer A because of problems when file loading on KS 2.x
+  move.b     d0,CIATAHI(a0)
   move.b     #$8f,CIAICR(a0)                      ; enable CIA-A interrupts for AmigaOS
 
   movem.l    (sp)+,d0/a0/a6
