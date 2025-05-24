@@ -14,7 +14,7 @@
   endif                                                      ; TEST_MEM_SIZES
 
 main:
-  bsr.s      .init_ram_and_file_list
+  bsr.s      .init_ram
   bsr        ctrl_save_orig_system_state
   bsr        dos_init
 
@@ -83,7 +83,6 @@ main:
 .exit_game:
   bsr        ctrl_restore_screen
   bsr        dos_cleanup
-  ifd        DEBUG
   bsr        exec_free_mem
   moveq.l    #0,d0
   rts
@@ -91,14 +90,8 @@ main:
   bsr        exec_free_mem
   moveq.l    #1,d0
   rts
-  endif
-  ifd        RELEASE
-  bsr        exec_reboot
-  endif
 
-.init_ram_and_file_list:
-
-  ifd        DEBUG
+.init_ram:
   ; allocate mem
   moveq.l    #MemScheme,d0
   move.l     #A100ChipMemSize,d1
@@ -106,29 +99,7 @@ main:
   bsr        exec_alloc_mem
   tst.l      d0
   bne.s      .error
-  bsr.s      .save_a4_and_a5
-  ; read file list from floppy drive
-  move.l     disk_struct_ptr(pc),a4
-  bsr        disk_begin_io
-  tst.l      d0
-  bne.s      .error
-  move.l     chip_mem_ptr(pc),a3                             ; at this point in program flow there is nothing in chip mem area, so just use its beginning
-  bsr        disk_read_file_list
-  tst.l      d0
-  bne.s      .error
-  bsr        disk_end_io
-  tst.l      d0
-  bne.s      .error
-  endif
-  ifd        RELEASE
-  ; bootblock allocated memory, pointers in a4 + a5
-  ; bootblock already read file list from floppy drive
-  bsr.s      .save_a4_and_a5
-  endif
-
-  rts
-
-.save_a4_and_a5:
+  ; store pointers
   lea.l      chip_mem_ptr(pc),a0
   move.l     a5,(a0)
   lea.l      other_mem_ptr(pc),a0
