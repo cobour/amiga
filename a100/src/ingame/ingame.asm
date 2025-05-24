@@ -109,8 +109,6 @@ ig_start:
   move.l     other_mem_ptr(pc),a1
   cmp.b      #GameModeInfinite,c_om_gamemode(a1)
   bne.s      .ls_clear
-  move.l     chip_mem_ptr(pc),a3
-  add.l      #ig_cm_screenbuffer,a3
   bra        sg_load                                                            ; implicit rts
 .ls_clear:
   moveq.l    #s000_unzipped_filesize-1,d7

@@ -76,23 +76,14 @@ hs_start:
   rts
 
 .load_highscores:
-  move.l     other_mem_ptr(pc),a4
-  bsr        disk_begin_io
-  tst.l      d0
-  bne.s      .lh_exit
-
-  move.l     other_mem_ptr(pc),a2
-  add.l      #hs_om_highscore_data,a2
-  move.l     chip_mem_ptr(pc),a3
-  add.l      #hs_cm_screenbuffer,a3
-  move.l     #fn_highscores,d4
-  bsr        disk_read_file
-  tst.l      d0
-  bne.s      .lh_exit
-
-  bsr        disk_end_io
-.lh_exit:
+  lea.l      .lh_filename(pc),a0
+  move.l     a0,d5
+  move.l     other_mem_ptr(pc),d6
+  add.l      #hs_om_highscore_data,d6
+  move.l     #h000_unzipped_filesize,d7
+  bsr        dos_readfile
   ; set hs_om_highscore_data_pointer(a4) depending on game-mode
+  move.l     d6,a2
   move.b     c_om_gamemode(a4),d1
   cmp.b      #GameModeSpeedRun,d1
   beq.s      .lh_speed_run
@@ -101,6 +92,9 @@ hs_start:
 .lh_speed_run:
   move.l     a2,hs_om_highscore_data_pointer(a4)
   rts
+.lh_filename:
+  dc.b       "H000.dat",0
+  even
 
 .save_highscores:
   tst.b      hs_om_save_on_exit(a4)

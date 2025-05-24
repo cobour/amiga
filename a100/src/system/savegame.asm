@@ -6,26 +6,21 @@ SAVEGAME_ASM equ 1
 
 ; in:
 ;   a2 - target pointer
-;   a3 - buffer in chip ram
 ; out:
 ;   d0 - zero for success, other for error
 sg_load:
-  movem.l    d4/a4,-(sp)
-
-  move.l     other_mem_ptr(pc),a4
-  bsr        disk_begin_io
-  tst.l      d0
-  bne.s      .exit
-
-  move.l     #fn_savegame,d4
-  bsr        disk_read_file
-  tst.l      d0
-  bne.s      .exit
-
-  bsr        disk_end_io
-.exit:
-  movem.l    (sp)+,d4/a4
+  movem.l    d5-d7/a0,-(sp)
+  lea.l      sg_filename(pc),a0
+  move.l     a0,d5
+  move.l     a2,d6
+  move.l     #s000_unzipped_filesize,d7
+  bsr        dos_readfile
+  movem.l    (sp)+,d5-d7/a0
   rts
+
+sg_filename:
+  dc.b       "S000.dat",0
+  even
 
 ; in:
 ;   a3 - pointer to struct sg_data*

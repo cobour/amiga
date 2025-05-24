@@ -78,29 +78,20 @@ mm_start:
   rts
 
 .load_highscores:
-  move.l      other_mem_ptr(pc),a4
-  bsr         disk_begin_io
-  tst.l       d0
-  bne.s       .lh_exit
-
-  move.l      other_mem_ptr(pc),a2
-  add.l       #mm_om_highscore_data,a2
-  move.l      chip_mem_ptr(pc),a3
-  add.l       #mm_cm_screenbuffer,a3
-  move.l      #fn_highscores,d4
-  bsr         disk_read_file
-  tst.l       d0
-  bne.s       .lh_exit
-
-  bsr         disk_end_io
-.lh_exit:
+  lea.l       .lh_filename(pc),a0
+  move.l      a0,d5
+  move.l      other_mem_ptr(pc),d6
+  add.l       #mm_om_highscore_data,d6
+  move.l      #h000_unzipped_filesize,d7
+  bsr         dos_readfile
   rts
+.lh_filename:
+  dc.b        "H000.dat",0
+  even
 
 .load_savegame:
   move.l      chip_mem_ptr(pc),a2
   add.l       #mm_cm_screenbuffer,a2
-  move.l      chip_mem_ptr(pc),a3
-  add.l       #mm_cm_screenbuffer+sg_data_sizeof,a3
   bsr         sg_load
   rts
 
