@@ -45,16 +45,23 @@ dos_init:
   rts
 
 ; Reads file from disk
-; d5 = filename
-; d6 = target location
-; d7 = no. of bytes
+; in:
+;   d5 = filename
+;   d6 = target location
+;   d7 = no. of bytes
+; out:
+;   d0 = zero for success, any other value for error
 dos_readfile: 
-  movem.l    d0-d7/a0-a6,-(sp)
+  movem.l    d1-d7/a0-a6,-(sp)
+
 ; open file for read
   move.l     d5,d1
   move.l     #ModeOldfile,d2
   move.l     dos_base(pc),a6
   jsr        Open(a6)
+  tst.l      d0
+  beq.s      .error
+
   lea.l      dos_file_handle(pc),a0
   move.l     d0,(a0)
 
@@ -63,12 +70,20 @@ dos_readfile:
   move.l     d6,d2
   move.l     d7,d3
   jsr        Read(a6)
+  tst.l      d0
+  blt.s      .error
 
 ; close file
   move.l     dos_file_handle(pc),d1
   jsr        Close(a6)
 
-  movem.l    (sp)+,d0-d7/a0-a6
+.exit:
+  movem.l    (sp)+,d1-d7/a0-a6
+  moveq.l    #0,d0
+  rts
+.error:
+  movem.l    (sp)+,d1-d7/a0-a6
+  moveq.l    #-1,d0
   rts
 
 ; cleans up at end of program
