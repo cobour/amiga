@@ -19,9 +19,6 @@ keyboard_init:
 	; disable all CIA-A interrupts
   move.b     #$7f,CIAICR(a2)
 
-	; stop TimerB, set to one-shot mode and load with handshake-length
-  move.b     #KBD_HANDSHAKE&$ff,CIATALO(a2)       ; => SWITCHED from Timer B to Timer A because of problems when file loading on KS 2.x
-  move.b     #KBD_HANDSHAKE>>8,CIATAHI(a2)
   move.b     #%00011000,CIACRA(a2)
 
   ; set level 2 handler
@@ -44,12 +41,8 @@ keyboard_cleanup:
   move.w     d0,INTENA(a6)
   move.w     d0,INTREQ(a6)
 
-	; Reset CIA-A to its original state. TimerB was $ffff.
 	; AmigaOS enables TA, TB, ALRM and SP interrupts (still blocked by INTENA at this point).
   lea.l      CIAA,a0
-  moveq.l    #-1,d0
-  move.b     d0,CIATALO(a0)                       ; TB=$ffff  => SWITCHED from Timer B to Timer A because of problems when file loading on KS 2.x
-  move.b     d0,CIATAHI(a0)
   move.b     #$8f,CIAICR(a0)                      ; enable CIA-A interrupts for AmigaOS
 
   movem.l    (sp)+,d0/a0/a6
@@ -57,7 +50,7 @@ keyboard_cleanup:
 
 ; level 2 interrupt handler; reads raw key codes from pressed keys
 keyboard_handler:
-  movem.l    d0-d1/a0-a1/a6,-(sp)
+  movem.l    d0-d3/a0-a1/a6,-(sp)
   lea.l      CIAA,a0
   lea.l      CustomBase,a6
 
@@ -69,8 +62,18 @@ keyboard_handler:
 	; SP interrupt detected, get key code
   move.b     CIASDR(a0),d0
 
-	; start timer and initiate SP handshaking
-  or.b       #$01,CIACRB(a0)
+	; get target scanline to wait for 
+  ; yeah, this wastes lots of time for the game, but this works on A500 and A1200 and KS 1.3-3.1 without interfering with dos loading
+  ; using TimerB on CIAA worked with KS1.3 but made dos-loading on KS2.x or KS3.x hang :-(
+  move.l     VPOSR(a6),d2
+  and.l      #$1ff00,d2
+  add.l      #$200,d2
+  cmp.l      #312<<8,d2
+  ble.s      .no_adjust_of_scanline
+  moveq.l    #1,d2
+.no_adjust_of_scanline:
+
+  ; initiate SP handshaking
   or.b       #%01000000,CIACRA(a0)
 
 	; process the keycode in the meantime
@@ -87,16 +90,18 @@ keyboard_handler:
   move.w     d1,(a1)                              ; update kbd_write_index
 
 .handshake:
-	; wait for timer underflow to finish handshaking
-  moveq.l    #2,d1
-  and.b      CIAICR(a0),d1
-  beq.s      .handshake
+	; wait for scanline to finish handshaking
+  move.l     VPOSR(a6),d3
+  and.l      #$1ff00,d3
+  cmp.l      d2,d3
+  bne.s      .handshake
+
   and.b      #%10111111,CIACRA(a0)                ; switch SP back to input
 
 .clrirq:
   move.w     #8,INTREQ(a6)                        ; clear PORTS interrupt
 
-  movem.l    (sp)+,d0-d1/a0-a1/a6
+  movem.l    (sp)+,d0-d3/a0-a1/a6
   rte
 
 ; Gets the raw key code of the next pressed key. 
