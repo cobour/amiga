@@ -7,6 +7,7 @@ MAINMENU_I                 equ 1
 
 ; copperlist struct
                                 rsreset
+mm_cm_cl_initial_wait:          rs.l       1                                
 mm_cm_cl_sprites:               rs.l       16
 mm_cm_cl_bitplanes:             rs.l       12
 mm_cm_cl_bpl_config:            rs.l       9

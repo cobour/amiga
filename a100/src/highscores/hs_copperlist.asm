@@ -5,6 +5,8 @@
 
 ; MUST MATCH STRUCT hs_cm_cl_*
 
+; initial wait
+  dc.w       $2a01,$ff00
 ; sprite pointer
   dc.w       SPR0PTH,$0000
   dc.w       SPR0PTL,$0000

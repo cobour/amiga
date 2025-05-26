@@ -7,6 +7,7 @@ INGAME_I     equ 1
 
 ; copperlist struct
                               rsreset
+ig_cm_cl_initial_wait:        rs.l       1                                
 ig_cm_cl_sprites:             rs.l       16
 ig_cm_cl_bitplanes:           rs.l       12
 ig_cm_cl_bpl_config:          rs.l       9

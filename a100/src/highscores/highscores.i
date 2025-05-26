@@ -18,6 +18,7 @@ HsDataNameLength           equ hs_data_entry_score-hs_data_entry_name
 
 ; copperlist struct
                                 rsreset
+hs_cm_cl_initial_wait:          rs.l       1                                
 hs_cm_cl_sprites:               rs.l       16
 hs_cm_cl_bitplanes:             rs.l       12
 hs_cm_cl_bpl_config:            rs.l       9
