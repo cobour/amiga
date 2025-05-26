@@ -262,7 +262,6 @@ ig_start:
   
   ; save data to file
   lea.l      ig_om_savegame(a4),a2
-  lea.l      ig_cm_screenbuffer(a5),a3
   bsr        sg_save
 
   rts
@@ -277,7 +276,6 @@ ig_start:
   
   ; save data to file
   lea.l      ig_om_savegame(a4),a2
-  lea.l      ig_cm_screenbuffer(a5),a3
   bsr        sg_save
 
   rts

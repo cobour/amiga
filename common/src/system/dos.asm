@@ -4,10 +4,12 @@
 DOS_ASM     equ 1
 
 AccessRead  equ -2
-ModeOldfile equ 1005
+ModeOldFile equ 1005
+ModeNewFile equ 1006
 Open        equ -$1e
 Close       equ -$24
 Read        equ -$2a
+Write       equ -$30
 Lock        equ -$54
 UnLock      equ -$5a
 CurrentDir  equ -$7e
@@ -56,7 +58,7 @@ dos_readfile:
 
 ; open file for read
   move.l     d5,d1
-  move.l     #ModeOldfile,d2
+  move.l     #ModeOldFile,d2
   move.l     dos_base(pc),a6
   jsr        Open(a6)
   tst.l      d0
@@ -70,6 +72,48 @@ dos_readfile:
   move.l     d6,d2
   move.l     d7,d3
   jsr        Read(a6)
+  tst.l      d0
+  blt.s      .error
+
+; close file
+  move.l     dos_file_handle(pc),d1
+  jsr        Close(a6)
+
+.exit:
+  movem.l    (sp)+,d1-d7/a0-a6
+  moveq.l    #0,d0
+  rts
+.error:
+  movem.l    (sp)+,d1-d7/a0-a6
+  moveq.l    #-1,d0
+  rts
+
+; Writes file contents to disk
+; in:
+;   d5 = filename
+;   d6 = source location
+;   d7 = no. of bytes
+; out:
+;   d0 = zero for success, any other value for error
+dos_writefile:
+  movem.l    d1-d7/a0-a6,-(sp)
+
+; open file for read
+  move.l     d5,d1
+  move.l     #ModeNewFile,d2
+  move.l     dos_base(pc),a6
+  jsr        Open(a6)
+  tst.l      d0
+  beq.s      .error
+
+  lea.l      dos_file_handle(pc),a0
+  move.l     d0,(a0)
+
+; write data to file
+  move.l     dos_file_handle(pc),d1
+  move.l     d6,d2
+  move.l     d7,d3
+  jsr        Write(a6)
   tst.l      d0
   blt.s      .error
 

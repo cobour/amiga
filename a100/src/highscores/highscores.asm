@@ -100,22 +100,12 @@ hs_start:
   tst.b      hs_om_save_on_exit(a4)
   beq.s      .sh_exit
 
-  move.l     other_mem_ptr(pc),a4
-  bsr        disk_begin_io
-  tst.l      d0
-  bne.s      .sh_exit
-
-  moveq.l    #h000_unzipped_filesize,d7
-  move.l     #fn_highscores,d4
-  move.l     other_mem_ptr(pc),a2
-  add.l      #hs_om_highscore_data,a2
-  move.l     chip_mem_ptr(pc),a3
-  add.l      #hs_cm_screenbuffer,a3
-  bsr        disk_write_file
-  ; ignore possible write error
-  moveq.l    #0,d0
-
-  bsr        disk_end_io
+  lea.l      .lh_filename(pc),a0
+  move.l     a0,d5
+  move.l     other_mem_ptr(pc),d6
+  add.l      #hs_om_highscore_data,d6
+  move.l     #h000_unzipped_filesize,d7
+  bsr        dos_writefile
 .sh_exit
   rts
 
