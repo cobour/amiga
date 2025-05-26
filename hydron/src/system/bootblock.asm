@@ -2,7 +2,10 @@
 ; DO NOT include this file anywhere!
 
 ; define profile because adf-generator-tool does not support additional assembler options (e.g. -DRELEASE)
-RELEASE equ 1
+RELEASE   equ 1
+
+; to prevent unnecessary code from being included
+BOOTBLOCK equ 1
 
   dc.b       "DOS",0                                    ; disk type
   dc.l       0                                          ; checksum
