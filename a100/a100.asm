@@ -43,24 +43,6 @@ main:
   lea.l      c_cm_all_black_copperlist(a0),a0
   bsr        ctrl_set_black_screen
 
-  ; REMOVE ME
-  ;lea.l      .filename(pc),a0
-  ;move.l     a0,d5
-  ;lea.l      .filebuffer(pc),a0
-  ;clr.l      (a0)
-  ;clr.l      4(a0)
-  ;move.l     a0,d6
-  ;move.l     #600,d7
-  ;bsr        dos_readfile
-  ;lea.l      .filebuffer(pc),a0
-  ;bra        .behind_dos_test
-;.filename:
-  ;dc.b       "TST",0
-;.filebuffer:
-  ;dcb.b      600
-;.behind_dos_test:
-  ; REMOVE ME
-
   cmp.b      #NextPartIngame,c_om_next_part(a4)
   bne.s      .0
   bsr        ig_start                                        ; MUST call ctrl_take_system and ctrl_free_system
@@ -112,10 +94,8 @@ main:
   include    "files_index.i"
   include    "../common/src/system/bcd.asm"
   include    "../common/src/system/exec.asm"
-;USE_TRACKDISK equ 1
 USE_DOS equ 1
   include    "../common/src/system/datafiles.asm"
-  include    "../common/src/system/disk.asm"                 ; REMOVE ME
   include    "../common/src/system/dos.asm"
   include    "../common/src/system/control.asm"
   include    "../common/src/system/keyboard.asm"

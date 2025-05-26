@@ -10,15 +10,6 @@ asmIndexFilename: ../asm_files_index.i
 # filenames of source files are relative to sourceFolder
 targetFiles:
 
-  - filename: C000
-    description: main_code_file
-    memoryType: OTHER
-    doZip: false
-    codeFile: true
-    sources:
-      - filename: ../a100.asm
-        id: A100
-
   - filename: F000
     description: ingame_chip
     memoryType: CHIP
