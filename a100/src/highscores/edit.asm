@@ -27,6 +27,8 @@ hse_process_events:
   cmp.b       #HsViewScreenEditEntry,hs_om_view_screen(a4)
   bne.s       .exit
 
+  ; only one event per frame !
+
 .process_event:
   moveq.l     #0,d0
   bsr         ev_get_next_event
@@ -90,7 +92,7 @@ hse_process_events:
   SFX         f002_sfx_delete
   lea.l       hse_cursor_back_restore_count(pc),a0
   move.b      #2,(a0)
-  bra         .process_event
+  bra         .exit
 
 .pe_handle_char:
   lea.l       hse_char_count(pc),a0
@@ -110,7 +112,7 @@ hse_process_events:
   subq.b      #1,d1
   bsr         hse_print_char
   SFX         f002_sfx_print
-  bra         .process_event
+  bra         .exit
 
 ; in:  d0.b
 ; out: d0.b
