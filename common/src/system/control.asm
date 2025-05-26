@@ -108,7 +108,17 @@ ctrl_take_system:
 
   WAITVB2
 
-; set our dma and irq settings
+  ; stop floppy drive motor
+  ; found here: http://eab.abime.net/showthread.php?t=84507
+  lea.l      $bfd100,a0
+  or.b       #$f8,(a0)
+  nop
+  and.b      #$87,(a0)
+  nop
+  or.b       #$78,(a0)
+  nop
+
+  ; set our dma and irq settings
   move.w     #%1000010111100000,DMACON(a6)
   move.w     #%0000000000011111,DMACON(a6)
   move.w     #%0111111111111111,INTENA(a6)
