@@ -50,7 +50,7 @@ keyboard_cleanup:
 
 ; level 2 interrupt handler; reads raw key codes from pressed keys
 keyboard_handler:
-  movem.l    d0-d3/a0-a1/a6,-(sp)
+  movem.l    d0-d2/a0-a1/a6,-(sp)
   lea.l      CIAA,a0
   lea.l      CustomBase,a6
 
@@ -65,13 +65,7 @@ keyboard_handler:
 	; get target scanline to wait for 
   ; yeah, this wastes lots of time for the game, but this works on A500 and A1200 and KS 1.3-3.1 without interfering with dos loading
   ; using TimerB on CIAA worked with KS1.3 but made dos-loading on KS2.x or KS3.x hang :-(
-  move.l     VPOSR(a6),d2
-  and.l      #$1ff00,d2
-  add.l      #$200,d2
-  cmp.l      #312<<8,d2
-  ble.s      .no_adjust_of_scanline
-  moveq.l    #1,d2
-.no_adjust_of_scanline:
+  move.b     VHPOSR(a6),d2
 
   ; initiate SP handshaking
   or.b       #%01000000,CIACRA(a0)
@@ -90,18 +84,21 @@ keyboard_handler:
   move.w     d1,(a1)                              ; update kbd_write_index
 
 .handshake:
-	; wait for scanline to finish handshaking
-  move.l     VPOSR(a6),d3
-  and.l      #$1ff00,d3
-  cmp.l      d2,d3
-  bne.s      .handshake
+	; wait for 3 scanlines to finish handshaking
+  moveq.l    #2,d0
+.handshake_loop:
+  move.b     VHPOSR(a6),d1
+  cmp.b      d2,d1
+  beq.s      .handshake_loop
+  move.b     d1,d2
+  dbf        d0,.handshake_loop
 
   and.b      #%10111111,CIACRA(a0)                ; switch SP back to input
 
 .clrirq:
   move.w     #8,INTREQ(a6)                        ; clear PORTS interrupt
 
-  movem.l    (sp)+,d0-d3/a0-a1/a6
+  movem.l    (sp)+,d0-d2/a0-a1/a6
   rte
 
 ; Gets the raw key code of the next pressed key. 
