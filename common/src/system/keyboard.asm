@@ -62,9 +62,9 @@ keyboard_handler:
 	; SP interrupt detected, get key code
   move.b     CIASDR(a0),d0
 
-	; get target scanline to wait for 
+	; get initial scanline, wait via scanline-counting, not via CIA-timer
   ; yeah, this wastes lots of time for the game, but this works on A500 and A1200 and KS 1.3-3.1 without interfering with dos loading
-  ; using TimerB on CIAA worked with KS1.3 but made dos-loading on KS2.x or KS3.x hang :-(
+  ; using TimerB on CIAA worked with KS1.3 but made dos-loading on KS2.x or KS3.x hang when using floppy :-(
   move.b     VHPOSR(a6),d2
 
   ; initiate SP handshaking
