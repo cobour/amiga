@@ -22,6 +22,7 @@ ig_start:
   tst.l      d0
   bne        .error
 
+  WAITVB2
   SETPTRS
 
   bsr        .init_global_vars
@@ -78,6 +79,7 @@ ig_start:
   bsr        _mt_end
   bsr        keyboard_cleanup
   bsr        ctrl_free_system
+  WAITVB2
 
   ;
   ; handle savegame file and set next part
@@ -180,7 +182,7 @@ ig_start:
 
 .init_screen_buffer_pointers:
   ; init pointers for both buffers
-  move.l     #f000_gfx_ingame_screen,d0
+  move.l     #f000_gfx_ingame_screen_2a,d0
   bsr        datafiles_get_pointer
   move.l     df_idx_ptr_rawdata(a0),a0
   lea.l      ig_cm_screenbuffer(a5),a1
@@ -244,7 +246,7 @@ ig_start:
   rts
 
 .init_fade:
-  move.l     #f001_gfx_ingame_screen_colors,d0
+  move.l     #f001_gfx_ingame_screen_2a_colors,d0
   bsr        datafiles_get_pointer
   move.l     df_idx_ptr_rawdata(a0),a1
   lea.l      ig_om_fade_color_tab(a4),a0
@@ -289,7 +291,7 @@ ig_save_game_and_return_to_mm:
   move.b     #50,ig_om_end_countdown(a4)
 
   ; init fade-out
-  move.l     #f001_gfx_ingame_screen_colors,d0
+  move.l     #f001_gfx_ingame_screen_2a_colors,d0
   bsr        datafiles_get_pointer
   move.l     df_idx_ptr_rawdata(a0),a1
   lea.l      ig_om_fade_color_tab(a4),a0

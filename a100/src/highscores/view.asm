@@ -28,7 +28,7 @@ hs_view_save_background:
 hs_view_init:
   ; init gfx and mask pointers
   lea.l       hsv_font_metadata(pc),a3
-  move.l      #f002_gfx_font16,d0
+  move.l      #f002_gfx_font16_2a,d0
   bsr         datafiles_get_pointer
   lea.l       df_idx_metadata(a0),a1
   move.l      a1,(a3)+                                             ; metadata
@@ -253,7 +253,7 @@ hs_view_draw:
   move.l      d1,BLTDPTH(a6)
 
   ; start blit
-  move.w      #(16*HsScreenBitPlanes<<6)+1,BLTSIZE(a6)
+  move.w      #(12*HsScreenBitPlanes<<6)+1,BLTSIZE(a6)
 
   bra         .exit
 
@@ -305,7 +305,7 @@ hs_view_draw:
   move.l      d3,BLTDPTH(a6)
 
   ; start blit
-  move.w      #(16*HsScreenBitPlanes<<6)+1,BLTSIZE(a6)
+  move.w      #(12*HsScreenBitPlanes<<6)+1,BLTSIZE(a6)
 
 .upd_pointers_and_offsets:
   lea.l       hsv_draw_buffer_counter(pc),a1

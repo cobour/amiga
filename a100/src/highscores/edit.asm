@@ -301,7 +301,7 @@ hse_print_char_do:
   move.l      d3,BLTBPTH(a6)
   move.l      d2,BLTCPTH(a6)
   move.l      d2,BLTDPTH(a6)
-  move.w      #(16*HsScreenBitPlanes<<6)+1,BLTSIZE(a6)             ; start blit
+  move.w      #(12*HsScreenBitPlanes<<6)+1,BLTSIZE(a6)             ; start blit
 
   rts
 

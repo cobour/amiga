@@ -14,7 +14,7 @@ bs_init:
 ; draws to frontbuffer (which is copied to backbuffer after init)
 .init_gfx:
   ; get active selector - gfx and mask pointers
-  move.l      #f000_gfx_active_selector,d0
+  move.l      #f000_gfx_active_selector_2,d0
   bsr         datafiles_get_pointer
   lea.l       df_idx_metadata(a0),a1
   move.l      df_idx_ptr_rawdata(a0),d0                          ; source gfx data
@@ -26,7 +26,7 @@ bs_init:
   move.l      d1,(a2)
 
   ; get empty brick - gfx and mask pointers
-  move.l      #f000_gfx_bricks_small,d0
+  move.l      #f000_gfx_bricks_small_2,d0
   bsr         datafiles_get_pointer
   lea.l       df_idx_metadata(a0),a1
   move.l      df_idx_ptr_rawdata(a0),d0                          ; source gfx data

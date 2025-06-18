@@ -13,6 +13,7 @@ hs_start:
   tst.l      d0
   bne        .error
 
+  WAITVB2
   SETPTRS
 
   bsr        .init_vars
@@ -53,6 +54,7 @@ hs_start:
   bsr        keyboard_cleanup
   bsr        _mt_end
   bsr        ctrl_free_system
+  WAITVB2
   bsr        .save_highscores
   move.b     #NextPartMainmenu,c_om_next_part(a4)
   rts
@@ -65,7 +67,7 @@ hs_start:
   move.l     #fn_highscores_other,d1
   move.l     #fn_highscores_chip,d2
   move.l     chip_mem_ptr(pc),d5
-  add.l      #hs_cm_screenbuffer,d5
+  add.l      #hs_cm_cursor_restore_buffer,d5
   move.l     d5,d6
   add.l      #512,d6
   move.l     other_mem_ptr(pc),a0
@@ -247,7 +249,7 @@ hs_start:
   rts
 
 .init_fade:
-  move.l     #f003_gfx_highscores_screen_colors,d0
+  move.l     #f003_gfx_font16_2a_colors,d0
   bsr        datafiles_get_pointer
   move.l     df_idx_ptr_rawdata(a0),a1
   lea.l      hs_om_fade_color_tab(a4),a0
@@ -323,7 +325,7 @@ hs_process_events:
   ; end of this highscores part
 .pehs_end_of_part:
   move.b     #35,hs_om_end_countdown(a4)
-  move.l     #f003_gfx_highscores_screen_colors,d0
+  move.l     #f003_gfx_font16_2a_colors,d0
   bsr        datafiles_get_pointer
   move.l     df_idx_ptr_rawdata(a0),a1
   lea.l      hs_om_fade_color_tab(a4),a0

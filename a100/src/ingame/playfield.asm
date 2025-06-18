@@ -37,7 +37,7 @@ pf_init:
 ; draws to frontbuffer (which is copied to backbuffer after init)
 .init_gfx:
   ; get empty brick - gfx and mask pointers
-  move.l      #f000_gfx_bricks_big,d0
+  move.l      #f000_gfx_bricks_big_2,d0
   bsr         datafiles_get_pointer
   lea.l       df_idx_metadata(a0),a1
   move.l      df_idx_ptr_rawdata(a0),d0                            ; source gfx data
@@ -626,7 +626,7 @@ pf_draw:
 .get_gfx_and_mask_pointers_and_init_blitter:
   movem.l     d0/d7,-(sp)
   ; get pointers
-  move.l      #f000_gfx_bricks_big,d0
+  move.l      #f000_gfx_bricks_big_2,d0
   bsr         datafiles_get_pointer
   lea.l       df_idx_metadata(a0),a1
   move.l      df_idx_ptr_rawdata(a0),a2                            ; a2 = source gfx data

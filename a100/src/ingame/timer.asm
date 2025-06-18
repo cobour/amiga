@@ -80,7 +80,7 @@ t_update:
   SFX         f000_sfx_gameover
 
   ; init fade-out
-  move.l      #f001_gfx_ingame_screen_colors,d0
+  move.l      #f001_gfx_ingame_screen_2a_colors,d0
   bsr         datafiles_get_pointer
   move.l      df_idx_ptr_rawdata(a0),a1
   lea.l       ig_om_fade_color_tab(a4),a0
@@ -132,7 +132,7 @@ t_draw:
   ; init pointer
   move.l      sc_font_metadata_ptr(pc),a1
   move.l      d7,d3
-  add.l       #(IgScreenWidthBytes*IgScreenBitPlanes*208)+6,d3    ; d3 = target pointer
+  add.l       #(IgScreenWidthBytes*IgScreenBitPlanes*209)+6,d3    ; d3 = target pointer
   move.l      sc_font_gfx_ptr(pc),d1                              ; d1 = gfx pointer
   move.l      sc_font_mask_ptr(pc),d2                             ; d2 = mask pointer
 
@@ -205,7 +205,7 @@ t_draw:
   move.l      d3,BLTDPTH(a6)
 
   ; start blit
-  move.w      #(16*IgScreenBitPlanes<<6)+1,BLTSIZE(a6)
+  move.w      #(12*IgScreenBitPlanes<<6)+1,BLTSIZE(a6)
 
   ; next
   addq.l      #2,d3
@@ -220,15 +220,15 @@ t_draw:
   addq.l      #8,d2
 
   ; source pointers
-  move.l      d1,BLTAPTH(a6)
-  move.l      d2,BLTBPTH(a6)
+  move.l      d2,BLTAPTH(a6)
+  move.l      d1,BLTBPTH(a6)
 
   ; destination pointers
   move.l      d3,BLTCPTH(a6)
   move.l      d3,BLTDPTH(a6)
 
   ; start blit
-  move.w      #(16*IgScreenBitPlanes<<6)+2,BLTSIZE(a6)
+  move.w      #(12*IgScreenBitPlanes<<6)+2,BLTSIZE(a6)
 
 .exit:
   rts

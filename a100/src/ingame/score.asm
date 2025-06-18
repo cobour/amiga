@@ -20,7 +20,7 @@ sc_init:
 
   ; init vars
   lea.l       sc_font_metadata_ptr(pc),a3
-  move.l      #f000_gfx_font16,d0
+  move.l      #f000_gfx_font16_2a,d0
   bsr         datafiles_get_pointer
   lea.l       df_idx_metadata(a0),a1
   move.l      a1,(a3)+                                             ; metadata
@@ -101,7 +101,7 @@ sc_update:
   ;
   move.l      sc_font_metadata_ptr(pc),a1
   move.l      d7,d4
-  add.l       #(IgScreenWidthBytes*IgScreenBitPlanes*208)+18,d4    ; target pointer
+  add.l       #(IgScreenWidthBytes*IgScreenBitPlanes*209)+18,d4    ; target pointer
 
   WAIT_BLT
 
@@ -151,7 +151,7 @@ sc_update:
   move.l      d4,BLTDPTH(a6)
 
   ; start blit
-  move.w      #(16*IgScreenBitPlanes<<6)+1,BLTSIZE(a6)
+  move.w      #(12*IgScreenBitPlanes<<6)+1,BLTSIZE(a6)
 
   ; next
   addq.l      #2,d4

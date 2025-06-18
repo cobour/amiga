@@ -23,7 +23,7 @@ MmTextAreaBufferWidthBytes equ MmTextAreaBufferWidth/8
 MmTextAreaBufferWidthWords equ MmTextAreaBufferWidth/16
 MmTextAreaBufferHeight     equ 118
 MmTextAreaBufferSize       equ (MmTextAreaBufferWidth/8)*MmTextAreaBufferHeight*MmScreenBitPlanes
-MmOffsetOfTextArea         equ (MmScreenBitPlanes*MmScreenWidthBytes*107)+4
+MmOffsetOfTextArea         equ (MmScreenBitPlanes*MmScreenWidthBytes*108)+4
 
                                 rsreset
 mm_cm_common:                   rs.b       c_cm_sizeof

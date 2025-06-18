@@ -14,19 +14,19 @@ targetFiles:
     description: ingame_chip
     memoryType: CHIP
     sources:
-      - filename: gfx/ingame_screen.iff
+      - filename: gfx/ingame_screen_2a.iff
         id: SCRN
         withMask: false
-      - filename: gfx/font16.iff
+      - filename: gfx/font16_2a.iff
         id: FONT
-        flattenedTileFormat: 16x16
+        flattenedTileFormat: 16x12
         flattenedReducedTileCount: 59
-      - filename: gfx/bricks_big.iff
+      - filename: gfx/bricks_big_2.iff
         id: BRBG
-      - filename: gfx/bricks_small.iff
+      - filename: gfx/bricks_small_2.iff
         id: BRSM
         invertMask: true
-      - filename: gfx/active_selector.iff
+      - filename: gfx/active_selector_2.iff
         id: ASEL
       - filename: music/peace_of_mind.mod
         id: MS01
@@ -70,7 +70,7 @@ targetFiles:
     memoryType: OTHER
     relatedFile: F000
     sources:
-      - filename: gfx/ingame_screen.iff
+      - filename: gfx/ingame_screen_2a.iff
         id: COLS
         colorsOnly: true
       - filename: music/peace_of_mind.mod
@@ -163,9 +163,9 @@ targetFiles:
         id: MS02
       - filename: ../src/highscores/hs_copperlist.asm
         id: HSCL
-      - filename: gfx/font16.iff
+      - filename: gfx/font16_2a.iff
         id: FONT
-        flattenedTileFormat: 16x16
+        flattenedTileFormat: 16x12
       - filename: sfx/tick.wav
         id: STIC
         volume: 64
@@ -192,7 +192,7 @@ targetFiles:
     memoryType: OTHER
     relatedFile: F002
     sources:
-      - filename: gfx/highscores_screen.iff
+      - filename: gfx/font16_2a.iff
         id: COLS
         colorsOnly: true
       - filename: music/spearhead.mod
@@ -205,9 +205,9 @@ targetFiles:
       - filename: gfx/mainmenu_screen.iff
         id: SCRN
         withMask: false
-      - filename: gfx/font16.iff
+      - filename: gfx/font16_2a.iff
         id: FONT
-        flattenedTileFormat: 16x16
+        flattenedTileFormat: 16x12
       - filename: music/space_odyssey.mod
         id: MS03
       - filename: ../src/mainmenu/mm_copperlist.asm
@@ -230,7 +230,7 @@ targetFiles:
     memoryType: OTHER
     relatedFile: F004
     sources:
-      - filename: gfx/mainmenu_screen.iff
+      - filename: gfx/font16_2a.iff
         id: COLS
         colorsOnly: true
       - filename: music/space_odyssey.mod

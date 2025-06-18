@@ -11,7 +11,7 @@ MENUPART_ASM equ 1
 mp_init:
   ; font vars - mus be done before mp_set_part
   lea.l       mp_font_metadata_ptr(pc),a3
-  move.l      #f004_gfx_font16,d0
+  move.l      #f004_gfx_font16_2a,d0
   bsr         datafiles_get_pointer
   lea.l       df_idx_metadata(a0),a1
   move.l      a1,(a3)+                                                                ; metadata
@@ -207,7 +207,7 @@ mp_draw_line_to_print_buffer:
   move.l      d5,BLTBPTH(a6)
   move.l      d1,BLTCPTH(a6)
   move.l      d1,BLTDPTH(a6)
-  move.w      #(16*IgScreenBitPlanes<<6)+1,BLTSIZE(a6)
+  move.w      #(12*IgScreenBitPlanes<<6)+1,BLTSIZE(a6)
 
   addq.l      #2,d1
   dbf         d7,.loop
@@ -413,7 +413,7 @@ mp_process_events:
   ; set end countdown
   move.b      #35,mm_om_end_countdown(a4)
   ; trigger fade out
-  move.l      #f005_gfx_mainmenu_screen_colors,d0
+  move.l      #f005_gfx_font16_2a_colors,d0
   bsr         datafiles_get_pointer
   move.l      df_idx_ptr_rawdata(a0),a1
   lea.l       mm_om_fade_color_tab(a4),a0

@@ -18,6 +18,7 @@ mm_start:
   tst.l       d0
   bne         .error
 
+  WAITVB2
   SETPTRS
 
   bsr         .init_vars                                                                               ; must be called first -=> savegame data is loaded at a5+mm_cm_screenbuffer
@@ -57,6 +58,7 @@ mm_start:
   bsr         keyboard_cleanup
   bsr         _mt_end
   bsr         ctrl_free_system
+  WAITVB2
   rts
 
 .error:
@@ -175,7 +177,7 @@ mm_start:
   rts
 
 .init_fade:
-  move.l      #f005_gfx_mainmenu_screen_colors,d0
+  move.l      #f005_gfx_font16_2a_colors,d0
   bsr         datafiles_get_pointer
   move.l      df_idx_ptr_rawdata(a0),a1
   lea.l       mm_om_fade_color_tab(a4),a0

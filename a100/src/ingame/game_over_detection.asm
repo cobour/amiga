@@ -44,8 +44,8 @@ game_over_detection:
 
   ; no brick can be placed on the playfield => game over
 .god_no_brick_is_placable:
-  SETPTRS                                         ; restore a4-a6
-  move.b     #1,ig_om_gameover(a4)                ; signal game over
+  SETPTRS                                            ; restore a4-a6
+  move.b     #1,ig_om_gameover(a4)                   ; signal game over
   move.b     #50,ig_om_end_countdown(a4)
 
   ; play sfx
@@ -55,24 +55,24 @@ game_over_detection:
   move.b     #1,ig_om_clear_savegame(a4)
 
   ; init fade-out
-  move.l     #f001_gfx_ingame_screen_colors,d0
+  move.l     #f001_gfx_ingame_screen_2a_colors,d0
   bsr        datafiles_get_pointer
   move.l     df_idx_ptr_rawdata(a0),a1
   lea.l      ig_om_fade_color_tab(a4),a0
   moveq.l    #32,d0
   moveq.l    #1,d1
-  bra        fade_init                            ; indirect rts
+  bra        fade_init                               ; indirect rts
   
   ; any of the bricks can be placed on the playfield => all fine
 .god_exit:
-  SETPTRS                                         ; restore a4-a6
+  SETPTRS                                            ; restore a4-a6
   rts
 
-  endif                                           ; ifnd UNITTEST
+  endif                                              ; ifnd UNITTEST
 
   ifd        UNITTEST
 unittest_check_one_brick:
-  endif                                           ; ifd UNITTEST
+  endif                                              ; ifd UNITTEST
 
 ; checks all possible positions on the playfield for one brick
 ; in:
@@ -122,11 +122,11 @@ unittest_check_one_brick:
 .cobop_columns_loop:
   move.w     (a1,d2.w),d3
   tst.b      d3
-  beq.s      .cobop_columns_loop_next             ; brick element empty => next
+  beq.s      .cobop_columns_loop_next                ; brick element empty => next
   move.b     (a6),d3
   tst.b      d3
   beq.s      .cobop_columns_loop_next
-  moveq.l    #0,d2                                ; brick element not empty and playfield element not empty => brick not placable at this position
+  moveq.l    #0,d2                                   ; brick element not empty and playfield element not empty => brick not placable at this position
   rts
 .cobop_columns_loop_next:
   addq.w     #2,d2
@@ -137,4 +137,4 @@ unittest_check_one_brick:
   moveq.l    #1,d2
   rts
 
-  endif                                           ; ifnd GAME_OVER_DETECTION_ASM
+  endif                                              ; ifnd GAME_OVER_DETECTION_ASM
