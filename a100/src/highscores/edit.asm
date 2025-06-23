@@ -195,6 +195,7 @@ hse_print_cursor:
     
 .no_cursor_restore:
 
+  moveq.l     #0,d1                                                ; because "bsr.s hse_print_char_do" modifies d1, moving a 24bit value into it
   move.b      hse_char_count(pc),d1
   cmp.b       #6,d1
   bge.s       .exit
