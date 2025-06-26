@@ -187,6 +187,7 @@ class IffSource extends AbstractSource {
 		CHUNK_PROCESSORS.add(new AnnoProcessor());
 		CHUNK_PROCESSORS.add(new CrngProcessor());
 		CHUNK_PROCESSORS.add(new DppsProcessor());
+		CHUNK_PROCESSORS.add(new DrngProcessor());
 		CHUNK_PROCESSORS.add(new BmhdProcessor());
 		CHUNK_PROCESSORS.add(new CamgProcessor());
 		CHUNK_PROCESSORS.add(new CmapProcessor());
@@ -253,6 +254,19 @@ class IffSource extends AbstractSource {
 		@Override
 		public String id() {
 			return "DPPS";
+		}
+
+		@Override
+		public void process(FileInputStream src, IffSource uow) throws IOException {
+			int chunkSize = BINARY_VALUE_CONVERTER.readLong(src);
+			src.skip(chunkSize);
+		}
+	}
+
+	private static class DrngProcessor implements ChunkProcessor {
+		@Override
+		public String id() {
+			return "DRNG";
 		}
 
 		@Override
