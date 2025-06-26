@@ -413,7 +413,7 @@ mp_process_events:
   ; set end countdown
   move.b      #35,mm_om_end_countdown(a4)
   ; trigger fade out
-  move.l      #f005_gfx_font16_2a_colors,d0
+  move.l      #f005_gfx_mainmenu_screen_K2_colors,d0
   bsr         datafiles_get_pointer
   move.l      df_idx_ptr_rawdata(a0),a1
   lea.l       mm_om_fade_color_tab(a4),a0

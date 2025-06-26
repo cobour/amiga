@@ -189,7 +189,7 @@ hs_start:
 
 .init_screen_buffer_pointers:
   ; init pointers for both buffers
-  move.l     #f002_gfx_highscores_screen,d0
+  move.l     #f002_gfx_highscores_screen_K2,d0
   bsr        datafiles_get_pointer
   move.l     df_idx_ptr_rawdata(a0),a0
   lea.l      hs_cm_screenbuffer(a5),a1
@@ -249,7 +249,7 @@ hs_start:
   rts
 
 .init_fade:
-  move.l     #f003_gfx_font16_2a_colors,d0
+  move.l     #f003_gfx_highscores_screen_K2_colors,d0
   bsr        datafiles_get_pointer
   move.l     df_idx_ptr_rawdata(a0),a1
   lea.l      hs_om_fade_color_tab(a4),a0
@@ -325,7 +325,7 @@ hs_process_events:
   ; end of this highscores part
 .pehs_end_of_part:
   move.b     #35,hs_om_end_countdown(a4)
-  move.l     #f003_gfx_font16_2a_colors,d0
+  move.l     #f003_gfx_highscores_screen_K2_colors,d0
   bsr        datafiles_get_pointer
   move.l     df_idx_ptr_rawdata(a0),a1
   lea.l      hs_om_fade_color_tab(a4),a0
