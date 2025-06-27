@@ -14,14 +14,14 @@ mp_init:
   move.l      #f004_gfx_font16_2a,d0
   bsr         datafiles_get_pointer
   lea.l       df_idx_metadata(a0),a1
-  move.l      a1,(a3)+                                                                ; metadata
+  move.l      a1,(a3)+                                                                                                ; metadata
   move.l      df_idx_ptr_rawdata(a0),d0
-  move.l      d0,(a3)+                                                                ; gfx
+  move.l      d0,(a3)+                                                                                                ; gfx
   add.l       df_iff_rawsize(a1),d0
-  move.l      d0,(a3)+                                                                ; mask
+  move.l      d0,(a3)+                                                                                                ; mask
 
   ; init more vars
-  clr.l       (a3)+                                                                   ; mp_zoom_in_counter and mp_zoom_out_counter - 12 bytes - MUST BE ADJUSTED WHEN MenuPartRows IS CHANGED
+  clr.l       (a3)+                                                                                                   ; mp_zoom_in_counter and mp_zoom_out_counter - 12 bytes - MUST BE ADJUSTED WHEN MenuPartRows IS CHANGED
   clr.l       (a3)+
   clr.l       (a3)
   lea.l       mp_current_part(pc),a3
@@ -49,7 +49,7 @@ mp_init:
 
   ; init highscore data
   move.l      a4,a1
-  add.l       #mm_om_highscore_data+50,a1                                             ; magic value, so no need to include files from different game part
+  add.l       #mm_om_highscore_data+50,a1                                                                             ; magic value, so no need to include files from different game part
   lea.l       mp_data_highscores_infinite(pc),a2
   bsr.s       .init_highscore_data
   move.l      a4,a1
@@ -165,10 +165,10 @@ mp_draw_line_to_print_buffer:
   move.l      (a1,d0.w),d1
   bsr         mm_clear_text_print_buffer_line
   add.l       a5,d1
-  add.l       #mm_cm_textarea_print_buffer,d1                                         ; target pointer (begin of row)
+  add.l       #mm_cm_textarea_print_buffer,d1                                                                         ; target pointer (begin of row)
 
-  move.l      mp_font_gfx_ptr(pc),d3                                                  ; source pointer gfx  (base pointer, space char)
-  move.l      mp_font_mask_ptr(pc),d2                                                 ; source pointer mask (base pointer, space char)
+  move.l      mp_font_gfx_ptr(pc),d3                                                                                  ; source pointer gfx  (base pointer, space char)
+  move.l      mp_font_mask_ptr(pc),d2                                                                                 ; source pointer mask (base pointer, space char)
 
   WAIT_BLT
 
@@ -197,9 +197,9 @@ mp_draw_line_to_print_buffer:
   sub.b       #$20,d0
   add.w       d0,d0
   move.l      d3,d5
-  add.l       d0,d5                                                                   ; source pointer gfx
+  add.l       d0,d5                                                                                                   ; source pointer gfx
   move.l      d2,d4
-  add.l       d0,d4                                                                   ; source pointer mask
+  add.l       d0,d4                                                                                                   ; source pointer mask
 
   WAIT_BLT
 
@@ -216,12 +216,12 @@ mp_draw_line_to_print_buffer:
   rts
 
 .line_offsets:
-  dc.l        MmTextAreaBufferWidthBytes*MmScreenBitPlanes*20*0
-  dc.l        MmTextAreaBufferWidthBytes*MmScreenBitPlanes*20*1
-  dc.l        MmTextAreaBufferWidthBytes*MmScreenBitPlanes*20*2
-  dc.l        MmTextAreaBufferWidthBytes*MmScreenBitPlanes*20*3
-  dc.l        MmTextAreaBufferWidthBytes*MmScreenBitPlanes*20*4
-  dc.l        MmTextAreaBufferWidthBytes*MmScreenBitPlanes*20*5
+  dc.l        (MmTextAreaBufferWidthBytes*MmScreenBitPlanes*20*0)+(MmTextAreaBufferWidthBytes*MmScreenBitPlanes*2)
+  dc.l        (MmTextAreaBufferWidthBytes*MmScreenBitPlanes*20*1)+(MmTextAreaBufferWidthBytes*MmScreenBitPlanes*2)
+  dc.l        (MmTextAreaBufferWidthBytes*MmScreenBitPlanes*20*2)+(MmTextAreaBufferWidthBytes*MmScreenBitPlanes*2)
+  dc.l        (MmTextAreaBufferWidthBytes*MmScreenBitPlanes*20*3)+(MmTextAreaBufferWidthBytes*MmScreenBitPlanes*2)
+  dc.l        (MmTextAreaBufferWidthBytes*MmScreenBitPlanes*20*4)+(MmTextAreaBufferWidthBytes*MmScreenBitPlanes*2)
+  dc.l        (MmTextAreaBufferWidthBytes*MmScreenBitPlanes*20*5)+(MmTextAreaBufferWidthBytes*MmScreenBitPlanes*2)
 
 mp_process_events:
   tst.b       mm_om_end_countdown(a4)
@@ -316,22 +316,22 @@ mp_process_events:
   beq.s       .check_s
   tst.b       mm_om_savegame_is_used(a4)
   beq.s       .check_s
-  cmp.b       #$13,d0                                                                 ; R
+  cmp.b       #$13,d0                                                                                                 ; R
   beq.s       .mp_main_start_or_resume
   bra.s       .check_other
 .check_s:
-  cmp.b       #$21,d0                                                                 ; S
+  cmp.b       #$21,d0                                                                                                 ; S
   beq.s       .mp_main_start_or_resume
 .check_other:
-  cmp.b       #$37,d0                                                                 ; M
+  cmp.b       #$37,d0                                                                                                 ; M
   beq.s       .mp_main_mode
-  cmp.b       #$12,d0                                                                 ; E
+  cmp.b       #$12,d0                                                                                                 ; E
   beq         .mp_main_exit
-  cmp.b       #$33,d0                                                                 ; C
+  cmp.b       #$33,d0                                                                                                 ; C
   beq         .mp_main_credits
-  cmp.b       #$17,d0                                                                 ; I
+  cmp.b       #$17,d0                                                                                                 ; I
   beq         .mp_main_instructions
-  cmp.b       #$25,d0                                                                 ; H
+  cmp.b       #$25,d0                                                                                                 ; H
   beq         .mp_main_highscores
   SFX         f004_sfx_error
   rts
@@ -419,7 +419,7 @@ mp_process_events:
   lea.l       mm_om_fade_color_tab(a4),a0
   moveq.l     #32,d0
   moveq.l     #1,d1
-  bra         fade_init                                                               ; implicit rts
+  bra         fade_init                                                                                               ; implicit rts
 
 .mp_credits_gfx:
   cmp.b       #EventTimer,d0
@@ -549,9 +549,9 @@ mp_update:
 
   ; init values for line of menu
   lea.l       mp_zoom_out_counter(pc),a0
-  move.l      a5,d5                                                                   ; pointer to restore buffer
+  move.l      a5,d5                                                                                                   ; pointer to restore buffer
   add.l       #mm_cm_textarea_restore_buffer,d5
-  move.l      #MmOffsetOfTextArea,d6                                                  ; offset in screenbuffer
+  move.l      #MmOffsetOfTextArea,d6                                                                                  ; offset in screenbuffer
   moveq.l     #MenuPartRows-1,d7
 .zo_find_line_loop:
   tst.b       (a0)
@@ -562,17 +562,17 @@ mp_update:
   dbf         d7,.zo_find_line_loop
 .zo_line_found:
 
-  sub.b       #1,(a0)                                                                 ; sub first because counter must be executed for 16 to 1 and not for zero - but zero-based access to data-table
+  sub.b       #1,(a0)                                                                                                 ; sub first because counter must be executed for 16 to 1 and not for zero - but zero-based access to data-table
   moveq.l     #0,d0
-  move.b      (a0),d0                                                                 ; step for zoom out -> use to pick values in zoom_data
+  move.b      (a0),d0                                                                                                 ; step for zoom out -> use to pick values in zoom_data
   lsl.w       #3,d0
   lea.l       .zoom_data(pc),a0
   moveq.l     #0,d4
   move.w      (a0,d0.w),d4
-  add.l       d4,d5                                                                   ; BLTAPTH
+  add.l       d4,d5                                                                                                   ; BLTAPTH
   move.w      2(a0,d0.w),d4
-  add.l       d4,d6                                                                   ; BLTDPTH
-  move.w      4(a0,d0.w),d4                                                           ; BLTSIZE
+  add.l       d4,d6                                                                                                   ; BLTDPTH
+  move.w      4(a0,d0.w),d4                                                                                           ; BLTSIZE
   bra.s       .do_blit
 
 .test_zoom_in:
@@ -582,9 +582,9 @@ mp_update:
   
   ; init values for line of menu
   lea.l       mp_zoom_in_counter(pc),a0
-  move.l      a5,d5                                                                   ; pointer to print buffer
+  move.l      a5,d5                                                                                                   ; pointer to print buffer
   add.l       #mm_cm_textarea_print_buffer,d5
-  move.l      #MmOffsetOfTextArea,d6                                                  ; offset in screenbuffer
+  move.l      #MmOffsetOfTextArea,d6                                                                                  ; offset in screenbuffer
   moveq.l     #MenuPartRows-1,d7
 .zi_find_line_loop:
   tst.b       (a0)
@@ -595,32 +595,32 @@ mp_update:
   dbf         d7,.zi_find_line_loop
 .zi_line_found:
 
-  sub.b       #1,(a0)                                                                 ; sub first because counter must be executed for 16 to 1 and not for zero - but zero-based access to data-table
+  sub.b       #1,(a0)                                                                                                 ; sub first because counter must be executed for 16 to 1 and not for zero - but zero-based access to data-table
   moveq.l     #0,d0
-  move.b      (a0),d0                                                                 ; step for zoom in -> use to pick values in zoom_data
+  move.b      (a0),d0                                                                                                 ; step for zoom in -> use to pick values in zoom_data
   lsl.w       #3,d0
   lea.l       .zoom_data(pc),a0
   moveq.l     #0,d4
   move.w      (a0,d0.w),d4
-  add.l       d4,d5                                                                   ; BLTAPTH
+  add.l       d4,d5                                                                                                   ; BLTAPTH
   move.w      2(a0,d0.w),d4
-  add.l       d4,d6                                                                   ; BLTDPTH
-  move.w      4(a0,d0.w),d4                                                           ; BLTSIZE
+  add.l       d4,d6                                                                                                   ; BLTDPTH
+  move.w      4(a0,d0.w),d4                                                                                           ; BLTSIZE
 
 .do_blit:
   WAIT_BLT
-  move.w      #%0000100111110000,BLTCON0(a6)                                          ; simple A -> D copy, no shifting
+  move.w      #%0000100111110000,BLTCON0(a6)                                                                          ; simple A -> D copy, no shifting
   clr.w       BLTCON1(a6)
-  move.w      #$ffff,d0                                                               ; no first/last word mask
+  move.w      #$ffff,d0                                                                                               ; no first/last word mask
   move.w      d0,BLTAFWM(a6)
   move.w      d0,BLTALWM(a6)
-  clr.w       BLTAMOD(a6)                                                             ; modulos for source and target
+  clr.w       BLTAMOD(a6)                                                                                             ; modulos for source and target
   move.w      #MmScreenWidthBytes-MmTextAreaBufferWidthBytes,BLTDMOD(a6)
-  move.l      d5,BLTAPTH(a6)                                                          ; pointers
+  move.l      d5,BLTAPTH(a6)                                                                                          ; pointers
   move.l      mm_om_backbuffer(a4),d0
   add.l       d6,d0
   move.l      d0,BLTDPTH(a6)
-  move.w      d4,BLTSIZE(a6)                                                          ; start blit - TODO use d4
+  move.w      d4,BLTSIZE(a6)                                                                                          ; start blit - TODO use d4
 
 .exit:
   rts
@@ -712,7 +712,7 @@ mp_update:
 ;
 
 mp_current_part:
-  dc.w        0                                                                       ; id of current part
+  dc.w        0                                                                                                       ; id of current part
 mp_current_part_data:
   dc.l        0
 mp_current_part_timer:
@@ -745,7 +745,7 @@ mp_data:
 mp_data_start_or_resume:
   dcb.b       MenuPartRowLength
 mp_data_mode:
-  dcb.b       MenuPartRowLength                                                       ; set via macros MODE_I and MODE_T
+  dcb.b       MenuPartRowLength                                                                                       ; set via macros MODE_I and MODE_T
   dc.b        " (I)NSTRUCTIONS "
   dc.b        "  (H)IGHSCORES  "
   dc.b        "   (C)REDITS    "
@@ -847,6 +847,6 @@ mp_data_highscores_timer:
   dc.b        "                "
   dc.b        "                "
 
-  dc.w        -1                                                                      ; end of list
+  dc.w        -1                                                                                                      ; end of list
 
-  endif                                                                               ; ifnd MENUPART_ASM
+  endif                                                                                                               ; ifnd MENUPART_ASM
