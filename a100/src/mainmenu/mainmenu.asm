@@ -116,7 +116,7 @@ mm_start:
 
 .init_screen_buffer_pointers:
   ; init pointers for both buffers
-  move.l      #f004_gfx_mainmenu_screen_K2,d0
+  move.l      #f004_gfx_mainmenu_screen_3b,d0
   bsr         datafiles_get_pointer
   move.l      df_idx_ptr_rawdata(a0),a0
   lea.l       mm_cm_screenbuffer(a5),a1
@@ -177,7 +177,7 @@ mm_start:
   rts
 
 .init_fade:
-  move.l      #f005_gfx_mainmenu_screen_K2_colors,d0
+  move.l      #f005_gfx_mainmenu_screen_3b_colors,d0
   bsr         datafiles_get_pointer
   move.l      df_idx_ptr_rawdata(a0),a1
   lea.l       mm_om_fade_color_tab(a4),a0
