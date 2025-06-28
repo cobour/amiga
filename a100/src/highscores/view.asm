@@ -28,7 +28,7 @@ hs_view_save_background:
 hs_view_init:
   ; init gfx and mask pointers
   lea.l       hsv_font_metadata(pc),a3
-  move.l      #f002_gfx_font16_2a,d0
+  move.l      #f002_gfx_font16_2c,d0
   bsr         datafiles_get_pointer
   lea.l       df_idx_metadata(a0),a1
   move.l      a1,(a3)+                                             ; metadata

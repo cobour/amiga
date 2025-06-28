@@ -17,7 +17,7 @@ targetFiles:
       - filename: gfx/ingame_screen_2a.iff
         id: SCRN
         withMask: false
-      - filename: gfx/font16_2a.iff
+      - filename: gfx/font16_2c.iff
         id: FONT
         flattenedTileFormat: 16x12
         flattenedReducedTileCount: 59
@@ -163,7 +163,7 @@ targetFiles:
         id: MS02
       - filename: ../src/highscores/hs_copperlist.asm
         id: HSCL
-      - filename: gfx/font16_2a.iff
+      - filename: gfx/font16_2c.iff
         id: FONT
         flattenedTileFormat: 16x12
       - filename: sfx/tick.wav
@@ -205,7 +205,7 @@ targetFiles:
       - filename: gfx/mainmenu_screen_3b.iff
         id: SCRN
         withMask: false
-      - filename: gfx/font16_2a.iff
+      - filename: gfx/font16_2c.iff
         id: FONT
         flattenedTileFormat: 16x12
       - filename: music/space_odyssey.mod

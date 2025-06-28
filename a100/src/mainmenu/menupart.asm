@@ -11,7 +11,7 @@ MENUPART_ASM equ 1
 mp_init:
   ; font vars - mus be done before mp_set_part
   lea.l       mp_font_metadata_ptr(pc),a3
-  move.l      #f004_gfx_font16_2a,d0
+  move.l      #f004_gfx_font16_2c,d0
   bsr         datafiles_get_pointer
   lea.l       df_idx_metadata(a0),a1
   move.l      a1,(a3)+                                                                                                ; metadata
