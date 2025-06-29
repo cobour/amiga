@@ -111,6 +111,8 @@ ig_start:
   move.l     other_mem_ptr(pc),a1
   cmp.b      #GameModeInfinite,c_om_gamemode(a1)
   bne.s      .ls_clear
+  move.l     chip_mem_ptr(pc),a3
+  add.l      #ig_cm_screenbuffer,a3
   bra        sg_load                                                            ; implicit rts
 .ls_clear:
   moveq.l    #s000_unzipped_filesize-1,d7
@@ -264,6 +266,7 @@ ig_start:
   
   ; save data to file
   lea.l      ig_om_savegame(a4),a2
+  lea.l      ig_cm_screenbuffer(a5),a3
   bsr        sg_save
 
   rts
@@ -278,6 +281,7 @@ ig_start:
   
   ; save data to file
   lea.l      ig_om_savegame(a4),a2
+  lea.l      ig_cm_screenbuffer(a5),a3
   bsr        sg_save
 
   rts
