@@ -17,6 +17,9 @@ targetFiles:
     sources:
       - filename: ../hydron.asm
         id: HYDR
+        defines:
+          - RELEASE
+          - USE_TRACKDISK
 
   - filename: F000
     description: ingame_chip

@@ -12,7 +12,8 @@
 					"-Fhunk",
 					"-linedebug",
 					"-DDEBUG",
-					"-DIS_STANDARD_EXE"
+					"-DIS_STANDARD_EXE",
+					"-DUSE_TRACKDISK"
 				]
 			},
 			"vlink": {

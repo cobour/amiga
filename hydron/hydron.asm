@@ -114,8 +114,6 @@ main:
 ;
   include    "files_index.i"
   include    "../common/src/system/exec.asm"
-USE_TRACKDISK equ 1
-;USE_DOS equ 1
   include    "../common/src/system/datafiles.asm"
   include    "../common/src/system/disk.asm"
   include    "../common/src/system/control.asm"
