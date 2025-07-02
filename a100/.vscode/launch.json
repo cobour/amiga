@@ -72,8 +72,60 @@
                 //"--automatic_input_grab=0",
                 "--video_sync=0",
                 "--fullscreen=0"
-            ] //,
-            //"preLaunchTask": "Create ADF"
+            ],
+            "preLaunchTask": "Create ADF"
+        },
+        {
+            "type": "amiga-assembly",
+            "request": "launch",
+            "name": "Run WHDLoad DEBUG",
+            "stopOnEntry": false,
+            "trace": false,
+            "program": "${workspaceFolder}/uae/dh0/A100",
+            "remoteProgram": "SYS:A100",
+            "emulatorType": "fs-uae",
+            "emulatorArgs": [
+                "--chip_memory=512",
+                //"--chip_memory=2048",
+                "--slow_memory=0",
+                //"--kickstart_file=/Users/frank/Development/projects/kickroms/kick13.rom",
+                "--kickstart_file=/Users/frank/Development/projects/kickroms/kick31.rom",
+                "--hard_drive_0=${workspaceFolder}/uae/dh0",
+                "--floppy_drive_1=${workspaceFolder}/dist/A100.adf",
+                //"--automatic_input_grab=0",
+                "--joystick_port_1=keyboard",
+                "--amiga_model=A500",
+                //"--amiga_model=A1200",
+                "--automatic_input_grab=0",
+                "--video_sync=0",
+                "--fullscreen=0"
+            ],
+            "preLaunchTask": "Build WHDLoad DEBUG"
+        },
+        {
+            "type": "amiga-assembly",
+            "request": "launch",
+            "name": "Run WHDLoad RELEASE",
+            "program": "",
+            "noDebug": true,
+            "emulatorType": "fs-uae",
+            "emulatorArgs": [
+                "--chip_memory=512",
+                //"--chip_memory=2048",
+                "--slow_memory=0",
+                //"--kickstart_file=/Users/frank/Development/projects/kickroms/kick13.rom",
+                "--kickstart_file=/Users/frank/Development/projects/kickroms/kick31.rom",
+                "--hard_drive_0=${workspaceFolder}/uae/dh0",
+                "--floppy_drive_1=${workspaceFolder}/dist/A100.adf",
+                //"--automatic_input_grab=0",
+                "--joystick_port_1=keyboard",
+                "--amiga_model=A500",
+                //"--amiga_model=A1200",
+                "--automatic_input_grab=0",
+                "--video_sync=0",
+                "--fullscreen=0"
+            ],
+            "preLaunchTask": "Build WHDLoad RELEASE"
         }
     ]
 }

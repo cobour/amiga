@@ -78,6 +78,9 @@ hs_start:
   rts
 
 .load_highscores:
+
+  ifd        USE_TRACKDISK
+
   move.l     other_mem_ptr(pc),a4
   bsr        disk_begin_io
   tst.l      d0
@@ -104,7 +107,36 @@ hs_start:
   move.l     a2,hs_om_highscore_data_pointer(a4)
   rts
 
+  endif                                                                         ; ifd USE_TRACKDISK
+
+  ifd        USE_DOS
+
+  lea.l      .lh_filename(pc),a0
+  move.l     a0,d5
+  move.l     other_mem_ptr(pc),d6
+  add.l      #hs_om_highscore_data,d6
+  move.l     #h000_unzipped_filesize,d7
+  bsr        dos_readfile
+  ; set hs_om_highscore_data_pointer(a4) depending on game-mode
+  move.l     d6,a2
+  move.b     c_om_gamemode(a4),d1
+  cmp.b      #GameModeSpeedRun,d1
+  beq.s      .lh_speed_run
+  ; step to infinite-mode-highscores
+  lea.l      hs_data_entry_sizeof*5(a2),a2
+.lh_speed_run:
+  move.l     a2,hs_om_highscore_data_pointer(a4)
+  rts
+.lh_filename:
+  dc.b       "H000.dat",0
+  even
+
+  endif                                                                         ; ifd USE_DOS
+
 .save_highscores:
+
+  ifd        USE_TRACKDISK
+
   tst.b      hs_om_save_on_exit(a4)
   beq.s      .sh_exit
 
@@ -126,6 +158,24 @@ hs_start:
   bsr        disk_end_io
 .sh_exit
   rts
+
+  endif                                                                         ; ifd USE_TRACKDISK
+
+  ifd        USE_DOS
+
+  tst.b      hs_om_save_on_exit(a4)
+  beq.s      .sh_exit
+
+  lea.l      .lh_filename(pc),a0
+  move.l     a0,d5
+  move.l     other_mem_ptr(pc),d6
+  add.l      #hs_om_highscore_data,d6
+  move.l     #h000_unzipped_filesize,d7
+  bsr        dos_writefile
+.sh_exit
+  rts
+
+  endif                                                                         ; ifd USE_DOS
 
 .init_vars:
   moveq.l    #0,d0

@@ -11,11 +11,14 @@
   move.l     #ig_om_sizeof,d5
   move.l     #mm_om_sizeof,d6
   move.l     #hs_om_sizeof,d7
-  endif                                                      ; TEST_MEM_SIZES
+  endif                                                      ; ifd TEST_MEM_SIZES
 
 main:
   bsr.s      .init_ram_and_file_list
   bsr        ctrl_save_orig_system_state
+  ifd        USE_DOS
+  bsr        dos_init
+  endif                                                      ; ifd USE_DOS
 
   SETPTRS
   clr.l      c_om_framecounter(a4)                           ; global framecounter for all parts
@@ -63,7 +66,12 @@ main:
   ;
 .exit_game:
   bsr        ctrl_restore_screen
-  ifd        DEBUG
+
+  ifd        USE_DOS
+  bsr        dos_cleanup
+  endif                                                      ; ifd USE_DOS
+
+  ifd        IS_STANDARD_EXE
   bsr        exec_free_mem
   moveq.l    #0,d0
   rts
@@ -71,14 +79,14 @@ main:
   bsr        exec_free_mem
   moveq.l    #1,d0
   rts
-  endif
-  ifd        RELEASE
+  else                                                       ; ifd IS_STANDARD_EXE
   bsr        exec_reboot
-  endif
+  endif                                                      ; else - ifd IS_STANDARD_EXE
 
 .init_ram_and_file_list:
 
-  ifd        DEBUG
+  ifd        IS_STANDARD_EXE
+
   ; allocate mem
   moveq.l    #MemScheme,d0
   move.l     #A100ChipMemSize,d1
@@ -87,6 +95,8 @@ main:
   tst.l      d0
   bne.s      .error
   bsr.s      .save_a4_and_a5
+
+  ifd        USE_TRACKDISK
   ; read file list from floppy drive
   move.l     disk_struct_ptr(pc),a4
   bsr        disk_begin_io
@@ -99,12 +109,15 @@ main:
   bsr        disk_end_io
   tst.l      d0
   bne.s      .error
-  endif
-  ifd        RELEASE
+  endif                                                      ; ifd USE_TRACKDISK
+
+  else                                                       ; ifd IS_STANDARD_EXE
+
   ; bootblock allocated memory, pointers in a4 + a5
   ; bootblock already read file list from floppy drive
   bsr.s      .save_a4_and_a5
-  endif
+
+  endif                                                      ; else - ifd IS_STANDARD_EXE
 
   rts
 
@@ -113,8 +126,10 @@ main:
   move.l     a5,(a0)
   lea.l      other_mem_ptr(pc),a0
   move.l     a4,(a0)
+  ifd        USE_TRACKDISK
   lea.l      disk_struct_ptr(pc),a0
   move.l     a4,(a0)
+  endif                                                      ; ifd USE_TRACKDISK
   rts
 
 ;
@@ -123,9 +138,13 @@ main:
   include    "files_index.i"
   include    "../common/src/system/bcd.asm"
   include    "../common/src/system/exec.asm"
-USE_TRACKDISK equ 1
   include    "../common/src/system/datafiles.asm"
+  ifd        USE_TRACKDISK
   include    "../common/src/system/disk.asm"
+  endif                                                      ; USE_TRACKDISK
+  ifd        USE_DOS
+  include    "../common/src/system/dos.asm"
+  endif                                                      ; USE_DOS
   include    "../common/src/system/control.asm"
   include    "../common/src/system/keyboard.asm"
   include    "../common/src/system/joystick.asm"

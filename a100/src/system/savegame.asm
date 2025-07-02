@@ -10,6 +10,9 @@ SAVEGAME_ASM equ 1
 ; out:
 ;   d0 - zero for success, other for error
 sg_load:
+
+  ifd        USE_TRACKDISK
+
   movem.l    d4/a4,-(sp)
 
   move.l     other_mem_ptr(pc),a4
@@ -27,6 +30,21 @@ sg_load:
   movem.l    (sp)+,d4/a4
   rts
 
+  endif                                    ; ifd USE_TRACKDISK
+
+  ifd        USE_DOS
+
+  movem.l    d5-d7/a0,-(sp)
+  lea.l      sg_filename(pc),a0
+  move.l     a0,d5
+  move.l     a2,d6
+  move.l     #s000_unzipped_filesize,d7
+  bsr        dos_readfile
+  movem.l    (sp)+,d5-d7/a0
+  rts
+
+  endif                                    ; ifd USE_DOS
+
 ; in:
 ;   a3 - pointer to struct sg_data*
 ; out:
@@ -41,6 +59,9 @@ sg_is_used:
 ; out:
 ;   d0 - zero for success, other for error
 sg_save:
+
+  ifd        USE_TRACKDISK
+
   move.l     other_mem_ptr(pc),a4
   bsr        disk_begin_io
   tst.l      d0
@@ -55,5 +76,26 @@ sg_save:
   bsr        disk_end_io
 .exit
   rts
+
+  endif                                    ; ifd USE_TRACKDISK
+
+  ifd        USE_DOS
+
+  movem.l    d5-d7/a0,-(sp)
+  lea.l      sg_filename(pc),a0
+  move.l     a0,d5
+  move.l     a2,d6
+  move.l     #s000_unzipped_filesize,d7
+  bsr        dos_writefile
+  ; ignore possible write error
+  moveq.l    #0,d0
+  movem.l    (sp)+,d5-d7/a0
+  rts
+
+sg_filename:
+  dc.b       "S000.dat",0
+  even
+
+  endif                                    ; ifd USE_DOS
 
   endif                                    ; ifnd SAVEGAME_ASM

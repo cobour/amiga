@@ -11,7 +11,8 @@
 					"-m68000",
 					"-Fhunk",
 					"-linedebug",
-					"-DDEBUG"
+					"-DDEBUG",
+					"-DIS_STANDARD_EXE"
 				]
 			},
 			"vlink": {

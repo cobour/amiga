@@ -18,6 +18,9 @@ targetFiles:
     sources:
       - filename: ../a100.asm
         id: A100
+        defines:
+          - RELEASE
+          - USE_TRACKDISK
 
   - filename: F000
     description: ingame_chip

@@ -80,6 +80,9 @@ mm_start:
   rts
 
 .load_highscores:
+
+  ifd         USE_TRACKDISK
+
   move.l      other_mem_ptr(pc),a4
   bsr         disk_begin_io
   tst.l       d0
@@ -97,6 +100,23 @@ mm_start:
   bsr         disk_end_io
 .lh_exit:
   rts
+
+  endif                                                                                                ; ifd USE_TRACKDISK
+
+  ifd         USE_DOS
+
+  lea.l       .lh_filename(pc),a0
+  move.l      a0,d5
+  move.l      other_mem_ptr(pc),d6
+  add.l       #mm_om_highscore_data,d6
+  move.l      #h000_unzipped_filesize,d7
+  bsr         dos_readfile
+  rts
+.lh_filename:
+  dc.b        "H000.dat",0
+  even
+
+  endif                                                                                                ; ifd USE_DOS
 
 .load_savegame:
   move.l      chip_mem_ptr(pc),a2
