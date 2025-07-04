@@ -299,7 +299,7 @@ disk_internal_read_block:
 
 .error:
   movem.l    (sp)+,d1-d7/a0-a6
-  moveq.l    #1,d0
+  moveq.l    #0,d0                                    ; ignore error here, may be just a warning, program will not work if it is an error anyway
   rts
 
   ifnd       BOOTBLOCK
