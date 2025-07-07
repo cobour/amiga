@@ -3,14 +3,85 @@ DISK_ASM equ 1
 
   include    "../common/src/system/disk.i"
 
-; reads file list from floppy disk
+; inits disk access
 ; in:
 ;   a3 - pointer to 512 byte read buffer (must be in chip mem)
 ;   a4 - pointer to disk-struct
 ; out:
 ;   d0 - zero for success, other for error
-disk_read_file_list:
+disk_init:
   movem.l    d1-d7/a0-a6,-(sp)
+
+  ; ***********************
+  ; **** USE_DOS       ****
+  ; ***********************
+
+  ifd        USE_DOS
+; open dos.library
+  move.l     ExecBase,a6
+  lea.l      dos_name(pc),a1
+  moveq.l    #0,d0
+  jsr        OpenLibrary(a6)
+  lea.l      dos_base(pc),a0
+  move.l     d0,(a0)
+  move.l     d0,a6
+
+  ifd        DEBUG
+; debug-launcher uses dh0: for executable, so we need to set current directory
+; lock dh0:
+  lea.l      dos_dh0_name(pc),a0
+  move.l     a0,d1
+  move.l     #AccessRead,d2
+  jsr        Lock(a6)
+  lea.l      dos_dh0_lock(pc),a0
+  move.l     d0,(a0)
+
+; set current directory to dh0:
+  move.l     d0,d1
+  jsr        CurrentDir(a6)
+  lea.l      dos_old_curdir(pc),a0
+  move.l     d0,(a0)
+  endif                                               ; ifd DEBUG
+  endif                                               ; ifd USE_DOS
+
+  ; ***********************
+  ; **** USE_TRACKDISK ****
+  ; ***********************
+
+  ifd        USE_TRACKDISK
+  bsr        disk_begin_io
+  bsr.s      .read_file_list
+  bsr        disk_end_io
+  endif                                               ; ifd USE_TRACKDISK
+
+  ; ***********************
+  ; **** USE_DISK_DMA  ****
+  ; ***********************
+
+  ifd        USE_DISK_DMA
+  fail       'TODO'
+  endif                                               ; ifd USE_DISK_DMA
+
+.success:
+  movem.l    (sp)+,d1-d7/a0-a6
+  moveq.l    #0,d0
+  rts
+
+.error:
+  movem.l    (sp)+,d1-d7/a0-a6
+  moveq.l    #1,d0
+  rts
+
+  ; ***********************
+  ; **** USE_TRACKDISK ****
+  ; ***********************
+  ; **** USE_DISK_DMA  ****
+  ; ***********************
+
+  ifnd       USE_DOS
+
+; scans disk for DAT-files
+.read_file_list:
   moveq.l    #DiskDriveNum,d5
   ; read rootblock
   move.l     #RbBlocknumber,d6                        ; number of block to read
@@ -43,14 +114,6 @@ disk_read_file_list:
   bne.s      .error
   bra.s      .read_file_header_blocks_loop
 .read_file_header_blocks_end:
-
-  movem.l    (sp)+,d1-d7/a0-a6
-  moveq.l    #0,d0
-  rts
-
-.error:
-  movem.l    (sp)+,d1-d7/a0-a6
-  moveq.l    #1,d0
   rts
 
 ; reads a file header block and adds metadata to file-list when dat-file
@@ -120,6 +183,42 @@ disk_read_file_list:
   moveq.l    #1,d0
   rts
 
+  endif                                               ; ifnd USE_DOS
+
+; cleans up at end of program
+disk_cleanup:
+
+  ; USE_DISK_DMA not necessary
+  ; USE_TRACKDISK not necessary
+
+  ; ***********************
+  ; **** USE_DOS       ****
+  ; ***********************
+
+  ifd        USE_DOS
+  movem.l    d0-d7/a0-a6,-(sp)
+
+  ifd        DEBUG
+; reset current directory
+  move.l     dos_base(pc),a6
+  move.l     dos_old_curdir(pc),d1
+  jsr        CurrentDir(a6)
+
+; unlock DH0:
+  move.l     dos_dh0_lock(pc),d1
+  jsr        UnLock(a6)
+  endif                                               ; ifd DEBUG
+
+; close dos.library
+  move.l     ExecBase,a6
+  move.l     dos_base(pc),a1
+  jsr        CloseLibrary(a6)
+
+  movem.l    (sp)+,d0-d7/a0-a6
+  endif                                               ; ifd USE_DOS
+
+  rts
+
 ; reads file from floppy disk
 ; in:
 ;   a2 - pointer to target where file data will be stored
@@ -130,6 +229,47 @@ disk_read_file_list:
 ;   d0 - zero for success, other for error
 disk_read_file:
   movem.l    d1-d7/a0-a6,-(sp)
+
+  ; ***********************
+  ; **** USE_DOS       ****
+  ; ***********************
+
+  ifd        USE_DOS
+; remap parameters
+  move.l     a2,d6
+  lea.l      dos_filename(pc),a0
+  move.l     d4,(a0)
+  move.l     a0,d1
+; open file for read
+  move.l     #ModeOldFile,d2
+  move.l     dos_base(pc),a6
+  jsr        Open(a6)
+  tst.l      d0
+  beq.s      .error
+
+  lea.l      dos_file_handle(pc),a0
+  move.l     d0,(a0)
+
+; read data from file
+  move.l     dos_file_handle(pc),d1
+  move.l     d6,d2
+  move.l     #880*1024,d3                             ; max possible file size
+  jsr        Read(a6)
+  tst.l      d0
+  blt.s      .error
+
+; close file
+  move.l     dos_file_handle(pc),d1
+  jsr        Close(a6)
+  endif                                               ; ifd USE_DOS
+
+  ; ***********************
+  ; **** USE_TRACKDISK ****
+  ; ***********************
+  ; **** USE_DISK_DMA  ****
+  ; ***********************
+
+  ifnd       USE_DOS
 
   ; find first block of file
   lea.l      disk_dat_files(a4),a1
@@ -162,6 +302,8 @@ disk_read_file:
   move.l     FdbNextDataBlock(a3),d6
   bra.s      .read_file_data_loop
 
+  endif                                               ; ifnd USE_DOS
+
 .success:
   movem.l    (sp)+,d1-d7/a0-a6
   moveq.l    #0,d0
@@ -172,6 +314,7 @@ disk_read_file:
   moveq.l    #1,d0
   rts
 
+
 ; initializes disk io
 ; in:
 ;   a4 - pointer to disk-struct
@@ -179,6 +322,14 @@ disk_read_file:
 ;   d0 - zero for success, other for error
 disk_begin_io:
   movem.l    d1-d7/a0-a6,-(sp)
+
+  ; USE_DOS not necessary
+
+  ; ***********************
+  ; **** USE_TRACKDISK ****
+  ; ***********************
+
+  ifd        USE_TRACKDISK
 
   ; AllocSignal
   move.l     ExecBaseD,a6
@@ -218,6 +369,20 @@ disk_begin_io:
   jsr        OpenDevice(a6)
   tst.l      d0
   bne.s      .error
+  bra.s      .success
+.trackdisk_device_name:
+  dc.b       "trackdisk.device",0
+  even
+
+  endif                                               ; ifd USE_TRACKDISK
+
+  ; ***********************
+  ; **** USE_DISK_DMA  ****
+  ; ***********************
+
+  ifd        USE_DISK_DMA
+  fail       'TODO'
+  endif                                               ; ifd USE_DISK_DMA
 
 .success:
   movem.l    (sp)+,d1-d7/a0-a6
@@ -229,9 +394,6 @@ disk_begin_io:
   moveq.l    #1,d0
   rts
 
-.trackdisk_device_name:
-  dc.b       "trackdisk.device",0
-  even
 
 ; cleans up after disk io
 ; in:
@@ -240,6 +402,15 @@ disk_begin_io:
 ;   d0 - zero for success, other for error
 disk_end_io:
   movem.l    d1-d7/a0-a6,-(sp)
+
+  ; USE_DOS not necessary
+
+  ; ***********************
+  ; **** USE_TRACKDISK ****
+  ; ***********************
+
+  ifd        USE_TRACKDISK
+
   move.l     ExecBaseD,a6
 
   ; stop floppy drive motors
@@ -257,6 +428,16 @@ disk_end_io:
   ; CloseDevice
   lea.l      disk_io_std_req(a4),a1
   jsr        CloseDevice(a6)
+
+  endif                                               ; ifd USE_TRACKDISK
+
+  ; ***********************
+  ; **** USE_DISK_DMA  ****
+  ; ***********************
+
+  ifd        USE_DISK_DMA
+  fail       'TODO'
+  endif                                               ; ifd USE_DISK_DMA
 
 .success:
   movem.l    (sp)+,d1-d7/a0-a6
@@ -278,6 +459,15 @@ disk_end_io:
 ;   d0 - zero for success, other for error
 disk_internal_read_block:
   movem.l    d1-d7/a0-a6,-(sp)
+
+  ; USE_DOS not necessary
+
+  ; ***********************
+  ; **** USE_TRACKDISK ****
+  ; ***********************
+
+  ifd        USE_TRACKDISK
+
   move.l     ExecBaseD,a6
 
   ; DoIO - read block
@@ -291,6 +481,16 @@ disk_internal_read_block:
   jsr        DoIO(a6)                                 ; call DoIO
   tst.l      d0
   bne.s      .error
+
+  endif                                               ; ifd USE_TRACKDISK
+
+  ; ***********************
+  ; **** USE_DISK_DMA  ****
+  ; ***********************
+
+  ifd        USE_DISK_DMA
+  fail       'TODO'
+  endif                                               ; ifd USE_DISK_DMA
 
 .success:
   movem.l    (sp)+,d1-d7/a0-a6
@@ -315,6 +515,48 @@ disk_internal_read_block:
 ;   d0 - zero for success, other for error
 disk_write_file:
   movem.l    d1-d7/a0-a6,-(sp)
+
+  ; ***********************
+  ; **** USE_DOS       ****
+  ; ***********************
+
+  ifd        USE_DOS
+
+; remap parameter
+  move.l     a2,d6
+  lea.l      dos_filename(pc),a0
+  move.l     d4,(a0)
+  move.l     a0,d1
+
+; open file for write
+  move.l     #ModeNewFile,d2
+  move.l     dos_base(pc),a6
+  jsr        Open(a6)
+  tst.l      d0
+  beq.s      .error
+
+  lea.l      dos_file_handle(pc),a0
+  move.l     d0,(a0)
+
+; write data to file
+  move.l     dos_file_handle(pc),d1
+  move.l     d6,d2
+  move.l     d7,d3
+  jsr        Write(a6)
+  tst.l      d0
+  blt.s      .error
+
+; close file
+  move.l     dos_file_handle(pc),d1
+  jsr        Close(a6)
+
+  endif                                               ; ifd USE_DOS
+
+  ; ***********************
+  ; **** USE_TRACKDISK ****
+  ; ***********************
+
+  ifd        USE_TRACKDISK
 
   ; check for write protection on disk
   move.l     ExecBaseD,a6
@@ -367,6 +609,16 @@ disk_write_file:
   tst.l      d0
   bne.s      .error
 
+  endif                                               ; ifd USE_TRACKDISK
+
+  ; ***********************
+  ; **** USE_DISK_DMA  ****
+  ; ***********************
+
+  ifd        USE_DISK_DMA
+  fail       'TODO'
+  endif                                               ; ifd USE_DISK_DMA
+
 .success:
   movem.l    (sp)+,d1-d7/a0-a6
   moveq.l    #0,d0
@@ -378,5 +630,33 @@ disk_write_file:
   rts
 
   endif                                               ; ifnd BOOTBLOCK
+
+  ; ***********************
+  ; **** USE_DOS       ****
+  ; ***********************
+
+  ifd        USE_DOS
+dos_name:         
+  dc.b       "dos.library",0
+  even
+dos_base:         
+  dc.l       0
+dos_file_handle:
+  dc.l       0
+dos_filename:
+  dc.b       0,0,0,0                                  ; space for filename before the dot
+  dc.b       ".dat",0
+  even
+
+  ifd        DEBUG
+dos_dh0_name:
+  dc.b       "dh0:",0
+  even
+dos_dh0_lock:
+  dc.l       0
+dos_old_curdir:
+  dc.l       0
+  endif                                               ; ifd DEBUG
+  endif                                               ; ifd USE_DOS
 
   endif                                               ; ifnd DISK_ASM

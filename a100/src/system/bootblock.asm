@@ -1,11 +1,12 @@
 
 ; DO NOT include this file anywhere!
 
-; define profile because adf-generator-tool does not support additional assembler options (e.g. -DRELEASE)
-RELEASE   equ 1
+; define profiles because adf-generator-tool does not support additional assembler options (e.g. -DRELEASE)
+RELEASE       equ 1
+USE_TRACKDISK equ 1
 
 ; define BOOTBLOCK so included sources can exclude code when running from bootblock
-BOOTBLOCK equ 1
+BOOTBLOCK     equ 1
 
   dc.b       "DOS",0                                        ; disk type
   dc.l       0                                              ; checksum
@@ -25,14 +26,14 @@ alloc:
   tst.l      d0
   bne.s      error
 
-  ; begin disk io
-  bsr        disk_begin_io
-
-  ; read file list
+  ; disk init (inernally read file list)
   move.l     a5,a3
-  bsr        disk_read_file_list
+  bsr        disk_init
   tst.l      d0
   bne.s      error
+
+  ; begin disk io
+  bsr        disk_begin_io
 
   ; calc memory location for code
   move.l     a4,a2

@@ -20,8 +20,6 @@ DATAFILES_ASM equ 1
 datafiles_load_and_unzip:
   movem.l    d3-d4/d7/a2-a6,-(sp)
 
-  ifd        USE_TRACKDISK
-
   ; init
   bsr        disk_begin_io
   tst.l      d0
@@ -36,29 +34,10 @@ datafiles_load_and_unzip:
   tst.l      d0
   bne.s      .error
 
-  endif                                                            ; ifd USE_TRACKDISK
-
-  ifd        USE_DOS
-
-  ; load other-mem file
-  move.l     d5,d4
-  lea.l      .filename(pc),a2
-  move.l     d1,(a2)
-  move.l     a2,d5
-  move.l     #880*1024,d7                                          ; max possible size
-  bsr        dos_readfile
-  move.l     d4,d5
-  tst.l      d0
-  bne.s      .error
-
-  endif                                                            ; ifd USE_DOS
-
   ; unzip other-mem file
   move.l     a0,a4
   move.l     d6,a5
   bsr        inflate
-
-  ifd        USE_TRACKDISK
 
   ; load chip-mem file
   move.l     d2,d4
@@ -69,37 +48,16 @@ datafiles_load_and_unzip:
   tst.l      d0
   bne.s      .error
 
-  endif                                                            ; ifd USE_TRACKDISK
-
-  ifd        USE_DOS
-
-  ; load chip-mem file
-  move.l     d5,d4
-  lea.l      .filename(pc),a2
-  move.l     d2,(a2)
-  move.l     a2,d5
-  move.l     #880*1024,d7                                          ; max possible size
-  bsr        dos_readfile
-  move.l     d4,d5
-  tst.l      d0
-  bne.s      .error
-
-  endif                                                            ; ifd USE_DOS
-
   ; unzip chip-mem file
   move.l     a1,a4
   move.l     d6,a5
   bsr        inflate
-
-  ifd        USE_TRACKDISK
 
   ; cleanup
   move.l     disk_struct_ptr(pc),a4
   bsr        disk_end_io
   tst.l      d0
   bne.s      .error
-
-  endif                                                            ; ifd USE_TRACKDISK
 
   ; set pointers
   bsr.s      .datafiles_set_pointers_in_index
@@ -115,16 +73,6 @@ datafiles_load_and_unzip:
   movem.l    (sp)+,d3-d4/d7/a2-a6
   moveq.l    #-1,d0
   rts
-
-  ifd        USE_DOS
-
-.filename:
-  dc.b       "    "                                                ; filename part before dot
-  dc.b       ".dat"
-  dc.b       0
-  even
-
-  endif                                                            ; ifd USE_DOS
 
 ; updates the offset-fields in index entries to the absolute pointers to the raw data of each entry
 ; called after loading and unzipping the files
@@ -223,11 +171,7 @@ datafiles_get_pointer:
 datafiles_index:
   dc.l       0
 
-  ifd        USE_TRACKDISK
-
 disk_struct_ptr:
   dc.l       0
-
-  endif                                                            ; ifd USE_TRACKDISK
 
   endif                                                            ; ifnd DATAFILES_ASM

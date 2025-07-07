@@ -47,7 +47,7 @@
 ;       Data-Tool: level as source // contains embedded tmx-file and iff-file (more later) => better: level references tmx, iff... via ID
 
 main:
-
+ 
   ifd        DEBUG
   ; allocate mem
   moveq.l    #1,d0
@@ -60,16 +60,10 @@ main:
   move.l     a4,(a0)
   lea.l      disk_struct_ptr(pc),a0
   move.l     a4,(a0)
-  ; read file list from floppy drive
+  ; init disk-io
   move.l     other_mem_ptr(pc),a4
-  bsr        disk_begin_io
-  tst.l      d0
-  bne.s      .error
   move.l     chip_mem_ptr(pc),a3                      ; TODO: inside framebuffer
-  bsr        disk_read_file_list
-  tst.l      d0
-  bne.s      .error
-  bsr        disk_end_io
+  bsr        disk_init
   tst.l      d0
   bne.s      .error
   endif
@@ -93,7 +87,7 @@ main:
   move.l     chip_mem_ptr(pc),a5
   bsr        ig_start
   bsr        ctrl_free_system
-
+  bsr        disk_cleanup
   bsr        ctrl_restore_screen
 
   ifd        DEBUG

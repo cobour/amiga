@@ -14,12 +14,8 @@
   endif                                                      ; ifd TEST_MEM_SIZES
 
 main:
-  bsr.s      .init_ram_and_file_list
+  bsr.s      .init_ram_and_disk
   bsr        ctrl_save_orig_system_state
-  ifd        USE_DOS
-  bsr        dos_init
-  endif                                                      ; ifd USE_DOS
-
   SETPTRS
   clr.l      c_om_framecounter(a4)                           ; global framecounter for all parts
   move.b     #NextPartMainmenu,c_om_next_part(a4)
@@ -68,7 +64,7 @@ main:
   bsr        ctrl_restore_screen
 
   ifd        USE_DOS
-  bsr        dos_cleanup
+  bsr        disk_cleanup
   endif                                                      ; ifd USE_DOS
 
   ifd        IS_STANDARD_EXE
@@ -83,7 +79,7 @@ main:
   bsr        exec_reboot
   endif                                                      ; else - ifd IS_STANDARD_EXE
 
-.init_ram_and_file_list:
+.init_ram_and_disk:
 
   ifd        IS_STANDARD_EXE
 
@@ -96,25 +92,14 @@ main:
   bne.s      .error
   bsr.s      .save_a4_and_a5
 
-  ifd        USE_TRACKDISK
-  ; read file list from floppy drive
-  move.l     disk_struct_ptr(pc),a4
-  bsr        disk_begin_io
-  tst.l      d0
-  bne.s      .error
+  SETPTRS
   move.l     chip_mem_ptr(pc),a3                             ; at this point in program flow there is nothing in chip mem area, so just use its beginning
-  bsr        disk_read_file_list
-  tst.l      d0
-  bne.s      .error
-  bsr        disk_end_io
-  tst.l      d0
-  bne.s      .error
-  endif                                                      ; ifd USE_TRACKDISK
+  bsr        disk_init
 
   else                                                       ; ifd IS_STANDARD_EXE
 
   ; bootblock allocated memory, pointers in a4 + a5
-  ; bootblock already read file list from floppy drive
+  ; bootblock already called disk_init
   bsr.s      .save_a4_and_a5
 
   endif                                                      ; else - ifd IS_STANDARD_EXE
@@ -139,12 +124,7 @@ main:
   include    "../common/src/system/bcd.asm"
   include    "../common/src/system/exec.asm"
   include    "../common/src/system/datafiles.asm"
-  ifd        USE_TRACKDISK
   include    "../common/src/system/disk.asm"
-  endif                                                      ; USE_TRACKDISK
-  ifd        USE_DOS
-  include    "../common/src/system/dos.asm"
-  endif                                                      ; USE_DOS
   include    "../common/src/system/control.asm"
   include    "../common/src/system/keyboard.asm"
   include    "../common/src/system/joystick.asm"

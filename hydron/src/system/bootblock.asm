@@ -2,10 +2,11 @@
 ; DO NOT include this file anywhere!
 
 ; define profile because adf-generator-tool does not support additional assembler options (e.g. -DRELEASE)
-RELEASE   equ 1
+RELEASE       equ 1
+USE_TRACKDISK equ 1
 
 ; to prevent unnecessary code from being included
-BOOTBLOCK equ 1
+BOOTBLOCK     equ 1
 
   dc.b       "DOS",0                                    ; disk type
   dc.l       0                                          ; checksum
@@ -24,26 +25,20 @@ alloc:
   bne.s      error
 
   ; begin disk io
-  bsr        disk_begin_io
-
-  ; read file list
   move.l     a5,a3
-  bsr        disk_read_file_list
-  tst.l      d0
-  bne.s      error
+  bsr        disk_init
 
   ; calc memory location for code
   move.l     a4,a2
   add.l      #OtherMemSize-c000_unzipped_filesize,a2
 
   ; read code file
+  bsr        disk_begin_io
   move.l     a5,a3
   move.l     #fn_main_code_file,d4
   bsr        disk_read_file
   tst.l      d0
   bne.s      error
-
-  ; end disk io
   bsr        disk_end_io
 
   ; jump to loaded code

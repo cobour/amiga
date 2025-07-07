@@ -16,7 +16,7 @@
             "emulatorArgs": [
                 "--chip_memory=1024", // 1024 because AmigaDOS is in mem
                 "--slow_memory=1024", // 1024 because AmigaDOS is in mem
-                //"--kickstart_file=path/to/kick.rom",
+                "--kickstart_file=/Users/frank/Development/projects/kickroms/kick31.rom",
                 "--hard_drive_0=${workspaceFolder}/uae/dh0",
                 "--floppy_drive_1=${workspaceFolder}/dist/Hydron.adf",
                 "--automatic_input_grab=0",
@@ -38,6 +38,7 @@
             "emulatorArgs": [
                 "--chip_memory=512",
                 "--slow_memory=512",
+                "--kickstart_file=/Users/frank/Development/projects/kickroms/kick31.rom",
                 "--floppy_drive_0=${workspaceFolder}/dist/Hydron.adf",
                 "--joystick_port_1=keyboard",
                 "--amiga_model=A500",
