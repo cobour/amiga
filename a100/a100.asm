@@ -76,7 +76,10 @@ main:
   moveq.l    #1,d0
   rts
   else                                                       ; ifd IS_STANDARD_EXE
-  bsr        exec_reboot
+  ;bsr        exec_reboot
+.loop_forever:
+  nop
+  bra.s      .loop_forever
   endif                                                      ; else - ifd IS_STANDARD_EXE
 
 .init_ram_and_disk:
