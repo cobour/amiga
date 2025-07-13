@@ -242,6 +242,7 @@ mp_process_events:
   tst.w       (a0)
   bne.s       .pe_update_timer_done
   moveq.l     #EventTimer,d1
+  moveq.l     #0,d2
   bsr         ev_add_event_to_queue
 .pe_update_timer_done:
 

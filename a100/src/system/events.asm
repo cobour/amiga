@@ -25,6 +25,7 @@ ev_check:
   cmp.b      #$41,d0                              ; Backspace
   bne.s      .ck0
   moveq.l    #EventUnselect,d1
+  moveq.l    #0,d2
   bsr        ev_add_event_to_queue
   bra.s      .check_keyboard
 .ck0:
@@ -32,6 +33,7 @@ ev_check:
   cmp.b      #$45,d0                              ; Esc
   bne.s      .ck1
   moveq.l    #EventUnselect,d1
+  moveq.l    #0,d2
   bsr        ev_add_event_to_queue
   bra.s      .check_keyboard
 .ck1:
@@ -39,6 +41,7 @@ ev_check:
   cmp.b      #$46,d0                              ; Del
   bne.s      .ck2
   moveq.l    #EventUnselect,d1
+  moveq.l    #0,d2
   bsr        ev_add_event_to_queue
   bra.s      .check_keyboard
 .ck2:
@@ -46,6 +49,7 @@ ev_check:
   cmp.b      #$43,d0                              ; Enter
   bne.s      .ck3
   moveq.l    #EventSelect,d1
+  moveq.l    #0,d2
   bsr        ev_add_event_to_queue
   bra.s      .check_keyboard
 .ck3:
@@ -53,6 +57,7 @@ ev_check:
   cmp.b      #$44,d0                              ; Return
   bne.s      .ck4
   moveq.l    #EventSelect,d1
+  moveq.l    #0,d2
   bsr        ev_add_event_to_queue
   bra.s      .check_keyboard
 .ck4:
@@ -60,6 +65,7 @@ ev_check:
   cmp.b      #$4c,d0                              ; Cursor Up
   bne.s      .ck5
   moveq.l    #EventUp,d1
+  moveq.l    #1,d2
   bsr        ev_add_event_to_queue
   bra.s      .check_keyboard
 .ck5:
@@ -67,6 +73,7 @@ ev_check:
   cmp.b      #$4d,d0                              ; Cursor Down
   bne.s      .ck6
   moveq.l    #EventDown,d1
+  moveq.l    #1,d2
   bsr        ev_add_event_to_queue
   bra.s      .check_keyboard
 .ck6:
@@ -74,13 +81,15 @@ ev_check:
   cmp.b      #$4e,d0                              ; Cursor Right
   bne.s      .ck7
   moveq.l    #EventRight,d1
+  moveq.l    #1,d2
   bsr        ev_add_event_to_queue
-  bra.s      .check_keyboard
+  bra        .check_keyboard
 .ck7:
 
   cmp.b      #$4f,d0                              ; Cursor Left
   bne.s      .ck8
   moveq.l    #EventLeft,d1
+  moveq.l    #1,d2
   bsr        ev_add_event_to_queue
   bra        .check_keyboard
 .ck8:
@@ -88,6 +97,7 @@ ev_check:
   cmp.b      #$40,d0                              ; Space
   bne.s      .ck8_first_row
   move.b     d0,d1
+  moveq.l    #1,d2
   bsr        ev_add_event_to_queue
   bra        .check_keyboard
 
@@ -97,6 +107,7 @@ ev_check:
   cmp.b      #$19,d0
   bgt.s      .ck8_second_row
   move.b     d0,d1
+  moveq.l    #1,d2
   bsr        ev_add_event_to_queue
   bra        .check_keyboard
 
@@ -106,6 +117,7 @@ ev_check:
   cmp.b      #$28,d0
   bgt.s      .ck8_third_row
   move.b     d0,d1
+  moveq.l    #1,d2
   bsr        ev_add_event_to_queue
   bra        .check_keyboard
 
@@ -115,6 +127,7 @@ ev_check:
   cmp.b      #$37,d0
   bgt.s      .ck9
   move.b     d0,d1
+  moveq.l    #1,d2
   bsr        ev_add_event_to_queue
   bra        .check_keyboard
 
@@ -133,30 +146,35 @@ ev_check:
   btst       #JsUp,d0
   beq.s      .cj0
   moveq.l    #EventUp,d1
+  moveq.l    #0,d2
   bsr        ev_add_event_to_queue
 .cj0:
 
   btst       #JsDown,d0
   beq.s      .cj1
   moveq.l    #EventDown,d1
+  moveq.l    #0,d2
   bsr        ev_add_event_to_queue
 .cj1:
 
   btst       #JsLeft,d0
   beq.s      .cj2
   moveq.l    #EventLeft,d1
+  moveq.l    #0,d2
   bsr        ev_add_event_to_queue
 .cj2:
 
   btst       #JsRight,d0
   beq.s      .cj3
   moveq.l    #EventRight,d1
+  moveq.l    #0,d2
   bsr        ev_add_event_to_queue
 .cj3:
 
   btst       #JsFire,d0
   beq.s      .cj4
   moveq.l    #EventSelect,d1
+  moveq.l    #0,d2
   bsr        ev_add_event_to_queue
 .cj4:
 
@@ -165,12 +183,13 @@ ev_check:
 
 ; in:
 ;   d1 - Event-ID (see events.i)
+;   d2 - zero = delay check, non-zero = no delay-check
 ev_add_event_to_queue:
   movem.l    d2-d3/a1,-(sp)
 
-  ; chars and space without delay 
-  cmp.b      #$10,d1
-  bge.s      .new_event
+  ; do delay-check?
+  tst.b      d2
+  bne.s      .new_event
 
   ; check if event may be issued again
   move.l     d1,d2
