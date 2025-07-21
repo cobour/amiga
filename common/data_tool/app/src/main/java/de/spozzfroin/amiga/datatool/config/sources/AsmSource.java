@@ -4,6 +4,9 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
@@ -49,7 +52,7 @@ class AsmSource extends AbstractSource {
 	public void readAndConvertSourceData(Config config) throws Exception {
 		LOG.print(String.format("assembling \"%s\"", this.getFilename()));
 		var objectFilename = this.assemble(config);
-		this.copyCodeHunk(config, objectFilename);
+		this.copyCode(config, objectFilename);
 	}
 
 	@Override
@@ -79,7 +82,7 @@ class AsmSource extends AbstractSource {
 		var objectFilename = sourceFilename.substring(sourceFilename.lastIndexOf("/") + 1).replaceFirst(".asm", ".o");
 		var commands = new ArrayList<String>();
 		commands.addAll(List.of(config.getVasm(), sourceFilename, "-o", config.getTempFolder() + objectFilename,
-				"-m68000", "-Fhunk"));
+				"-m68000", "-Fbin"));
 		commands.addAll(this.defines);
 		var process = new ProcessBuilder(commands).directory(new File(config.getAsmWorkingFolder())).inheritIO()
 				.start();
@@ -95,19 +98,12 @@ class AsmSource extends AbstractSource {
 		return objectFilename;
 	}
 
-	private void copyCodeHunk(Config config, String objectFilename) throws IOException {
+	private void copyCode(Config config, String objectFilename) throws IOException {
+		Path srcPath = Paths.get(config.getTempFolder() + objectFilename);
+		long filesize = Files.size(srcPath);
+		this.rawdata = new byte[(int) filesize];
 		try (FileInputStream fis = new FileInputStream(config.getTempFolder() + objectFilename)) {
-			do {
-				var hunkID = Integer.toHexString(AsmSource.BINARY_VALUE_CONVERTER.readLong(fis));
-				var hunkLength = AsmSource.BINARY_VALUE_CONVERTER.readLong(fis) * 4; // length in longwords
-				if (hunkID.equals("3e9")) { // code hunk
-					this.bin_length = hunkLength;
-					this.rawdata = new byte[this.bin_length];
-					fis.read(this.rawdata);
-				} else {
-					fis.skip(hunkLength);
-				}
-			} while (this.rawdata == null);
+			fis.read(this.rawdata);
 		}
 	}
 }
