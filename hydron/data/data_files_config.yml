@@ -2,22 +2,36 @@
 sourceFolder: ./
 tempFolder: ./converted
 targetFolder: ../uae/dh0
+diskimageFolder: ../dist
 # asmWorkingFolder is relative to amiga/common/data-tool/app folder
-asmWorkingFolder: ../../../a100
+asmWorkingFolder: ../../../hydron
 # index filenames are relative to folder of this config file
 indexFilename: ../files_index.i
 asmIndexFilename: ../asm_files_index.i
 # filenames of source files are relative to sourceFolder
 targetFiles:
+
+  - filename: BOBL
+    description: bootblock_code_file
+    memoryType: OTHER
+    doZip: false
+    codeFile: true
+    bootblockFile: true
+    sources:
+      - filename: ../src/system/bootblock.asm
+        id: BOBL
+        isBootblock: true
+
   - filename: C000
     description: main_code_file
     memoryType: OTHER
     doZip: false
     codeFile: true
     sources:
-      - filename: ../hydron.asm
+      - filename: ../new_hydron.asm
         id: HYDR
         defines:
+          - BOOTBLOCK
           - RELEASE
           - USE_TRACKDISK
 
@@ -53,3 +67,12 @@ targetFiles:
         colorsOnly: true
       - filename: music/revenge_of_earth.mod
         id: MP01
+
+diskimageFiles:
+  - filename: Hydron.adf
+    diskname: HYDR
+    bootblock: BOBL
+    datafiles:
+      - C000
+      - F000
+      - F001

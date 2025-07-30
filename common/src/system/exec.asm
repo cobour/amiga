@@ -110,7 +110,8 @@ exec_alloc_mem:
   movem.l    (sp)+,d1-d7/a0-a3/a6
   rts
 
-  ifd        IS_STANDARD_EXE
+  ifd        STANDARD_EXE
+
 ; Frees allocated memory blocks
 exec_free_mem:
   movem.l    d0-d7/a0-a6,-(sp)
@@ -136,7 +137,9 @@ exec_free_mem:
   movem.l    (sp)+,d0-d7/a0-a6
   rts
 
-  else                                          ; ifd IS_STANDARD_EXE
+  endif                                         ; ifd STANDARD_EXE
+
+  ifd        BOOTBLOCK
 
 ; Performs a reset
 exec_reboot:
@@ -157,12 +160,12 @@ exec_reboot:
   reset
   jmp        (a0)
 
-  endif                                         ; else - ifd IS_STANDARD_EXE
+  endif                                         ; ifd BOOTBLOCK
+
 chip_mem_ptr:
   dc.l       0
 other_mem_ptr:
   dc.l       0
-
 chip_mem_size:
   dc.l       0
 other_mem_size:

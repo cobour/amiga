@@ -36,6 +36,13 @@ class TargetFileFactory {
 			targetFile.setCodeFile(false);
 		}
 		//
+		if (parameter.containsKey("bootblockFile")) {
+			var bootblockFile = ((Boolean) parameter.get("bootblockFile")).booleanValue();
+			targetFile.setBootblockFile(bootblockFile);
+		} else {
+			targetFile.setBootblockFile(false);
+		}
+		//
 		if (parameter.containsKey("relatedFile")) {
 			var relatedFileName = (String) parameter.get("relatedFile");
 			TargetFile relatedFile = config.getTargetFiles().stream()

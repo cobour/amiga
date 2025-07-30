@@ -169,45 +169,8 @@ VBLANK_MUSIC    equ 0
 ; need at least 550.
 DMADELAY        equ 576                                                                         ; was 496
 
-
-; Custom chip registers
-CUSTOM          equ $dff000
-;INTREQR		equ	$01e
-;INTENAR		equ	$01c
-;DMACON		equ	$096
-;INTENA		equ	$09a
-;INTREQ		equ	$09c
-AUD0LC          equ $0a0
-AUD0LEN         equ $0a4
-AUD0VOL         equ $0a8
-AUD1LC          equ $0b0
-AUD1LEN         equ $0b4
-AUD1VOL         equ $0b8
-AUD2LC          equ $0c0
-AUD2LEN         equ $0c4
-AUD2VOL         equ $0c8
-AUD3LC          equ $0d0
-AUD3LEN         equ $0d4
-AUD3VOL         equ $0d8
-
-; Audio channel registers
-AUDLC           equ 0
-AUDLEN          equ 4
-AUDPER          equ 6
-AUDVOL          equ 8
-
-; CIA registers
-CIAA            equ $bfe001
-CIAB            equ $bfd000
-CIAPRA          equ $000
-CIATALO         equ $400
-CIATAHI         equ $500
-CIATBLO         equ $600
-CIATBHI         equ $700
-CIAICR          equ $d00
-CIACRA          equ $e00
-CIACRB          equ $f00
-
+                  include    "../common/src/system/custom.i"
+                  include    "../common/src/system/cia.i"
 
 ; Sound effects structure, passed into _mt_playfx
                   rsreset
@@ -3430,5 +3393,3 @@ _mt_SongEnd:
                   endc                                                                          ; !MINIMAL
 
                   endc                                                                          ; SDATA/!SDATA
-
-                  end

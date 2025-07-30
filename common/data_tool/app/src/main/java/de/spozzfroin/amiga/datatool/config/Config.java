@@ -5,10 +5,12 @@ import java.util.List;
 public class Config {
 
 	private List<TargetFile> targetFiles;
+	private List<DiskimageFile> diskimageFiles;
 	private String vasm;
 	private String sourceFolder;
 	private String tempFolder;
 	private String targetFolder;
+	private String diskimageFolder;
 	private String asmWorkingFolder;
 	private String indexFilename;
 	private String asmIndexFilename;
@@ -82,5 +84,22 @@ public class Config {
 
 	void setBaseFolder(String theBaseFolder) {
 		this.baseFolder = theBaseFolder.endsWith("/") ? theBaseFolder : theBaseFolder + "/";
+	}
+
+	public List<DiskimageFile> getDiskimageFiles() {
+		return this.diskimageFiles;
+	}
+
+	void setDiskimageFiles(List<DiskimageFile> diskimageFiles) {
+		this.diskimageFiles = diskimageFiles;
+	}
+
+	String getDiskimageFolder() {
+		return this.baseFolder
+				+ (this.diskimageFolder.endsWith("/") ? this.diskimageFolder : this.diskimageFolder + "/");
+	}
+
+	void setDiskimageFolder(String diskimageFolder) {
+		this.diskimageFolder = diskimageFolder;
 	}
 }

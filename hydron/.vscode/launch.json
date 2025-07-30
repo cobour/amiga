@@ -7,7 +7,7 @@
         {
             "type": "amiga-assembly",
             "request": "launch",
-            "name": "Run DEBUG",
+            "name": "Run WHDLoad Debug",
             "stopOnEntry": false,
             "trace": false,
             "program": "${workspaceFolder}/uae/dh0/Hydron",
@@ -16,6 +16,61 @@
             "emulatorArgs": [
                 "--chip_memory=1024", // 1024 because AmigaDOS is in mem
                 "--slow_memory=1024", // 1024 because AmigaDOS is in mem
+                //"--slow_memory=0",
+                "--fast_memory=0",
+                //"--kickstart_file=/Users/frank/Development/projects/kickroms/kick13.rom",
+                "--kickstart_file=/Users/frank/Development/projects/kickroms/kick31.rom",
+                "--hard_drive_0=${workspaceFolder}/uae/dh0",
+                "--automatic_input_grab=0",
+                "--joystick_port_1=keyboard",
+                "--amiga_model=A500",
+                "--automatic_input_grab=0",
+                "--video_sync=0",
+                "--fullscreen=0"
+            ],
+            "preLaunchTask": "Build WHDLoad Debug"
+        },
+        {
+            "type": "amiga-assembly",
+            "request": "launch",
+            "name": "Run WHDLoad Release",
+            "stopOnEntry": false,
+            "trace": false,
+            "program": "${workspaceFolder}/uae/dh0/Hydron",
+            "remoteProgram": "SYS:Hydron",
+            "emulatorType": "fs-uae",
+            "emulatorArgs": [
+                "--chip_memory=1024", // 1024 because AmigaDOS is in mem
+                "--slow_memory=1024", // 1024 because AmigaDOS is in mem
+                //"--slow_memory=0",
+                "--fast_memory=0",
+                //"--kickstart_file=/Users/frank/Development/projects/kickroms/kick13.rom",
+                "--kickstart_file=/Users/frank/Development/projects/kickroms/kick31.rom",
+                "--hard_drive_0=${workspaceFolder}/uae/dh0",
+                "--automatic_input_grab=0",
+                "--joystick_port_1=keyboard",
+                "--amiga_model=A500",
+                "--automatic_input_grab=0",
+                "--video_sync=0",
+                "--fullscreen=0"
+            ],
+            "preLaunchTask": "Build WHDLoad Release"
+        },
+        {
+            "type": "amiga-assembly",
+            "request": "launch",
+            "name": "Run Floppy Loader Debug",
+            "stopOnEntry": false,
+            "trace": false,
+            "program": "${workspaceFolder}/uae/dh0/Hydron",
+            "remoteProgram": "SYS:Hydron",
+            "emulatorType": "fs-uae",
+            "emulatorArgs": [
+                "--chip_memory=1024", // 1024 because AmigaDOS is in mem
+                "--slow_memory=1024", // 1024 because AmigaDOS is in mem
+                //"--slow_memory=0",
+                "--fast_memory=0",
+                //"--kickstart_file=/Users/frank/Development/projects/kickroms/kick13.rom",
                 "--kickstart_file=/Users/frank/Development/projects/kickroms/kick31.rom",
                 "--hard_drive_0=${workspaceFolder}/uae/dh0",
                 "--floppy_drive_1=${workspaceFolder}/dist/Hydron.adf",
@@ -26,18 +81,46 @@
                 "--video_sync=0",
                 "--fullscreen=0"
             ],
-            "preLaunchTask": "Build DEBUG"
+            "preLaunchTask": "Build Floppy Loader Debug"
         },
         {
             "type": "amiga-assembly",
             "request": "launch",
-            "name": "Run RELEASE",
+            "name": "Run Floppy Debug",
+            "stopOnEntry": false,
+            "trace": false,
+            "program": "${workspaceFolder}/uae/dh0/Hydron",
+            "remoteProgram": "SYS:Hydron",
+            "emulatorType": "fs-uae",
+            "emulatorArgs": [
+                "--chip_memory=1024", // 1024 because AmigaDOS is in mem
+                "--slow_memory=1024", // 1024 because AmigaDOS is in mem
+                //"--slow_memory=0",
+                "--fast_memory=0",
+                //"--kickstart_file=/Users/frank/Development/projects/kickroms/kick13.rom",
+                "--kickstart_file=/Users/frank/Development/projects/kickroms/kick31.rom",
+                "--hard_drive_0=${workspaceFolder}/uae/dh0",
+                "--floppy_drive_1=${workspaceFolder}/dist/Hydron.adf",
+                "--automatic_input_grab=0",
+                "--joystick_port_1=keyboard",
+                "--amiga_model=A500",
+                "--automatic_input_grab=0",
+                "--video_sync=0",
+                "--fullscreen=0"
+            ],
+            "preLaunchTask": "Build Floppy Debug"
+        },
+        {
+            "type": "amiga-assembly",
+            "request": "launch",
+            "name": "Run Floppy Release",
             "program": "",
             "noDebug": true,
             "emulatorType": "fs-uae",
             "emulatorArgs": [
                 "--chip_memory=512",
                 "--slow_memory=512",
+                //"--kickstart_file=/Users/frank/Development/projects/kickroms/kick13.rom",
                 "--kickstart_file=/Users/frank/Development/projects/kickroms/kick31.rom",
                 "--floppy_drive_0=${workspaceFolder}/dist/Hydron.adf",
                 "--joystick_port_1=keyboard",
@@ -46,7 +129,7 @@
                 "--video_sync=0",
                 "--fullscreen=0"
             ],
-            "preLaunchTask": "Create ADF"
+            "preLaunchTask": "Run data-tool"
         }
     ]
 }

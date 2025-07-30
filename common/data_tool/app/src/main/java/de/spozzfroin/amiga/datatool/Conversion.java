@@ -21,38 +21,46 @@ class Conversion {
 		LOG.print("*******************************");
 		LOG.print("***** starting conversion *****");
 		LOG.print("*******************************");
-		this.readAllSourceData(config, false);
-		this.calcAllAdditionalData(config, false);
-		this.writeAllRawData(config, false);
+		// normal data-files
+		this.readAllSourceData(config, false, false);
+		this.calcAllAdditionalData(config, false, false);
+		this.writeAllRawData(config, false, false);
 		this.writeIndexFile(config, false);
 		// code-files
-		this.readAllSourceData(config, true);
-		this.calcAllAdditionalData(config, true);
-		this.writeAllRawData(config, true);
+		this.readAllSourceData(config, true, false);
+		this.calcAllAdditionalData(config, true, false);
+		this.writeAllRawData(config, true, false);
 		this.writeIndexFile(config, true);
+		// bootblock-files
+		this.readAllSourceData(config, true, true);
+		this.calcAllAdditionalData(config, true, true);
+		this.writeAllRawData(config, true, true);
+		// no index file for bootblocks
+		//
+		this.writeAllDiskimageFiles(config);
 	}
 
-	private void readAllSourceData(Config config, boolean codeFiles) throws Exception {
+	private void readAllSourceData(Config config, boolean codeFiles, boolean bootblockFiles) throws Exception {
 		for (var tf : config.getTargetFiles()) {
-			if (tf.isCodeFile() != codeFiles) {
+			if (tf.isCodeFile() != codeFiles || tf.isBootblockFile() != bootblockFiles) {
 				continue;
 			}
 			tf.readAllSourceData(config);
 		}
 	}
 
-	private void calcAllAdditionalData(Config config, boolean codeFiles) throws Exception {
+	private void calcAllAdditionalData(Config config, boolean codeFiles, boolean bootblockFiles) throws Exception {
 		for (var tf : config.getTargetFiles()) {
-			if (tf.isCodeFile() != codeFiles) {
+			if (tf.isCodeFile() != codeFiles || tf.isBootblockFile() != bootblockFiles) {
 				continue;
 			}
 			tf.calcAllAdditionalData(config);
 		}
 	}
 
-	private void writeAllRawData(Config config, boolean codeFiles) throws Exception {
+	private void writeAllRawData(Config config, boolean codeFiles, boolean bootblockFiles) throws Exception {
 		for (var tf : config.getTargetFiles()) {
-			if (tf.isCodeFile() != codeFiles) {
+			if (tf.isCodeFile() != codeFiles || tf.isBootblockFile() != bootblockFiles) {
 				continue;
 			}
 			tf.writeAllRawdata(config);
@@ -91,6 +99,17 @@ class Conversion {
 			} else {
 				writer.println(" endif ; ifnd FILES_INDEX_I");
 			}
+		}
+	}
+
+	private void writeAllDiskimageFiles(Config config) throws Exception {
+		if (config.getDiskimageFiles() == null) {
+			return;
+		}
+		LOG.divider();
+		LOG.print("Writing diskimage files");
+		for (var dif : config.getDiskimageFiles()) {
+			dif.create(config);
 		}
 	}
 }

@@ -2,6 +2,7 @@
 CUSTOM_I      equ 1
 
 CustomBase    equ $dff000
+CUSTOM        equ $dff000
 
 BplColorOn    equ $200
 DdfResolution equ 8
@@ -16,6 +17,8 @@ CLXDAT        equ $e
 ADKCONR       equ $10
 INTENAR       equ $1c
 INTREQR       equ $1e
+DSKPTH        equ $20
+DSKLEN        equ $24
 BLTCON0       equ $40
 BLTCON1       equ $42
 BLTAFWM       equ $44
@@ -33,6 +36,7 @@ BLTCMOD       equ $60
 BLTBMOD       equ $62
 BLTAMOD       equ $64
 BLTDMOD       equ $66
+DSKSYNC       equ $7e
 COP1LC        equ $80
 COP2LC        equ $84
 COPJMP1       equ $88
@@ -45,6 +49,18 @@ CLXCON        equ $98
 INTENA        equ $9a
 INTREQ        equ $9c
 ADKCON        equ $9e
+AUD0LC        equ $a0
+AUD0LEN       equ $a4
+AUD0VOL       equ $a8
+AUD1LC        equ $b0
+AUD1LEN       equ $b4
+AUD1VOL       equ $b8
+AUD2LC        equ $c0
+AUD2LEN       equ $c4
+AUD2VOL       equ $c8
+AUD3LC        equ $d0
+AUD3LEN       equ $d4
+AUD3VOL       equ $d8
 BPL1PTH       equ $e0
 BPL1PTL       equ $e2
 BPL2PTH       equ $e4
@@ -126,5 +142,11 @@ COLOR28       equ $1b8
 COLOR29       equ $1ba
 COLOR30       equ $1bc
 COLOR31       equ $1be
+
+; Audio channel registers offsets
+AUDLC         equ 0
+AUDLEN        equ 4
+AUDPER        equ 6
+AUDVOL        equ 8
 
   endif                ; ifnd CUSTOM_I

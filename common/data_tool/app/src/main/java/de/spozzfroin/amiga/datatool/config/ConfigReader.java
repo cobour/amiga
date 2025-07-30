@@ -16,6 +16,7 @@ public class ConfigReader {
 
 	private static final SimpleLogger LOG = SimpleLogger.getInstance();
 	private final TargetFileFactory targetFileFactory = new TargetFileFactory();
+	private final DiskimageFileFactory diskimageFileFactory = new DiskimageFileFactory();
 
 	public Config run(String[] args) throws Exception {
 		LOG.divider();
@@ -34,6 +35,7 @@ public class ConfigReader {
 		var elements = this.readConfigFile(filename);
 		this.setGlobalProperties(config, elements);
 		this.readTargetFiles(config, elements);
+		this.readDiskimageFiles(config, elements);
 		//
 		return config;
 	}
@@ -55,6 +57,9 @@ public class ConfigReader {
 		var targetFolder = (String) elements.get("targetFolder");
 		config.setTargetFolder(targetFolder);
 		//
+		var diskimageFolder = (String) elements.get("diskimageFolder");
+		config.setDiskimageFolder(diskimageFolder);
+		//
 		var asmWorkingFolder = (String) elements.get("asmWorkingFolder");
 		config.setAsmWorkingFolder(asmWorkingFolder);
 		//
@@ -73,6 +78,19 @@ public class ConfigReader {
 		for (var parameter : targetFileParameters) {
 			var targetFile = this.targetFileFactory.create(parameter, config);
 			config.getTargetFiles().add(targetFile);
+		}
+	}
+
+	private void readDiskimageFiles(Config config, Map<String, Object> elements) {
+		@SuppressWarnings("unchecked")
+		var diskimageFileParameters = (List<LinkedHashMap<String, Object>>) elements.get("diskimageFiles");
+		if (diskimageFileParameters == null) {
+			return;
+		}
+		config.setDiskimageFiles(new ArrayList<>());
+		for (var parameter : diskimageFileParameters) {
+			var diskimageFile = this.diskimageFileFactory.create(parameter, config);
+			config.getDiskimageFiles().add(diskimageFile);
 		}
 	}
 

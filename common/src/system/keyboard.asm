@@ -1,6 +1,7 @@
   ifnd       KEYBOARD_ASM
 KEYBOARD_ASM equ 1
 
+  include    "../common/src/system/cia.i"
   include    "../common/src/system/keyboard.i"
 
 ; README: more or less copied from the game "Solid Gold" (Thank you!)

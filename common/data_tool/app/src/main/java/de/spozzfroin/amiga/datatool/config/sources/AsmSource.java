@@ -24,7 +24,7 @@ class AsmSource extends AbstractSource {
 
 	private List<String> defines;
 	private byte[] rawdata;
-	private int bin_length;
+	private boolean isBootblock;
 
 	AsmSource(TargetFile theParent) {
 		super(theParent);
@@ -40,6 +40,12 @@ class AsmSource extends AbstractSource {
 					.collect(Collectors.toList());
 		} else {
 			this.defines = new ArrayList<>();
+		}
+		//
+		if (parameter.containsKey("isBootblock")) {
+			this.isBootblock = ((Boolean) parameter.get("isBootblock")).booleanValue();
+		} else {
+			this.isBootblock = false;
 		}
 	}
 
@@ -67,6 +73,20 @@ class AsmSource extends AbstractSource {
 
 	@Override
 	public void writeRawData(Config config, OutputStream data) throws Exception {
+		if (this.isBootblock) {
+			// calc checksum (use long because int is always signed in Java
+			// but the chechsum needs to be unsigned 32bits)
+			long checksum = 0;
+			for (int i = 0; i < this.rawdata.length; i += 4) {
+				checksum += BINARY_VALUE_CONVERTER.getLong(this.rawdata, i);
+				if (checksum > 0xffffffffL) {
+					checksum -= 0x100000000L; // do the overflow
+					checksum++;
+				}
+			}
+			checksum = ~checksum;
+			BINARY_VALUE_CONVERTER.setLong(this.rawdata, 4, checksum);
+		}
 		LOG.print(String.format("writing rawdata of \"%s\"", this.getFilename()));
 		data.write(this.rawdata);
 	}
@@ -101,6 +121,12 @@ class AsmSource extends AbstractSource {
 	private void copyCode(Config config, String objectFilename) throws IOException {
 		Path srcPath = Paths.get(config.getTempFolder() + objectFilename);
 		long filesize = Files.size(srcPath);
+		if (this.isBootblock) {
+			if (filesize > 1024) {
+				throw new IllegalStateException("Bootblock too large!!");
+			}
+			filesize = 1024;
+		}
 		this.rawdata = new byte[(int) filesize];
 		try (FileInputStream fis = new FileInputStream(config.getTempFolder() + objectFilename)) {
 			fis.read(this.rawdata);
