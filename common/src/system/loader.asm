@@ -1,6 +1,6 @@
 
 ; FOR USE_TRACKDISK ONLY
-; needs defined MAIN_CODE_FILE and MAIN_CODE_FILE_SIZE
+; needs defined MAIN_CODE_FILE
 
   ; set first 4 colors to black
   lea.l      $dff180,a0
@@ -20,11 +20,17 @@ alloc:
   tst.l      d0
   bne.s      error
 
+  ; get size of main code file
+  move.l     a4,a0
+  move.l     #MAIN_CODE_FILE,d0
+  bsr        disk_get_file_size
+  add.l      #512,d1                            ; safety buffer - why?
+
   ; read code file
   bsr        disk_begin_io
   move.l     a4,a2
   add.l      other_mem_size(pc),a2
-  sub.l      #MAIN_CODE_FILE_SIZE+512,a2
+  sub.l      d1,a2
   move.l     a5,a3
   move.l     #MAIN_CODE_FILE,d4
   bsr        disk_read_file

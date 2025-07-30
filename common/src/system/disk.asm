@@ -356,6 +356,38 @@ disk_end_io:
 
   ifd        USE_TRACKDISK
 
+; calculates size of file depending on metadata stored in file directory
+; in:
+;   d0 - filename
+;   a0 - pointer to disk-struct
+; out:
+;   d1 - size of file in bytes or -1 if file not found
+disk_get_file_size:
+  movem.l    a0/d0,-(sp)
+.loop:
+  tst.l      disk_file_name(a0)
+  beq.s      .error
+  cmp.l      disk_file_name(a0),d0
+  bne.s      .next
+  moveq.l    #0,d0
+  moveq.l    #0,d1
+  move.w     disk_file_num_blocks(a0),d0
+  move.w     disk_file_size_in_last_block(a0),d1
+  subq.w     #1,d0
+  lsl.l      #8,d0                                    ; d0 * 512
+  add.l      d0,d0                                    ; d0 * 512
+  add.l      d0,d1
+  bra.s      .success
+.next:
+  lea.l      disk_file_sizeof(a0),a0
+  bra.s      .loop
+
+.error:
+  moveq.l    #-1,d1
+.success:
+  movem.l    (sp)+,a0/d0
+  rts
+
 ; reads one block from floppy disk
 ; FOR INTERNAL USE OF DISK.ASM ONLY
 ; in:

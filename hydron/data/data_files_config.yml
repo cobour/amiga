@@ -16,7 +16,6 @@ targetFiles:
     memoryType: OTHER
     doZip: false
     codeFile: true
-    bootblockFile: true
     sources:
       - filename: ../src/system/bootblock.asm
         id: BOBL

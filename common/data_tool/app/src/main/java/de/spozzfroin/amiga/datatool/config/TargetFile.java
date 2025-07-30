@@ -24,7 +24,6 @@ public class TargetFile {
 	private MemoryType memoryType;
 	private boolean doZip;
 	private boolean codeFile;
-	private boolean bootblockFile;
 	private boolean skipIndex;
 	private TargetFile relatedFile;
 	private List<Source> sources;
@@ -158,20 +157,12 @@ public class TargetFile {
 		return this.codeFile;
 	}
 
-	public boolean isBootblockFile() {
-		return this.bootblockFile;
-	}
-
 	void setDoZip(boolean theDoZip) {
 		this.doZip = theDoZip;
 	}
 
 	void setCodeFile(boolean theCodeFile) {
 		this.codeFile = theCodeFile;
-	}
-
-	void setBootblockFile(boolean theBootblockFile) {
-		this.bootblockFile = theBootblockFile;
 	}
 
 	TargetFile getRelatedFile() {

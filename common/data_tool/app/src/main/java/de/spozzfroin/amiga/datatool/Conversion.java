@@ -22,45 +22,40 @@ class Conversion {
 		LOG.print("***** starting conversion *****");
 		LOG.print("*******************************");
 		// normal data-files
-		this.readAllSourceData(config, false, false);
-		this.calcAllAdditionalData(config, false, false);
-		this.writeAllRawData(config, false, false);
+		this.readAllSourceData(config, false);
+		this.calcAllAdditionalData(config, false);
+		this.writeAllRawData(config, false);
 		this.writeIndexFile(config, false);
 		// code-files
-		this.readAllSourceData(config, true, false);
-		this.calcAllAdditionalData(config, true, false);
-		this.writeAllRawData(config, true, false);
+		this.readAllSourceData(config, true);
+		this.calcAllAdditionalData(config, true);
+		this.writeAllRawData(config, true);
 		this.writeIndexFile(config, true);
-		// bootblock-files
-		this.readAllSourceData(config, true, true);
-		this.calcAllAdditionalData(config, true, true);
-		this.writeAllRawData(config, true, true);
-		// no index file for bootblocks
 		//
 		this.writeAllDiskimageFiles(config);
 	}
 
-	private void readAllSourceData(Config config, boolean codeFiles, boolean bootblockFiles) throws Exception {
+	private void readAllSourceData(Config config, boolean codeFiles) throws Exception {
 		for (var tf : config.getTargetFiles()) {
-			if (tf.isCodeFile() != codeFiles || tf.isBootblockFile() != bootblockFiles) {
+			if (tf.isCodeFile() != codeFiles) {
 				continue;
 			}
 			tf.readAllSourceData(config);
 		}
 	}
 
-	private void calcAllAdditionalData(Config config, boolean codeFiles, boolean bootblockFiles) throws Exception {
+	private void calcAllAdditionalData(Config config, boolean codeFiles) throws Exception {
 		for (var tf : config.getTargetFiles()) {
-			if (tf.isCodeFile() != codeFiles || tf.isBootblockFile() != bootblockFiles) {
+			if (tf.isCodeFile() != codeFiles) {
 				continue;
 			}
 			tf.calcAllAdditionalData(config);
 		}
 	}
 
-	private void writeAllRawData(Config config, boolean codeFiles, boolean bootblockFiles) throws Exception {
+	private void writeAllRawData(Config config, boolean codeFiles) throws Exception {
 		for (var tf : config.getTargetFiles()) {
-			if (tf.isCodeFile() != codeFiles || tf.isBootblockFile() != bootblockFiles) {
+			if (tf.isCodeFile() != codeFiles) {
 				continue;
 			}
 			tf.writeAllRawdata(config);
