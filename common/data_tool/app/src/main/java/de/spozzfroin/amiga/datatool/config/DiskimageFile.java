@@ -96,7 +96,7 @@ public class DiskimageFile {
 		data.write(filler);
 		//
 		// 5. set fillerSize for adf
-		this.fillerSize -= 1024;
+		this.fillerSize -= 512;
 	}
 
 	private void addDatafiles(Config config, OutputStream data) throws Exception {
