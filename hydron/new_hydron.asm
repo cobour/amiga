@@ -7,6 +7,9 @@ main_code_start:
 
   ; DUMMY CODE START
   bsr        ctrl_take_system
+  move.l     chip_mem_ptr(pc),a0
+  bsr        ctrl_set_black_screen
+  move.w     #$7fff,DMACON(a6)
   lea.l      $dff000,a6
   lea.l      $bfe001,a5
   moveq.l    #0,d0
