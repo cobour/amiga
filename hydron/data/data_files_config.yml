@@ -20,6 +20,10 @@ targetFiles:
       - filename: ../src/system/bootblock.asm
         id: BOBL
         isBootblock: true
+        defines:
+          - BOOTBLOCK
+          - RELEASE
+          - USE_TRACKDISK
 
   - filename: C000
     description: main_code_file

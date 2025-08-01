@@ -1,8 +1,5 @@
 
-; no build task - define these here
-BOOTBLOCK      equ 1
-RELEASE        equ 1
-USE_TRACKDISK  equ 1
+; bootblock metadata and loader
 
 MAIN_CODE_FILE equ $43303030                      ; "C000"
 
