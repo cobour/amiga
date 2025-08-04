@@ -75,7 +75,7 @@ class AsmSource extends AbstractSource {
 	public void writeRawData(Config config, OutputStream data) throws Exception {
 		if (this.isBootblock) {
 			// calc checksum (use long because int is always signed in Java
-			// but the chechsum needs to be unsigned 32bits)
+			// but the checksum needs to be unsigned 32bits)
 			long checksum = 0;
 			for (int i = 0; i < this.rawdata.length; i += 4) {
 				checksum += BINARY_VALUE_CONVERTER.getLong(this.rawdata, i);
