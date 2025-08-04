@@ -2,11 +2,15 @@ package de.spozzfroin.amiga.datatool.config;
 
 import java.io.FileOutputStream;
 import java.io.OutputStream;
+import java.io.PrintWriter;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.time.LocalDateTime;
 import java.util.List;
 
+import de.spozzfroin.amiga.datatool.config.sources.Source;
 import de.spozzfroin.amiga.datatool.util.BinaryValueConverter;
 import de.spozzfroin.amiga.datatool.util.SimpleLogger;
 
@@ -19,11 +23,20 @@ public class DiskimageFile {
 
 	private String filename;
 	private String diskname;
-	private String bootblock;
+	private Source bootblockSource;
+	private String mainCodefile;
 	private List<String> datafiles;
 	private int fillerSize;
 
 	public void create(Config config) throws Exception {
+		//
+		// add main codefile at first position of datafiles
+		this.datafiles.add(0, this.mainCodefile);
+		//
+		// write include file for bootblock with info about main codefile
+		this.writeBootblockInclude(config);
+		//
+		// create diskimage
 		LOG.print("writing " + this.filename);
 		this.fillerSize = (80 * 2 * 11 * 512);
 		var path = Paths.get(config.getDiskimageFolder(), this.filename);
@@ -36,19 +49,26 @@ public class DiskimageFile {
 		}
 	}
 
+	private void writeBootblockInclude(Config config) throws Exception {
+		var includeFile = Paths.get(config.getMainCodeIncludeFilename());
+		var maincodeFilename = Paths.get(config.getTargetFolder() + this.mainCodefile + ".dat");
+		try (PrintWriter writer = new PrintWriter(Files.newBufferedWriter(includeFile, StandardCharsets.UTF_8))) {
+			writer.println("; generated " + LocalDateTime.now());
+			writer.println(" ifnd MAIN_CODE_I");
+			writer.println("MAIN_CODE_I equ 1");
+			writer.println(" ");
+			writer.println("MAIN_CODE_FILE equ \"" + this.mainCodefile + "\"");
+			writer.println("MAIN_CODE_SIZE equ " + Files.size(maincodeFilename));
+			writer.println(" ");
+			writer.println(" endif ; ifnd MAIN_CODE_I");
+		}
+	}
+
 	private void addBootblock(Config config, OutputStream data) throws Exception {
-		//
-		// add bootblock datafile to adf file
-		var tf = config.getTargetFiles().stream() //
-				.filter(f -> f.getIdentifier().toUpperCase().equals(this.bootblock)) //
-				.findAny().get();
-		var path = tf.getTargetDataFile(config);
-		var bootblock = Files.readAllBytes(path);
-		data.write(bootblock);
+		this.bootblockSource.readAndConvertSourceData(config);
+		this.bootblockSource.calcAdditionalData(config); // currently not used in AsmSource, just for completeness
+		this.bootblockSource.writeRawData(config, data);
 		this.fillerSize -= 1024;
-		//
-		// delete bootblock datafile because it is no longer needed
-		Files.delete(path);
 	}
 
 	private void addDirectory(Config config, OutputStream data) throws Exception {
@@ -135,8 +155,12 @@ public class DiskimageFile {
 		this.diskname = diskname;
 	}
 
-	void setBootblock(String bootblock) {
-		this.bootblock = bootblock;
+	void setMainCodefile(String mainCodefile) {
+		this.mainCodefile = mainCodefile;
+	}
+
+	void setBootblockSource(Source bootblockSource) {
+		this.bootblockSource = bootblockSource;
 	}
 
 	void setDatafiles(List<String> datafiles) {

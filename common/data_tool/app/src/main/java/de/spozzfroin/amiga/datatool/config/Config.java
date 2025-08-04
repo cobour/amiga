@@ -14,6 +14,7 @@ public class Config {
 	private String asmWorkingFolder;
 	private String indexFilename;
 	private String asmIndexFilename;
+	private String mainCodeIncludeFilename;
 
 	// not read from yaml, but calculated during initialization
 	private String baseFolder;
@@ -101,5 +102,13 @@ public class Config {
 
 	void setDiskimageFolder(String diskimageFolder) {
 		this.diskimageFolder = diskimageFolder;
+	}
+
+	String getMainCodeIncludeFilename() {
+		return this.baseFolder + this.mainCodeIncludeFilename;
+	}
+
+	void setMainCodeIncludeFilename(String mainCodeIncludeFilename) {
+		this.mainCodeIncludeFilename = mainCodeIncludeFilename;
 	}
 }

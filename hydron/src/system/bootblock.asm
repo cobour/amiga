@@ -1,7 +1,7 @@
 
 ; bootblock metadata and loader
 
-MAIN_CODE_FILE equ $43303030                      ; "C000"
+  include    "main_code.i"
 
   dc.b       "DOS",0                              ; disk type
   dc.l       0                                    ; checksum

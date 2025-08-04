@@ -4,6 +4,7 @@
 *.gz
 files_index.i
 asm_files_index.i
+main_code.i
 *.dat
 .DS_Store
 **/.DS_Store

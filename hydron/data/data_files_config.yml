@@ -5,25 +5,12 @@ targetFolder: ../uae/dh0
 diskimageFolder: ../dist
 # asmWorkingFolder is relative to amiga/common/data-tool/app folder
 asmWorkingFolder: ../../../hydron
-# index filenames are relative to folder of this config file
+# include filenames are relative to folder of this config file
 indexFilename: ../files_index.i
 asmIndexFilename: ../asm_files_index.i
+mainCodeIncludeFilename: ../main_code.i
 # filenames of source files are relative to sourceFolder
 targetFiles:
-
-  - filename: BOBL
-    description: bootblock_code_file
-    memoryType: OTHER
-    doZip: false
-    codeFile: true
-    sources:
-      - filename: ../src/system/bootblock.asm
-        id: BOBL
-        isBootblock: true
-        defines:
-          - BOOTBLOCK
-          - RELEASE
-          - USE_TRACKDISK
 
   - filename: C000
     description: main_code_file
@@ -74,8 +61,15 @@ targetFiles:
 diskimageFiles:
   - filename: Hydron.adf
     diskname: HYDR
-    bootblock: BOBL
+    mainCodefile: C000
+    bootblock:
+      - filename: ../src/system/bootblock.asm
+        id: BOBL
+        isBootblock: true
+        defines:
+          - BOOTBLOCK
+          - RELEASE
+          - USE_TRACKDISK
     datafiles:
-      - C000
       - F000
       - F001

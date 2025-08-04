@@ -68,6 +68,9 @@ public class ConfigReader {
 		//
 		var asmIndexFilename = (String) elements.get("asmIndexFilename");
 		config.setAsmIndexFilename(asmIndexFilename);
+		//
+		var mainCodeIncludeFilename = (String) elements.get("mainCodeIncludeFilename");
+		config.setMainCodeIncludeFilename(mainCodeIncludeFilename);
 	}
 
 	private void readTargetFiles(Config config, Map<String, Object> elements) {
