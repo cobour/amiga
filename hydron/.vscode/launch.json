@@ -57,6 +57,7 @@
             "preLaunchTask": "Build WHDLoad Release"
         },
         {
+            // FOR DEBUGGING OF INITIAL LOADER CODE ONLY (EVERYTHING BEFORE "jmp(a2)")
             "type": "amiga-assembly",
             "request": "launch",
             "name": "Run Floppy Loader Debug",
