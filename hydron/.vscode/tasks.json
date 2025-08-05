@@ -57,12 +57,12 @@
 			"vlink": {
 				"enabled": true,
 				"command": "${config:amiga-assembly.binDir}/vlink",
-				"includes": "new_hydron.asm",
+				"includes": "hydron.asm",
 				"excludes": "",
 				"createStartupSequence": true,
 				"createExeFileParentDir": true,
 				"exefilename": "../uae/dh0/Hydron",
-				"entrypoint": "new_hydron.asm",
+				"entrypoint": "hydron.asm",
 				"args": [
 					"-bamigahunk",
 					"-Bstatic"
@@ -95,12 +95,12 @@
 			"vlink": {
 				"enabled": true,
 				"command": "${config:amiga-assembly.binDir}/vlink",
-				"includes": "new_hydron.asm",
+				"includes": "hydron.asm",
 				"excludes": "",
 				"createStartupSequence": true,
 				"createExeFileParentDir": true,
 				"exefilename": "../uae/dh0/Hydron",
-				"entrypoint": "new_hydron.asm",
+				"entrypoint": "hydron.asm",
 				"args": [
 					"-bamigahunk",
 					"-Bstatic"
@@ -132,12 +132,12 @@
 			"vlink": {
 				"enabled": true,
 				"command": "${config:amiga-assembly.binDir}/vlink",
-				"includes": "new_hydron.asm",
+				"includes": "hydron.asm",
 				"excludes": "",
 				"createStartupSequence": true,
 				"createExeFileParentDir": true,
 				"exefilename": "../uae/dh0/Hydron",
-				"entrypoint": "new_hydron.asm",
+				"entrypoint": "hydron.asm",
 				"args": [
 					"-bamigahunk",
 					"-Bstatic"

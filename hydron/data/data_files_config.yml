@@ -18,7 +18,7 @@ targetFiles:
     doZip: false
     codeFile: true
     sources:
-      - filename: ../new_hydron.asm
+      - filename: ../hydron.asm
         id: HYDR
         defines:
           - BOOTBLOCK
