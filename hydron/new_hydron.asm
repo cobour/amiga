@@ -1,34 +1,44 @@
 
+  include    "src/globals.i"
+  include    "../common/src/system/screen.i"
+
 main_code_start:
 
   bsr        common_init
   tst.l      d0
   bne.s      .end
+  SETPTRS
 
-  ; DUMMY CODE START
-  bsr        ctrl_take_system
+  bsr        ctrl_save_orig_system_state
+
+  WAITVB
   move.l     chip_mem_ptr(pc),a0
+  lea.l      c_cm_all_black_copperlist(a0),a0
   bsr        ctrl_set_black_screen
-  move.w     #$7fff,DMACON(a6)
-  lea.l      $dff000,a6
-  lea.l      $bfe001,a5
-  moveq.l    #0,d0
-.color_loop:
-  move.w     d0,$0180(a6)
-  addq.w     #1,d0
-  cmp.w      #$1000,d0
-  bne.s      .no_overflow
-  moveq.l    #0,d0
-.no_overflow:
-  btst       #6,(a5)
-  bne.s      .color_loop
 
-  moveq.l    #0,d0
+  bsr        ig_start
+
+  bsr        ctrl_free_system
+  bsr        disk_cleanup
+  bsr        ctrl_restore_screen
+
 .end:
-  move.l     d0,$0180(a6)
-  move.l     d0,$0184(a6)
-  bra.s      .end
-  ; DUMMY CODE END
+  bsr        disk_cleanup
+
+  ifd        STANDARD_EXE
+
+  bsr        exec_free_mem
+  moveq.l    #0,d0
+  rts
+.error
+  bsr        exec_free_mem
+  moveq.l    #1,d0
+  rts
+  endif                                                ; ifd STANDARD_EXE
+
+  ifd        BOOTBLOCK
+  bsr        exec_reboot
+  endif                                                ; ifd BOOTBLOCK
 
   include    "files_index.i"
   include    "../common/src/system/common_init.asm"
@@ -36,5 +46,6 @@ main_code_start:
   include    "../common/src/system/datafiles.asm"
   include    "../common/src/system/disk.asm"
   include    "../common/src/system/control.asm"
+  include    "src/ingame.asm"
   include    "../common/src/3rdparty/inflate.asm"
   include    "../common/src/3rdparty/ptplayer.asm"

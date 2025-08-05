@@ -6,38 +6,37 @@ COMMON_INIT_ASM equ 1
 ;   d0 - zero = success, non-zero = error
 common_init:
 
+  ; bootblock has allocated mem, pointers in a4 and a5
+  ; bootblock has also read file directory block
+
+  ; standard exe must allocate mem amd read file directory block itself
+
   ifd        STANDARD_EXE
 
   moveq.l    #Mem1MB,d0
   bsr        exec_alloc_mem
 
+  endif                                ; ifd STANDARD_EXE
+
   lea.l      chip_mem_ptr(pc),a0
   move.l     a5,(a0)
   lea.l      other_mem_ptr(pc),a0
   move.l     a4,(a0)
+  lea.l      disk_struct_ptr(pc),a0
+  move.l     a4,(a0)
 
-  ifd        USE_TRACKDISK
+  ifnd       BOOTBLOCK
 
   move.l     a5,a3
   move.l     other_mem_ptr(pc),a4
-  bsr        disk_init
+  bsr        disk_init                 ; will set d0 as return value
 
-  endif                              ; ifd USE_TRACKDISK
+  else 
 
-  endif                              ; ifd STANDARD_EXE
-
-  ifd        BOOTBLOCK
-
-  ; bootblock has allocated mem, pointers in a4 and a5
-  ; bootblock has also read file directory block
-  lea.l      chip_mem_ptr(pc),a0
-  move.l     a5,(a0)
-  lea.l      other_mem_ptr(pc),a0
-  move.l     a4,(a0)
   moveq.l    #0,d0
 
-  endif                              ; ifd BOOTBLOCK
+  endif                                ; ifnd BOOTBLOCK
 
   rts
 
-  endif                              ; ifnd COMMON_INIT_ASM
+  endif                                ; ifnd COMMON_INIT_ASM

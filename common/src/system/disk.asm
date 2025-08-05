@@ -509,7 +509,7 @@ disk_write_file:
   move.l     4(a1),d6                                 ; data block
 
   ; read block from disk
-  bsr.s      disk_internal_read_block
+  bsr        disk_internal_read_block
   tst.l      d0
   bne.s      .error
 
