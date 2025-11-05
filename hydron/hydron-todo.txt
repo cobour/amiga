@@ -49,9 +49,10 @@ DONE		old game code should work now (all 5 launchers work, all 3 DEBUG-launchers
 				
 				DATA_TOOL: support multiple chip- and/or other-files to be combined (one index over all these files in main-other-mem-file)
 						more than one relatedFile (group all om-files beginning with index 0; concatenate one after another, then all cm-files beginning at index 0x010000, all one after another)
-							split om and cm into two files each
+							split om and cm into two files each (cm done, om todo)
 						error checking in relatedFiles (first all om, then all cm) OR sort them accordingly
-						filesizes in files_index.i no longer needed
+						filesizes in files_index.i no longer needed ; complete file obsolete??
+						asm_files_index.i obsolete
 						ASM: load and unzip list of files (name of master-om-index-file given, related filenames and sizes retrieved from header of master-om-index-file)
 
 

@@ -26,12 +26,17 @@ targetFiles:
           - USE_TRACKDISK
 
   - filename: F000
-    description: ingame_chip
+    description: ingame_chip_1
     memoryType: CHIP
     sources:
       - filename: gfx/test_ehb_256x256.iff
         id: TSTB
         withMask: false
+
+  - filename: F001
+    description: ingame_chip_2
+    memoryType: CHIP
+    sources:
       - filename: music/revenge_of_earth.mod
         id: MS01
       - filename: sfx/enter.wav
@@ -39,20 +44,21 @@ targetFiles:
         volume: 64
         priority: 64
 
-  - filename: F001
+  - filename: F100
     description: ingame_other
     memoryType: OTHER
     relatedFiles: # all related files must have been already defined! all om-files first, then all cm-files!
       - F000
+      - F001
     sources:
-      - filename: tiled/level_1.tmx
-        id: LVLO
-        reversedVertically: true
-      - filename: gfx/background_tiles.iff
-        id: LVLT
-        withMask: false
-        flattenedTileFormat: 16x16
-        flattenedReducedTileCount: 64
+#      - filename: tiled/level_1.tmx
+#        id: LVLO
+#        reversedVertically: true
+#      - filename: gfx/background_tiles.iff
+#        id: LVLT
+#        withMask: false
+#        flattenedTileFormat: 16x16
+#        flattenedReducedTileCount: 64
       - filename: gfx/background_tiles.iff
         id: COLS
         colorsOnly: true
@@ -74,3 +80,4 @@ diskimageFiles:
     datafiles:
       - F000
       - F001
+      - F100
