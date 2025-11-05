@@ -9,7 +9,7 @@ DATAFILES_ASM equ 1
 
 ; loads and unzips the given other-mem and chip-mem datafiles
 ; in:
-;   d1 - filename of other-mem datafile
+;   d1 - filename of other-mem datafile (masterfile containing index)
 ;   d2 - filename of chip-mem datafile
 ;   d5 - pointer to 512 byte buffer in chip mem (only needed when USE_TRACKDISK)
 ;   d6 - pointer to filebuffer in any mem
@@ -19,13 +19,14 @@ DATAFILES_ASM equ 1
 ;   d0 - zero if successfull, non-zero otherwise
 datafiles_load_and_unzip:
   movem.l    d3-d4/d7/a2-a6,-(sp)
+  movem.l    a0-a1,-(sp)                                           ; save original target pointers (other and chip)
 
   ; init
   bsr        disk_begin_io
   tst.l      d0
-  bne.s      .error
+  bne        .error
 
-  ; load other-mem file
+  ; load masterfile
   move.l     d1,d4
   move.l     d6,a2
   move.l     d5,a3
@@ -34,13 +35,29 @@ datafiles_load_and_unzip:
   tst.l      d0
   bne.s      .error
 
-  ; unzip other-mem file
+  ; unzip masterfile
   move.l     a0,a4
   move.l     d6,a5
   bsr        inflate
 
-  ; load chip-mem file
-  move.l     d2,d4
+  move.l     a0,a6                                                 ; related-files list
+
+  move.w     (a6)+,d7
+  subq.w     #1,d7
+.dlau_loop:
+  move.l     (a6)+,d4
+  cmp.l      d1,d4
+  bne.s      .dlau_loop_read_and_unzip
+
+  ; masterfile already loaded, just add to other-mem-target-pointer
+  move.l     (a6)+,d2
+  add.l      d2,a0
+  bra.s      .dlau_loop_next
+
+.dlau_loop_read_and_unzip:
+  move.l     (a6)+,d2                                              ; length of related file
+
+  ; load related file
   move.l     d6,a2
   move.l     d5,a3
   move.l     disk_struct_ptr(pc),a4
@@ -48,16 +65,32 @@ datafiles_load_and_unzip:
   tst.l      d0
   bne.s      .error
 
-  ; unzip chip-mem file
+  cmp.l      #$01000000,d2
+  blt.s      .dlau_loop_unzip_other_mem_file
+
+  ; unzip related chip-mem file
   move.l     a1,a4
   move.l     d6,a5
   bsr        inflate
+  and.l      #$00ffffff,d2
+  add.l      d2,a1
+  bra.s      .dlau_loop_next
+
+.dlau_loop_unzip_other_mem_file:
+  move.l     a0,a4
+  move.l     d6,a5
+  bsr        inflate
+  add.l      d2,a0
+
+.dlau_loop_next:
+  dbf        d7,.dlau_loop
 
   ; cleanup
   move.l     disk_struct_ptr(pc),a4
   bsr        disk_end_io
   tst.l      d0
   bne.s      .error
+  movem.l    (sp)+,a0-a1                                           ; restore original target pointers (other and chip)
 
   ; set pointers
   bsr.s      .datafiles_set_pointers_in_index
@@ -70,6 +103,7 @@ datafiles_load_and_unzip:
   moveq.l    #0,d0
   rts
 .error:
+  movem.l    (sp)+,a0-a1                                           ; restore original target pointers (other and chip)
   movem.l    (sp)+,d3-d4/d7/a2-a6
   moveq.l    #-1,d0
   rts
@@ -80,12 +114,20 @@ datafiles_load_and_unzip:
 ;   a0 - points to other-mem-file
 ;   a1 - points to chip-mem-file
 .datafiles_set_pointers_in_index:
+  ; skip filenames and filesizes
+  moveq.l    #0,d5
+  move.w     (a0),d5
+  lsl.l      #3,d5                                                 ; 8 bytes per file
+  addq.l     #2,d5                                                 ; number of files
+
   ; save pointer to index
   lea.l      datafiles_index(pc),a2
   move.l     a0,(a2)
+  add.l      d5,(a2)
 
   ; prepare loop
   move.l     a0,a2
+  add.l      d5,a0
   moveq.l    #0,d5
   move.l     #$01000000,d6
 

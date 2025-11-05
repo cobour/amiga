@@ -9,6 +9,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 import java.util.zip.GZIPOutputStream;
 
@@ -25,7 +26,7 @@ public class TargetFile {
 	private boolean doZip;
 	private boolean codeFile;
 	private boolean skipIndex;
-	private TargetFile relatedFile;
+	private List<TargetFile> relatedFiles;
 	private List<Source> sources;
 
 	private long sizeRawDataFile = -1;
@@ -51,7 +52,7 @@ public class TargetFile {
 		LOG.divider();
 		LOG.print(String.format("writing all rawdata from target file \"%s\"", this.filename));
 		try (FileOutputStream data = new FileOutputStream(this.getDataFile(config, true).toFile())) {
-			if (!this.isCodeFile() && this.memoryType == MemoryType.OTHER && !this.skipIndex) {
+			if (this.hasIndex()) {
 				var index = new TargetFileIndex(this);
 				index.write(data);
 			}
@@ -75,6 +76,20 @@ public class TargetFile {
 		}
 		//
 		Files.copy(completeDataFile, this.getTargetDataFile(config), StandardCopyOption.REPLACE_EXISTING);
+	}
+
+	boolean hasIndex() {
+		return !this.isCodeFile() && this.memoryType == MemoryType.OTHER && !this.skipIndex;
+	}
+
+	long calcSize(TargetFileIndex index) {
+		long indexSize = 0;
+		if (this.hasIndex()) {
+			indexSize = index.calcIndexSize();
+		}
+		AtomicLong size = new AtomicLong(indexSize);
+		this.sources.stream().forEach(s -> size.addAndGet(s.length()));
+		return size.get();
 	}
 
 	private Path gzipDataFile(Config config) throws Exception {
@@ -165,12 +180,12 @@ public class TargetFile {
 		this.codeFile = theCodeFile;
 	}
 
-	TargetFile getRelatedFile() {
-		return this.relatedFile;
+	List<TargetFile> getRelatedFiles() {
+		return this.relatedFiles;
 	}
 
-	void setRelatedFile(TargetFile theRelatedFile) {
-		this.relatedFile = theRelatedFile;
+	void setRelatedFiles(List<TargetFile> theRelatedFiles) {
+		this.relatedFiles = theRelatedFiles;
 	}
 
 	List<Source> getSources() {

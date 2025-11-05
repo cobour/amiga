@@ -42,7 +42,8 @@ targetFiles:
   - filename: F001
     description: ingame_other
     memoryType: OTHER
-    relatedFile: F000
+    relatedFiles: # all related files must have been already defined! all om-files first, then all cm-files!
+      - F000
     sources:
       - filename: tiled/level_1.tmx
         id: LVLO

@@ -2,6 +2,7 @@ package de.spozzfroin.amiga.datatool.config;
 
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import de.spozzfroin.amiga.datatool.config.sources.SourceFactory;
 
@@ -36,13 +37,13 @@ class TargetFileFactory {
 			targetFile.setCodeFile(false);
 		}
 		//
-		if (parameter.containsKey("relatedFile")) {
-			var relatedFileName = (String) parameter.get("relatedFile");
-			TargetFile relatedFile = config.getTargetFiles().stream()
-					.filter(tf -> tf.getFilename().equals(relatedFileName)).findFirst().get();
-			targetFile.setRelatedFile(relatedFile);
+		if (parameter.containsKey("relatedFiles")) {
+			var relatedFileNames = (List<String>) parameter.get("relatedFiles");
+			List<TargetFile> relatedFiles = config.getTargetFiles().stream()
+					.filter(tf -> relatedFileNames.contains(tf.getFilename())).collect(Collectors.toList());
+			targetFile.setRelatedFiles(relatedFiles);
 		} else {
-			targetFile.setRelatedFile(null);
+			targetFile.setRelatedFiles(null);
 		}
 		//
 		if (parameter.containsKey("skipIndex")) {

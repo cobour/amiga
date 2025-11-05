@@ -51,6 +51,18 @@ public class BinaryValueConverter {
 		}
 	}
 
+	public void writeLong(String value, OutputStream data) {
+		try {
+			var bytes = value.getBytes();
+			if (bytes.length != 4) {
+				throw new RuntimeException();
+			}
+			data.write(bytes);
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
+	}
+
 	// BigEndian
 	public void writeLong(int value, OutputStream data) {
 		try {

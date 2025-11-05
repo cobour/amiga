@@ -1,6 +1,6 @@
 package de.spozzfroin.amiga.datatool.config;
 
-import java.io.FileOutputStream;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -20,7 +20,7 @@ class TargetFileIndex {
 		this.targetFile = theTargetFile;
 	}
 
-	void write(FileOutputStream data) throws Exception {
+	void write(OutputStream data) throws Exception {
 		this.createIndexEntries();
 		int indexLength = this.calcIndexSize();
 		this.calcOffsets(indexLength);
@@ -28,23 +28,33 @@ class TargetFileIndex {
 	}
 
 	private void createIndexEntries() {
-		this.omEntries = this.targetFile.getSources().stream() //
+		var allTargetFiles = new ArrayList<TargetFile>();
+		allTargetFiles.add(this.targetFile);
+		allTargetFiles.addAll(this.targetFile.getRelatedFiles());
+		//
+		this.omEntries = allTargetFiles.stream() //
+				.filter(tf -> tf.getMemoryType().isOther()) //
+				.map(tf -> tf.getSources()) //
+				.flatMap(Collection::stream) //
 				.map(s -> s.getIndex()) //
 				.flatMap(Collection::stream) //
 				.collect(Collectors.toList());
-		if (this.targetFile.getRelatedFile() != null) {
-			this.cmEntries = this.targetFile.getRelatedFile().getSources().stream() //
-					.map(s -> s.getIndex()) //
-					.flatMap(Collection::stream) //
-					.collect(Collectors.toList());
-		} else {
-			this.cmEntries = new ArrayList<IndexEntry>();
-		}
+		//
+		this.cmEntries = allTargetFiles.stream() //
+				.filter(tf -> tf.getMemoryType().isChip()) //
+				.map(tf -> tf.getSources()) //
+				.flatMap(Collection::stream) //
+				.map(s -> s.getIndex()) //
+				.flatMap(Collection::stream) //
+				.collect(Collectors.toList());
 	}
 
-	private int calcIndexSize() {
+	int calcIndexSize() {
+		// header of datafile
+		int indexLength = 2; // number of files (2)
+		indexLength += 8 * (1 + this.targetFile.getRelatedFiles().size()); // (4 bytes filename, 4 bytes filesize)
+		indexLength += 2; // number of entries (2)
 		// see datafiles.i df_idx_*
-		int indexLength = 2; // number of entries (2)
 		for (var indexEntry : this.omEntries) {
 			indexLength += 14; // ID (4), type (4), offset of data (4) and length of metadata (2)
 			indexLength += indexEntry.metadata.length;
@@ -69,9 +79,22 @@ class TargetFileIndex {
 		}
 	}
 
-	private void writeTo(FileOutputStream data) throws Exception {
-		// see datafiles.i df_idx_*
+	private void writeTo(OutputStream data) throws Exception {
+		// files and sizes
+		BINARY_VALUE_CONVERTER.writeWord(1 + this.targetFile.getRelatedFiles().size(), data);
+		BINARY_VALUE_CONVERTER.writeLong(this.targetFile.getFilename(), data);
+		BINARY_VALUE_CONVERTER.writeLong((int) this.targetFile.calcSize(this), data);
+		for (var tf : this.targetFile.getRelatedFiles()) {
+			BINARY_VALUE_CONVERTER.writeLong(tf.getFilename(), data);
+			int size = (int) tf.calcSize(this);
+			if (tf.getMemoryType().isChip()) {
+				size += 0x01000000;
+			}
+			BINARY_VALUE_CONVERTER.writeLong(size, data);
+		}
+		// number of index-entries
 		BINARY_VALUE_CONVERTER.writeWord(this.omEntries.size() + this.cmEntries.size(), data);
+		// see datafiles.i df_idx_*
 		for (var indexEntry : this.omEntries) {
 			BINARY_VALUE_CONVERTER.writeLong(indexEntry.id.asInt(), data);
 			BINARY_VALUE_CONVERTER.writeLong(indexEntry.source.getType().asInt(), data);

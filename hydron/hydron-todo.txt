@@ -1,0 +1,73 @@
+
+DONE		ADF creation
+DONE		move disk-struct into include file
+DONE		load directory block
+DONE		define name of code-file to be loaded from bootblock as equ in bootblock.asm => pick that up in loader.asm (so loader.asm is common file)
+DONE		load codefile from bootblock and run it (use color-demo)
+DONE		cleanups in disk-dma-intern.asm (see top of file)
+DONE		new defines --- WHDLOAD vs FLOPPY (where to load datafiles from) and DEBUG vs RELEASE (include debug-info or not) and STANDARD_EXE or BOOTBLOCK (how is code started) // not to name USE_DOS vs USE_TRACKDISK vs USE_DISK_DMA
+DONE		create launchers
+DONE			FLOPPY RELEASE => fdd releae
+DONE			FLOPPY LD DEBUG (with debug_loader.asm) => for debugging loader code and init code in main code (set chip mem and other mem pointers, read file directory)
+DONE			FLOPPY DEBUG (with standard exe loaded from hdd) => for debugging game code (mem alloc'd, standard exe)
+DONE			WHDLoad RELEASE (with standard exe loaded from hdd, uses dos.library) => hdd release
+DONE			WHDLoad DEBUG (with standard exe loaded from hdd, uses dos.library) => for debugging WHDLoad RELEASE 
+DONE		make disk_internal_read_block only for USE_TRACKDISK
+DONE		every other api routine MUST distinguish between USE_DOS , USE_TRACKDISK and USE_DISK_DMA (because USE_DISK_DMA has its own internal methods to not mess things up)
+DONE		rename disk-dma-intern.asm to disk_dma_intern.asm
+
+DONE		delete USE_DISK_DMA code
+DONE		defines WHDLOAD and FLOPPY no more necessary (USE_DOS and USE_TRACKDISK are sufficient)
+DONE		keep disk_dma_intern.* and loader.asm files (rename loader.asm to loader_disk_dma.asm)
+DONE		common_init.asm => allocmem or store pointers
+DONE		common_init.asm => load directory block when USE_TRACKDISK
+DONE		do new launcher.asm from old bootblock
+DONE		old bootblock with USE_TRACKDISK (but bootblock.asm and loader.asm logic)
+DONE		rework USE_TRACKDISK to use new directory block and 512 byte blocks
+				
+DONE		DATA_TOOL: check if 50 files or less => exception
+DONE		DATA_TOOL: check if 1760 blocks or less => exception
+DONE		clean.sh
+DONE		dummy code should work now (all 5 launchers work, all 3 DEBUG-launchers are debuggable) => commit
+				
+DONE		disk.asm - calc_file_size (use directory block information => then asm_files_index.i not needed anymore because bootblock can calculate file length AND third step in Conversion.class of data_tool is not needed anymore also (boobblockFile attribute of targetfile obsolete too)
+DONE		move defines for bootblock assembly into yaml
+
+DONE		test on real hardware
+DONE		create bootblock include file => no more defines for maincodefile
+
+DONE		simplify common_init.asm
+DONE		implement loading of files (F000 and F001) and old code (play music etc)
+
+DONE		rename new_hydron.asm to hydron.asm
+DONE		old game code should work now (all 5 launchers work, all 3 DEBUG-launchers are debuggable) => commit
+				
+				USE_TRACKDISK : load complete file with one call to DoIO ??
+				BUG: why must code moved down by 512 bytes when loaded from bootblock?
+				write_file to support 512 byte block
+				asm_files_index.i no longer needed
+				
+				DATA_TOOL: support multiple chip- and/or other-files to be combined (one index over all these files in main-other-mem-file)
+						more than one relatedFile (group all om-files beginning with index 0; concatenate one after another, then all cm-files beginning at index 0x010000, all one after another)
+							split om and cm into two files each
+						error checking in relatedFiles (first all om, then all cm) OR sort them accordingly
+						filesizes in files_index.i no longer needed
+						ASM: load and unzip list of files (name of master-om-index-file given, related filenames and sizes retrieved from header of master-om-index-file)
+
+
+
+ON HOLD
+************
+				guru when disk_read_file in new_hydron.asm
+				
+				new define DISK_DMA_DRIVE_DF0 and DISK_DMA_DRIVE_DF1 => used to set DISK_DMA_DRIVE eq 3 or eq 4
+				contents of disk-dma-intern.i goes into disk.i
+				
+				DatFilesCount minus code files
+
+				common-init.asm (sets mem pointers OR allocs mem ; reads file directory OR not) => can be included by game code, is not specific to game, uses defines (DEBUG / RELEASE / IS_STANDARD_EXE / USE_DOS / USE_DISK_DMA) to detect what has to be done
+				copy disk-dma-intern.asm to common and let disk.asm use it
+					disk-dma-struct in om-common-struct
+					disk-dma-directory in om-common-struct
+				hydron.asm IS_STANDARD_EXE or not
+					alloc mem or set with $400 as cm and location behind code as om
