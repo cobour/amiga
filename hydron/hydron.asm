@@ -40,7 +40,6 @@ main_code_start:
   bsr        exec_reboot
   endif                                                ; ifd BOOTBLOCK
 
-  include    "files_index.i"
   include    "../common/src/system/common_init.asm"
   include    "../common/src/system/exec.asm"
   include    "../common/src/system/datafiles.asm"

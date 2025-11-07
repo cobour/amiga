@@ -8,6 +8,5 @@ rm -rf data/converted/*.dat.tmp
 rm -rf uae/dh0/Hydron
 rm -rf uae/dh0/*.dat
 rm -rf uae/dh0/*.uaem
-rm -rf asm_files_index.i
-rm -rf files_index.i
+rm -rf main_code.i
 rm -f ~/Documents/FS-UAE/Save\ States/Default/*.sdf

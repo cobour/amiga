@@ -9,7 +9,7 @@ INGAME_ASM equ 1
 ig_start:
 ; load and inflate files, TODO: just dummy data
 
-  move.l     #fn_ingame_other,d1
+  move.l     #"F101",d1
   move.l     chip_mem_ptr(pc),d5
   add.l      #ig_cm_blockbuffer,d5                                                  ; TODO: inside framebuffer
   move.l     chip_mem_ptr(pc),d6

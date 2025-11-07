@@ -42,19 +42,18 @@ DONE		implement loading of files (F000 and F001) and old code (play music etc)
 DONE		rename new_hydron.asm to hydron.asm
 DONE		old game code should work now (all 5 launchers work, all 3 DEBUG-launchers are debuggable) => commit
 				
-				USE_TRACKDISK : load complete file with one call to DoIO ??
-				BUG: why must code moved down by 512 bytes when loaded from bootblock?
-				write_file to support 512 byte block
-				asm_files_index.i no longer needed
-				
-				DATA_TOOL: support multiple chip- and/or other-files to be combined (one index over all these files in main-other-mem-file)
+DONE			DATA_TOOL: support multiple chip- and/or other-files to be combined (one index over all these files in main-other-mem-file)
 DONE				more than one relatedFile (group all om-files beginning with index 0; concatenate one after another, then all cm-files beginning at index 0x010000, all one after another)
 DONE					split om and cm into two files each (cm done, om todo)
 DONE				error checking in relatedFiles (first all om, then all cm) OR sort them accordingly
-						filesizes in files_index.i no longer needed ; complete file obsolete??
-						asm_files_index.i obsolete
+DONE					filesizes in files_index.i no longer needed ; complete file obsolete??
+DONE					asm_files_index.i obsolete
 DONE				ASM: load and unzip list of files (name of master-om-index-file given, related filenames and sizes retrieved from header of master-om-index-file)
 
+			USE_TRACKDISK : load complete file with one call to DoIO ??
+			BUG: why must code moved down by 512 bytes when loaded from bootblock?
+			write_file to support 512 byte block
+				
 
 
 ON HOLD

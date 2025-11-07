@@ -12,8 +12,6 @@ public class Config {
 	private String targetFolder;
 	private String diskimageFolder;
 	private String asmWorkingFolder;
-	private String indexFilename;
-	private String asmIndexFilename;
 	private String mainCodeIncludeFilename;
 
 	// not read from yaml, but calculated during initialization
@@ -65,22 +63,6 @@ public class Config {
 
 	void setAsmWorkingFolder(String theAsmWorkingFolder) {
 		this.asmWorkingFolder = theAsmWorkingFolder;
-	}
-
-	public String getIndexFilename() {
-		return this.baseFolder + this.indexFilename;
-	}
-
-	void setIndexFilename(String theIndexFilename) {
-		this.indexFilename = theIndexFilename;
-	}
-
-	public String getAsmIndexFilename() {
-		return this.baseFolder + this.asmIndexFilename;
-	}
-
-	void setAsmIndexFilename(String asmIndexFilename) {
-		this.asmIndexFilename = asmIndexFilename;
 	}
 
 	void setBaseFolder(String theBaseFolder) {

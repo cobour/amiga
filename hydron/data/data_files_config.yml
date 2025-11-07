@@ -6,8 +6,6 @@ diskimageFolder: ../dist
 # asmWorkingFolder is relative to amiga/common/data-tool/app folder
 asmWorkingFolder: ../../../hydron
 # include filenames are relative to folder of this config file
-indexFilename: ../files_index.i
-asmIndexFilename: ../asm_files_index.i
 mainCodeIncludeFilename: ../main_code.i
 # filenames of source files are relative to sourceFolder
 targetFiles:

@@ -63,12 +63,6 @@ public class ConfigReader {
 		var asmWorkingFolder = (String) elements.get("asmWorkingFolder");
 		config.setAsmWorkingFolder(asmWorkingFolder);
 		//
-		var indexFilename = (String) elements.get("indexFilename");
-		config.setIndexFilename(indexFilename);
-		//
-		var asmIndexFilename = (String) elements.get("asmIndexFilename");
-		config.setAsmIndexFilename(asmIndexFilename);
-		//
 		var mainCodeIncludeFilename = (String) elements.get("mainCodeIncludeFilename");
 		config.setMainCodeIncludeFilename(mainCodeIncludeFilename);
 	}
