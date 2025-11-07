@@ -39,9 +39,6 @@ class TargetFileFactory {
 		//
 		if (parameter.containsKey("relatedFiles")) {
 			var relatedFileNames = (List<String>) parameter.get("relatedFiles");
-			// List<TargetFile> relatedFiles = config.getTargetFiles().stream()
-			// .filter(tf ->
-			// relatedFileNames.contains(tf.getFilename())).collect(Collectors.toList());
 			var relatedFiles = relatedFileNames.stream().map(
 					fn -> config.getTargetFiles().stream().filter(tf -> tf.getFilename().equals(fn)).findFirst().get())
 					.collect(Collectors.toList());
