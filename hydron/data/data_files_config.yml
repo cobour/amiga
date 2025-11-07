@@ -45,11 +45,20 @@ targetFiles:
         priority: 64
 
   - filename: F100
+    description: ingame_other_2
+    memoryType: OTHER
+    sources:
+      - filename: gfx/background_tiles.iff
+        id: COLS
+        colorsOnly: true
+
+  - filename: F101
     description: ingame_other
     memoryType: OTHER
     relatedFiles: # all related files must have been already defined! all om-files first, then all cm-files!
-      - F000
+      - F100
       - F001
+      - F000
     sources:
 #      - filename: tiled/level_1.tmx
 #        id: LVLO
@@ -59,9 +68,6 @@ targetFiles:
 #        withMask: false
 #        flattenedTileFormat: 16x16
 #        flattenedReducedTileCount: 64
-      - filename: gfx/background_tiles.iff
-        id: COLS
-        colorsOnly: true
       - filename: music/revenge_of_earth.mod
         id: MP01
 
@@ -81,3 +87,4 @@ diskimageFiles:
       - F000
       - F001
       - F100
+      - F101

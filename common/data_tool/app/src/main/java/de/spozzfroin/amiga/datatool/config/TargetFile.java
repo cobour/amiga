@@ -25,7 +25,6 @@ public class TargetFile {
 	private MemoryType memoryType;
 	private boolean doZip;
 	private boolean codeFile;
-	private boolean skipIndex;
 	private List<TargetFile> relatedFiles;
 	private List<Source> sources;
 
@@ -79,7 +78,8 @@ public class TargetFile {
 	}
 
 	boolean hasIndex() {
-		return !this.isCodeFile() && this.memoryType == MemoryType.OTHER && !this.skipIndex;
+		return !this.isCodeFile() && this.memoryType == MemoryType.OTHER && this.relatedFiles != null
+				&& !this.relatedFiles.isEmpty();
 	}
 
 	long calcSize(TargetFileIndex index) {
@@ -194,13 +194,5 @@ public class TargetFile {
 
 	void setSources(List<Source> sources) {
 		this.sources = sources;
-	}
-
-	boolean isSkipIndex() {
-		return this.skipIndex;
-	}
-
-	void setSkipIndex(boolean skipIndex) {
-		this.skipIndex = skipIndex;
 	}
 }

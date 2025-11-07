@@ -39,18 +39,31 @@ class TargetFileFactory {
 		//
 		if (parameter.containsKey("relatedFiles")) {
 			var relatedFileNames = (List<String>) parameter.get("relatedFiles");
-			List<TargetFile> relatedFiles = config.getTargetFiles().stream()
-					.filter(tf -> relatedFileNames.contains(tf.getFilename())).collect(Collectors.toList());
+			// List<TargetFile> relatedFiles = config.getTargetFiles().stream()
+			// .filter(tf ->
+			// relatedFileNames.contains(tf.getFilename())).collect(Collectors.toList());
+			var relatedFiles = relatedFileNames.stream().map(
+					fn -> config.getTargetFiles().stream().filter(tf -> tf.getFilename().equals(fn)).findFirst().get())
+					.collect(Collectors.toList());
 			targetFile.setRelatedFiles(relatedFiles);
+			if (targetFile.getMemoryType().isChip()) {
+				throw new RuntimeException("index in other-mem files only");
+			}
+			var firstChipFound = false;
+			for (var tf : targetFile.getRelatedFiles()) {
+				switch (tf.getMemoryType()) {
+				case CHIP:
+					firstChipFound = true;
+					break;
+				case OTHER:
+					if (firstChipFound) {
+						throw new RuntimeException("other-mem first, then chip-mem");
+					}
+					break;
+				}
+			}
 		} else {
 			targetFile.setRelatedFiles(null);
-		}
-		//
-		if (parameter.containsKey("skipIndex")) {
-			var skipIndex = ((Boolean) parameter.get("skipIndex")).booleanValue();
-			targetFile.setSkipIndex(skipIndex);
-		} else {
-			targetFile.setSkipIndex(false);
 		}
 		//
 		var sourceParameters = (List<LinkedHashMap<String, Object>>) parameter.get("sources");

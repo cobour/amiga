@@ -143,7 +143,7 @@ class IffSource extends AbstractSource {
 		var metadata = new ByteArrayOutputStream();
 		if (this.colorsOnly) {
 			// see datafiles.i df_cols_*
-			BINARY_VALUE_CONVERTER.writeWord(this.colors.size() * 2, metadata);
+			BINARY_VALUE_CONVERTER.writeWord(this.colors.size(), metadata);
 		} else {
 			// see datafiles.i df_iff_*
 			var rawsize = (this.width / 8 * this.height * this.bitplanes); // size applies both for gfx and mask data
