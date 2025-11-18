@@ -26,7 +26,6 @@ ig_cm_cl_sizeof:      rs.b       0
                       rsreset
 ig_cm_common:         rs.b       c_cm_sizeof
 ig_cm_copperlist:     rs.b       ig_cm_cl_sizeof
-ig_cm_blockbuffer:    rs.b       512                ; TODO: inside framebuffer
 ig_cm_filebuffer:     rs.b       100000             ; TODO: inside framebuffer
 ig_cm_datfile:        rs.b       0                  ; variable filesizes, therefore this MUST be the last entry in this struct
 ig_cm_sizeof:         rs.b       0

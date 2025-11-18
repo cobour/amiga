@@ -10,8 +10,6 @@ ig_start:
 ; load and inflate files, TODO: just dummy data
 
   move.l     #"F101",d1
-  move.l     chip_mem_ptr(pc),d5
-  add.l      #ig_cm_blockbuffer,d5                                                  ; TODO: inside framebuffer
   move.l     chip_mem_ptr(pc),d6
   add.l      #ig_cm_filebuffer,d6                                                   ; TODO: inside framebuffer
   move.l     other_mem_ptr(pc),a0

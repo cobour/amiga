@@ -10,8 +10,7 @@ DATAFILES_ASM equ 1
 ; loads and unzips the given other-mem and chip-mem datafiles
 ; in:
 ;   d1 - filename of other-mem datafile (masterfile containing index)
-;   d5 - pointer to 512 byte buffer in chip mem (only needed when USE_TRACKDISK)
-;   d6 - pointer to filebuffer in any mem
+;   d6 - pointer to filebuffer in chip mem
 ;   a0 - target pointer of other-mem datafile
 ;   a1 - target pointer of chip-mem datafile
 ; out:
@@ -27,8 +26,7 @@ datafiles_load_and_unzip:
 
   ; load masterfile
   move.l     d1,d4
-  move.l     d6,a2
-  move.l     d5,a3
+  move.l     d6,a3
   move.l     disk_struct_ptr(pc),a4
   bsr        disk_read_file
   tst.l      d0
@@ -57,8 +55,7 @@ datafiles_load_and_unzip:
   move.l     (a6)+,d2                                              ; length of related file
 
   ; load related file
-  move.l     d6,a2
-  move.l     d5,a3
+  move.l     d6,a3
   move.l     disk_struct_ptr(pc),a4
   bsr        disk_read_file
   tst.l      d0

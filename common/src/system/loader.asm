@@ -22,9 +22,6 @@ alloc:
 
   ; read code file
   bsr        disk_begin_io
-  move.l     a4,a2
-  add.l      other_mem_size(pc),a2
-  sub.l      #MAIN_CODE_SIZE+512,a2             ; safety buffer - why?
   move.l     a5,a3
   move.l     #MAIN_CODE_FILE,d4
   bsr        disk_read_file
@@ -32,8 +29,19 @@ alloc:
   bne.s      error
   bsr        disk_end_io
 
+  move.l     a4,a2
+  add.l      other_mem_size(pc),a2
+  sub.l      #MAIN_CODE_SIZE+512,a2             ; safety buffer - why?
+  move.l     a2,a0
+  move.l     #MAIN_CODE_SIZE,d7
+  lsr.l      #1,d7
+  subq.w     #1,d7
+.copy_loop:
+  move.w     (a3)+,(a2)+
+  dbf        d7,.copy_loop
+
   ; jump to loaded code
-  jmp        (a2)
+  jmp        (a0)
 
 ; do not start the game but exit to dos
 error:

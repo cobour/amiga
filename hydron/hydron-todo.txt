@@ -50,9 +50,9 @@ DONE					filesizes in files_index.i no longer needed ; complete file obsolete??
 DONE					asm_files_index.i obsolete
 DONE				ASM: load and unzip list of files (name of master-om-index-file given, related filenames and sizes retrieved from header of master-om-index-file)
 
-			USE_TRACKDISK : load complete file with one call to DoIO ??
+DONE	USE_TRACKDISK : load complete file with one call to DoIO ??
 			BUG: why must code moved down by 512 bytes when loaded from bootblock?
-			write_file to support 512 byte block
+			write_file to support trackdisk files of any length
 				
 
 

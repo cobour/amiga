@@ -77,7 +77,8 @@ disk_init:
   moveq.l    #DiskDriveNum,d5
   ; read rootblock
   moveq.l    #RbBlocknumber,d6                        ; number of block to read
-  bsr        disk_internal_read_block
+  moveq.l    #1,d7
+  bsr        disk_internal_read_blocks
   tst.l      d0
   bne        .rfl_exit
 
@@ -133,8 +134,7 @@ disk_cleanup:
 
 ; reads file from floppy disk
 ; in:
-;   a2 - pointer to target where file data will be stored
-;   a3 - pointer to 512 byte read buffer (must be in chip mem)
+;   a3 - pointer to target where file data will be stored (must be in chip mem)
 ;   a4 - pointer to disk-struct (disk_sizeof for USE_TRACKDISK)
 ;   d4 - filename (first 4 chars before dot)
 ; out:
@@ -148,7 +148,7 @@ disk_read_file:
 
   ifd        USE_DOS
 ; remap parameters
-  move.l     a2,d6
+  move.l     a3,d6
   lea.l      dos_filename(pc),a0
   move.l     d4,(a0)
   move.l     a0,d1
@@ -193,30 +193,12 @@ disk_read_file:
   bra.s      .find_first_block_loop
 .file_found:
   moveq.l    #0,d6
-  move.w     disk_file_start_block(a1),d6             ; first data block / current data block in loop
-  move.w     d6,d5
-  add.w      disk_file_num_blocks(a1),d5              ; last data block
-
-.read_file_data_loop:
-  bsr        disk_internal_read_block
+  moveq.l    #0,d7
+  move.w     disk_file_start_block(a1),d6
+  move.w     disk_file_num_blocks(a1),d7
+  bsr        disk_internal_read_blocks
   tst.l      d0
   bne.s      .error
-
-  ; data copy - inner loop
-  move.w     #512,d7
-  cmp.w      d6,d5
-  bne.s      .not_last_block
-  move.w     disk_file_size_in_last_block(a1),d7
-.not_last_block:
-  subq.w     #1,d7
-  move.l     a3,a0
-.copy_file_data_loop:
-  move.b     (a0)+,(a2)+
-  dbf        d7,.copy_file_data_loop
-
-  addq.w     #1,d6
-  cmp.w      d6,d5
-  bge.s      .read_file_data_loop
 
   endif                                               ; ifd USE_TRACKDISK
 
@@ -356,28 +338,28 @@ disk_end_io:
 
   ifd        USE_TRACKDISK
 
-; reads one block from floppy disk
+; reads blocks from floppy disk
 ; FOR INTERNAL USE OF DISK.ASM ONLY
 ; in:
-;   a3 - pointer to 512 byte read buffer (must be in chip mem)
+;   a3 - pointer to target buffer (must be in chip mem)
 ;   a4 - pointer to disk-struct
-;   d6 - number of block
+;   d6 - number of first block
+;   d7 - number of blocks to read
 ; out:
 ;   d0 - zero for success, other for error
-disk_internal_read_block:
+disk_internal_read_blocks:
   movem.l    d1-d7/a0-a6,-(sp)
 
   move.l     ExecBaseD,a6
-
-  ; DoIO - read block
   lea.l      disk_io_std_req(a4),a1
   move.l     a3,IoSrData(a1)
-  move.w     #IoCmdRead,IoSrCommand(a1)               ; CMD_READ
-  move.l     #512,IoSrLength(a1)                      ; length of one block
-  lsl.l      #8,d6                                    ; block number * 512
-  add.l      d6,d6                                    ; block number * 512
+  move.w     #IoCmdRead,IoSrCommand(a1)
+  move.w     #512,d5
+  mulu       d5,d6
+  mulu       d5,d7
   move.l     d6,IoSrOffset(a1)
-  jsr        DoIO(a6)                                 ; call DoIO
+  move.l     d7,IoSrLength(a1)
+  jsr        DoIO(a6)
   tst.l      d0
   bne.s      .error
 
@@ -434,9 +416,8 @@ disk_get_file_size:
 ; writes data to a single-block file
 ; in:
 ;   d4 - filename (first 4 chars before dot)
-;   d7 - length of data in bytes (must not be more than 488 bytes!!)
-;   a2 - pointer to data to be written
-;   a3 - pointer to 512 byte buffer (must be in chip mem)
+;   d7 - length of data in bytes
+;   a3 - pointer to data to be written (must be in chip mem)
 ;   a4 - pointer to disk-struct (disk_sizeof for USE_TRACKDISK)
 ; out:
 ;   d0 - zero for success, other for error
@@ -450,7 +431,7 @@ disk_write_file:
   ifd        USE_DOS
 
 ; remap parameter
-  move.l     a2,d6
+  move.l     a3,d6
   lea.l      dos_filename(pc),a0
   move.l     d4,(a0)
   move.l     a0,d1
@@ -508,12 +489,13 @@ disk_write_file:
 .file_found:
   move.l     4(a1),d6                                 ; data block
 
-  ; read block from disk
-  bsr        disk_internal_read_block
+  ; read block from disk --- FIXME no longer necessary because NODOS disk is used (no need to preserve DOS block header)
+  moveq.l    #1,d7
+  bsr        disk_internal_read_blocks
   tst.l      d0
   bne.s      .error
 
-  ; copy data to block buffer
+  ; copy data to block buffer --- FIXME no longer necessary because NODOS disk is used (no need to preserve DOS block header)
   subq.l     #1,d7
   move.l     a2,a0
   move.l     a3,a1
@@ -522,7 +504,7 @@ disk_write_file:
   move.b     (a0)+,(a1)+
   dbf        d7,.copy_loop
 
-  ; DoIO - write block to trackdisk buffer
+  ; DoIO - write block to trackdisk buffer --- TODO set offset, length and pointer in struct (was set before by read block)
   move.l     ExecBaseD,a6
   lea.l      disk_io_std_req(a4),a1
   move.w     #IoCmdWrite,IoSrCommand(a1)
