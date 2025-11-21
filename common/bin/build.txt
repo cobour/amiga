@@ -1,0 +1,5 @@
+cd vasm
+make CPU=m68k SYNTAX=mot
+
+cd vlink
+make
