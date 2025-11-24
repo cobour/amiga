@@ -41,6 +41,8 @@ targetFiles:
         id: SFX1
         volume: 64
         priority: 64
+      - filename: code/ingame_copperlist.asm
+        id: IGCL
 
   - filename: F100
     description: ingame_other_2

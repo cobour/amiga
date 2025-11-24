@@ -16,7 +16,7 @@ DATAFILES_ASM equ 1
 ; out:
 ;   d0 - zero if successfull, non-zero otherwise
 datafiles_load_and_unzip:
-  movem.l    d3-d4/d7/a2-a6,-(sp)
+  movem.l    d2-d4/d7/a2-a6,-(sp)
   movem.l    a0-a1,-(sp)                                           ; save original target pointers (other and chip)
 
   ; init
@@ -95,12 +95,12 @@ datafiles_load_and_unzip:
   bsr.s      .datafiles_type_specific_init
 
   ; success
-  movem.l    (sp)+,d3-d4/d7/a2-a6
+  movem.l    (sp)+,d2-d4/d7/a2-a6
   moveq.l    #0,d0
   rts
 .error:
   movem.l    (sp)+,a0-a1                                           ; restore original target pointers (other and chip)
-  movem.l    (sp)+,d3-d4/d7/a2-a6
+  movem.l    (sp)+,d2-d4/d7/a2-a6
   moveq.l    #-1,d0
   rts
 
