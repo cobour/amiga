@@ -53,23 +53,13 @@ DONE				ASM: load and unzip list of files (name of master-om-index-file given, r
 DONE	convert copper list to chip-mem-datafile entry
 
 DONE	USE_TRACKDISK : load complete file with one call to DoIO ??
+
+			new memory layout (disk_dma project)
+			remove USE_TRACKDISK
+			additional switch USE_DISK_DMA (only one of USE_DOS and USE_DISK_DMA may be used)
+			
+
+ONHOLD
+***********
 			write_file to support trackdisk files of any length
-			BUG: why must code moved down by 512 bytes when loaded from bootblock?
-				
-
-
-ON HOLD
-************
-				guru when disk_read_file in new_hydron.asm
-				
-				new define DISK_DMA_DRIVE_DF0 and DISK_DMA_DRIVE_DF1 => used to set DISK_DMA_DRIVE eq 3 or eq 4
-				contents of disk-dma-intern.i goes into disk.i
-				
-				DatFilesCount minus code files
-
-				common-init.asm (sets mem pointers OR allocs mem ; reads file directory OR not) => can be included by game code, is not specific to game, uses defines (DEBUG / RELEASE / IS_STANDARD_EXE / USE_DOS / USE_DISK_DMA) to detect what has to be done
-				copy disk-dma-intern.asm to common and let disk.asm use it
-					disk-dma-struct in om-common-struct
-					disk-dma-directory in om-common-struct
-				hydron.asm IS_STANDARD_EXE or not
-					alloc mem or set with $400 as cm and location behind code as om
+			BUG: why must code moved down by 512 bytes when loaded from bootblock? =>maybe because last block of codefile is not using full 512 bytes and so the copy overwrites stack?
