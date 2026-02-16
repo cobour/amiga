@@ -52,13 +52,21 @@ public class DiskimageFile {
 	private void writeBootblockInclude(Config config) throws Exception {
 		var includeFile = Paths.get(config.getMainCodeIncludeFilename());
 		var maincodeFilename = Paths.get(config.getTargetFolder() + this.mainCodefile + ".dat");
+		var maincodeFilesize = Files.size(maincodeFilename);
+		var maincodeBlockCount = (int) maincodeFilesize / 512;
+		if (maincodeFilesize % 512 > 0) {
+			maincodeBlockCount++;
+		}
 		try (PrintWriter writer = new PrintWriter(Files.newBufferedWriter(includeFile, StandardCharsets.UTF_8))) {
 			writer.println("; generated " + LocalDateTime.now());
 			writer.println(" ifnd MAIN_CODE_I");
 			writer.println("MAIN_CODE_I equ 1");
 			writer.println(" ");
 			writer.println("MAIN_CODE_FILE equ \"" + this.mainCodefile + "\"");
-			writer.println("MAIN_CODE_SIZE equ " + Files.size(maincodeFilename));
+			writer.println("MAIN_CODE_SIZE equ " + maincodeFilesize);
+			writer.println("MAIN_CODE_FILE_START_BLOCK equ 3"); // blocks 0+1 = bootblock, block 2 = directory block,
+			// maincode always first file
+			writer.println("MAIN_CODE_FILE_BLOCK_COUNT equ " + maincodeBlockCount);
 			writer.println(" ");
 			writer.println(" endif ; ifnd MAIN_CODE_I");
 		}
