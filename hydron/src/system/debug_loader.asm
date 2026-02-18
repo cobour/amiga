@@ -4,4 +4,4 @@
 ;
 
   include    "main_code.i"
-  include    "../common/src/system/loader.asm"
+  include    "../common/src/system/loader_td.asm"

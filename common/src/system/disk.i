@@ -2,9 +2,9 @@
 DISK_I              equ 1
 
                                ifd        DEBUG
-DiskDriveNum        equ 1
+DiskDriveNum        equ 1                                                        ; for USE_TRACKDISK
                                else
-DiskDriveNum        equ 0
+DiskDriveNum        equ 0                                                        ; for USE_TRACKDISK
                                endif                                             ; ifd DEBUG
 
 ; file directory block (as written by data_tool)
@@ -78,10 +78,10 @@ disk_file_sizeof:              rs.b       0                                     
 ; main disk structure - needed for accessing files when USE_TRACKDISK
                                rsreset
 disk_dat_files:                rs.l       (MaxFilesOnDisk+1)*disk_file_sizeof    ; per ".dat"-file 8 bytes (4 bytes name before dot, 4 bytes number of first data block)
+                               ifd        USE_TRACKDISK
 disk_message_port:             rs.b       34
 disk_io_std_req:               rs.b       48
+                               endif                                             ; ifd USE_TRACKDISK
 disk_sizeof:                   rs.b       0                                      ; size after scanning for dat-files is completed
-disk_file_header_blocks:       rs.l       73                                     ; 72 possible plus NULL indicating end-of-list
-disk_while_scanning_sizeof:    rs.b       0                                      ; size before/while scanning for dat-files
 
                                endif                                             ; ifnd DISK_I
