@@ -10,7 +10,8 @@ DATAFILES_ASM equ 1
 ; loads and unzips the given other-mem and chip-mem datafiles
 ; in:
 ;   d1 - filename of other-mem datafile (masterfile containing index)
-;   d6 - pointer to filebuffer in chip mem
+;   d6 - pointer to filebuffer in any mem
+;   d7 - pointer to dmabuffer in chip mem
 ;   a0 - target pointer of other-mem datafile
 ;   a1 - target pointer of chip-mem datafile
 ; out:
@@ -20,6 +21,10 @@ datafiles_load_and_unzip:
   movem.l    a0-a1,-(sp)                                           ; save original target pointers (other and chip)
 
   ; init
+  lea.l      .buffer(pc),a2
+  move.l     d7,(a2)
+  move.l     d7,a3
+  move.l     disk_struct_ptr(pc),a4
   bsr        disk_begin_io
   tst.l      d0
   bne        .error
@@ -27,6 +32,7 @@ datafiles_load_and_unzip:
   ; load masterfile
   move.l     d1,d4
   move.l     d6,a3
+  move.l     d7,a2
   move.l     disk_struct_ptr(pc),a4
   bsr        disk_read_file
   tst.l      d0
@@ -57,6 +63,7 @@ datafiles_load_and_unzip:
   ; load related file
   move.l     d6,a3
   move.l     disk_struct_ptr(pc),a4
+  move.l     .buffer(pc),a2
   bsr        disk_read_file
   tst.l      d0
   bne.s      .error
@@ -71,6 +78,9 @@ datafiles_load_and_unzip:
   and.l      #$00ffffff,d2
   add.l      d2,a1
   bra.s      .dlau_loop_next
+
+.buffer:
+  dc.l       0                                                     ; TODO: fix this better
 
 .dlau_loop_unzip_other_mem_file:
   move.l     a0,a4

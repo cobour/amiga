@@ -17,12 +17,16 @@ LoadView      equ -$de
 ctrl_save_orig_system_state:
   movem.l    d0-d7/a0-a6,-(sp)
 
+  ifnd       USE_DISK_DMA
+
   move.l     ExecBase,a6
   lea        graphics_name(pc),a1
   moveq.l    #0,d0
   jsr        OpenLibrary(a6)
   lea.l      graphics_base(pc),a0
   move.l     d0,(a0)
+
+  endif                                            ; ifnd USE_DISK_DMA
 
   lea.l      CustomBase,a6
 
@@ -43,6 +47,14 @@ ctrl_save_orig_system_state:
 
   WAITVB2
 
+  lea.l      ctrl_cur_lvl2hdl(pc),a0
+  move.l     Level2Handler,(a0)
+
+  lea.l      ctrl_cur_lvl3hdl(pc),a0
+  move.l     Level3Handler,(a0)
+
+  ifnd       USE_DISK_DMA
+ 
   move.l     graphics_base(pc),a6
 
   lea.l      ctrl_cur_view(pc),a0
@@ -51,14 +63,10 @@ ctrl_save_orig_system_state:
   lea.l      ctrl_cur_copper(pc),a0
   move.l     CurrentCopper(a6),(a0)
 
-  lea.l      ctrl_cur_lvl2hdl(pc),a0
-  move.l     Level2Handler,(a0)
-
-  lea.l      ctrl_cur_lvl3hdl(pc),a0
-  move.l     Level3Handler,(a0)
-
   sub.l      a1,a1
   jsr        LoadView(a6)
+
+  endif                                            ; ifnd USE_DISK_DMA
 
   movem.l    (sp)+,d0-d7/a0-a6
   rts
@@ -66,6 +74,9 @@ ctrl_save_orig_system_state:
 ; Restores screen at end of program
 ctrl_restore_screen:
   movem.l    d0-d7/a0-a6,-(sp)
+
+  ifnd       USE_DISK_DMA
+
   lea.l      CustomBase,a6
   move.l     ctrl_cur_copper(pc),COP1LC(a6)
 
@@ -80,6 +91,8 @@ ctrl_restore_screen:
   move.l     graphics_base(pc),a1
   jsr        CloseLibrary(a6)
 
+  endif                                            ; ifnd USE_DISK_DMA
+ 
   movem.l    (sp)+,d0-d7/a0-a6
   rts
 

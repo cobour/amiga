@@ -21,7 +21,7 @@ targetFiles:
         defines:
           - BOOTBLOCK
           - RELEASE
-          - USE_TRACKDISK
+          - USE_DISK_DMA
 
   - filename: F000
     description: ingame_chip_1
@@ -82,7 +82,7 @@ diskimageFiles:
         defines:
           - BOOTBLOCK
           - RELEASE
-          - USE_TRACKDISK
+          - USE_DISK_DMA
     datafiles:
       - F000
       - F001

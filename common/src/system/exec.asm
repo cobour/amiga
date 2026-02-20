@@ -26,13 +26,13 @@ Mem1MB                   equ 1
 MemCustom                equ 2
 
 ; Memory sizes
-; When program is loaded from bootblock and Amiga has 512k chip + 512k chip/slow/fast mem, 
+; When program is loaded from bootblock with USE_TRACKDISK and Amiga has 512k chip + 512k chip/slow/fast mem, 
 ; then these sizes are allocatable under KickStart 1.3, 2.0 and 3.1
 ChipMemSize              equ 500650
 OtherMemSize             equ 475100
-; When program is loaded from bootblock and Amiga has 512k chip
+; When program is loaded from bootblock with USE_TRACKDISK and Amiga has 512k chip
 ; then this size is allocatable under KickStart 1.3, 2.0 and 3.1
-ChipMemSize512k          equ 453700             ; 1.3: 476000, 2.0: 454900, 3.1: 453700
+ChipMemSize512k          equ 453700                  ; 1.3: 476000, 2.0: 454900, 3.1: 453700
 
 ; Allocates memory
 ; in:
@@ -43,6 +43,16 @@ ChipMemSize512k          equ 453700             ; 1.3: 476000, 2.0: 454900, 3.1:
 ;   a4 - pointer to other mem block or zero
 exec_alloc_mem:
   movem.l    d1-d7/a0-a3/a6,-(sp)
+
+  ifd        MEM_1MB_ALL_DEBUG
+
+  include    "../common/src/system/loader.i"
+  include    "../hydron/main_code.i"
+
+  move.l     #$80000-$400,d5
+  move.l     #$80000-STACK_SIZE-MAIN_CODE_SIZE,d6
+
+  else                                               ; ifd MEM_1MB_ALL_DEBUG
 
   ; 512k?
   tst.l      d0
@@ -57,6 +67,8 @@ exec_alloc_mem:
   beq.s      .do_alloc
   move.l     #ChipMemSize,d5
   move.l     #OtherMemSize,d6
+
+  endif                                              ; ifd MEM_1MB_ALL_DEBUG
 
 .do_alloc:
   ; save sizes
@@ -137,18 +149,21 @@ exec_free_mem:
   movem.l    (sp)+,d0-d7/a0-a6
   rts
 
-  endif                                         ; ifd STANDARD_EXE
+  endif                                              ; ifd STANDARD_EXE
 
   ifd        BOOTBLOCK
 
 ; Performs a reset
 exec_reboot:
+
+  ifd        USE_TRACKDISK
+
   move.l     ExecBase,a6
   cmp.w      #KickstartV36,LibVersion(a6)
   blt.s      .1
   jmp        ColdReboot(a6)
 .1:
-  not.l      ExecBase                           ; invalidate ExecBase in memory => lets boot-checks fail and force exec to init everything
+  not.l      ExecBase                                ; invalidate ExecBase in memory => lets boot-checks fail and force exec to init everything
   lea.l      .2(pc),a5
   jsr        Supervisor(a6)
   CNOP       0,4
@@ -160,7 +175,15 @@ exec_reboot:
   reset
   jmp        (a0)
 
-  endif                                         ; ifd BOOTBLOCK
+  else                                               ; ifd USE_TRACKDISK
+
+  ; exec is thrashed, just do nothing until user resets
+.1:
+  bra.s      .1
+
+  endif                                              ; ifd USE_TRACKDISK
+
+  endif                                              ; ifd BOOTBLOCK
 
 chip_mem_ptr:
   dc.l       0
@@ -171,4 +194,4 @@ chip_mem_size:
 other_mem_size:
   dc.l       0
 
-  endif                                         ; ifnd EXEC_ASM
+  endif                                              ; ifnd EXEC_ASM

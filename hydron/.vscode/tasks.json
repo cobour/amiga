@@ -13,7 +13,7 @@
 					"-linedebug",
 					"-DDEBUG",
 					"-DSTANDARD_EXE",
-					"-DUSE_TRACKDISK"
+					"-DUSE_DISK_DMA"
 				]
 			},
 			"vlink": {
@@ -51,18 +51,18 @@
 					"-linedebug",
 					"-DDEBUG",
 					"-DSTANDARD_EXE",
-					"-DUSE_TRACKDISK"
+					"-DUSE_DISK_DMA"
 				]
 			},
 			"vlink": {
 				"enabled": true,
 				"command": "${config:amiga-assembly.binDir}/vlink",
-				"includes": "hydron.asm",
+				"includes": "src/system/debug_game.asm",
 				"excludes": "",
 				"createStartupSequence": true,
 				"createExeFileParentDir": true,
 				"exefilename": "../uae/dh0/Hydron",
-				"entrypoint": "hydron.asm",
+				"entrypoint": "src/system/debug_game.asm",
 				"args": [
 					"-bamigahunk",
 					"-Bstatic"

@@ -54,12 +54,27 @@ DONE	convert copper list to chip-mem-datafile entry
 
 DONE	USE_TRACKDISK : load complete file with one call to DoIO ??
 
-			new memory layout (disk_dma project)
-			remove USE_TRACKDISK
-			additional switch USE_DISK_DMA (only one of USE_DOS and USE_DISK_DMA may be used)
+
+DONE		new memory layout (disk_dma project)
+DONE		additional switch USE_DISK_DMA (only one of USE_DOS and USE_DISK_DMA may be used)
+DONE		common_init.asm => always disk_init
+DONE				disk_sizeof: USE_TRACKDISK around TD-fields
+DONE		WHDLoad still working properly?
+DONE		disk_read_file: buffer pointer as parameter
+DONE		exec_reboot no longer possible when USE_DISK_DMA => endless loop when exiting
+DONE		cleanup 3 loader sources (TODOs there)
+DONE		check every occurance of "a3 - pointer to 512 bytes in chip ram" in disk.asm
+DONE		set pointer to 12800+512 chip ram buffer before calling any routine in disk.asm
+DONE		adjust mem sizes in exec_alloc_mem when using Mem1MB (chip $80000-$400, other $80000-STACK_SIZE-MAIN_CODE_SIZE) => better optional switch DD_1MB and TD_1MB => set in loader files
+			better solution for exec_reboot (black screen?)
+			cleanup/refactor disk_direct.asm
+
+			DATA_TOOL: create whdload release package
+			does USE_TRACKDISK still work properly?
 			
 
 ONHOLD
 ***********
 			write_file to support trackdisk files of any length
-			BUG: why must code moved down by 512 bytes when loaded from bootblock? =>maybe because last block of codefile is not using full 512 bytes and so the copy overwrites stack?
+			BUG: USE_TRACKDISK: why must code moved down by 512 bytes when loaded from bootblock? =>maybe because last block of codefile is not using full 512 bytes and so the copy overwrites stack?
+			USE_TRACKDISK: mem layout in other: first main_code, then om-struct (maybe source of BUG)

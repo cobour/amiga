@@ -14,6 +14,8 @@ ig_start:
   add.l      #ig_cm_filebuffer,d6             ; TODO: inside framebuffer
   move.l     other_mem_ptr(pc),a0
   add.l      #ig_om_datfile,a0
+  move.l     chip_mem_ptr(pc),d7
+  add.l      #ig_cm_dmabuffer,d7              ; TODO: inside framebuffer
   move.l     chip_mem_ptr(pc),a1
   add.l      #ig_cm_datfile,a1
   bsr        datafiles_load_and_unzip

@@ -5,8 +5,8 @@ DISK_ASM equ 1
 
 ; inits disk access (one call at beginning of game)
 ; in:
-;   a3 - pointer to 512 byte read buffer (must be in chip mem)
-;   a4 - pointer to disk-struct (disk_sizeof for USE_TRACKDISK)
+;   a3 - pointer to read buffer (must be in chip mem) / USE_TRACKDISK 512 byte, USE_DISK_DMA 12800+512 byte
+;   a4 - pointer to disk-struct (disk_sizeof for USE_TRACKDISK and USE_DISK_DMA)
 ; out:
 ;   d0 - zero for success, other for error
 disk_init:
@@ -41,8 +41,8 @@ disk_init:
   jsr        CurrentDir(a6)
   lea.l      dos_old_curdir(pc),a0
   move.l     d0,(a0)
-  endif                                               ; ifd DEBUG
-  endif                                               ; ifd USE_DOS
+  endif                                                ; ifd DEBUG
+  endif                                                ; ifd USE_DOS
 
   ; ***********************
   ; **** USE_TRACKDISK ****
@@ -52,7 +52,17 @@ disk_init:
   bsr        disk_begin_io
   bsr.s      .read_file_list
   bsr        disk_end_io
-  endif                                               ; ifd USE_TRACKDISK
+  endif                                                ; ifd USE_TRACKDISK
+
+  ; ***********************
+  ; **** USE_DISK_DMA  ****
+  ; ***********************
+
+  ifd        USE_DISK_DMA
+  bsr        disk_begin_io
+  bsr.s      .read_file_list
+  bsr        disk_end_io
+  endif                                                ; ifd USE_DISK_DMA
 
 .success:
   movem.l    (sp)+,d1-d7/a0-a6
@@ -76,7 +86,7 @@ disk_init:
 
   moveq.l    #DiskDriveNum,d5
   ; read rootblock
-  moveq.l    #RbBlocknumber,d6                        ; number of block to read
+  moveq.l    #RbBlocknumber,d6                         ; number of block to read
   moveq.l    #1,d7
   bsr        disk_internal_read_blocks
   tst.l      d0
@@ -92,17 +102,60 @@ disk_init:
   move.w     (a3)+,(a4)+
   dbf        d7,.loop
 
+  ; empty entry at end of list
+  clr.l      (a4)+
+  clr.l      (a4)+
+  clr.w      (a4)
 .rfl_exit:
   movem.l    (sp)+,d1-d7/a0-a6
   rts
 
+  endif                                                ; ifd USE_TRACKDISK
 
-  endif                                               ; ifd USE_TRACKDISK
+  ; ***********************
+  ; **** USE_DISK_DMA  ****
+  ; ***********************
+
+  ifd        USE_DISK_DMA
+
+; reads file directory block created by data_tool
+.read_file_list:
+  movem.l    d1-d7/a0-a6,-(sp)
+
+  ; read rootblock
+  moveq.l    #RbBlocknumber,d0                         ; number of block to read
+  moveq.l    #1,d1
+  move.l     a3,a0
+  move.l     a3,a1
+  lea.l      512(a1),a1
+  bsr        dd_load_file
+  tst.l      d0
+  bne        .rfl_exit
+
+  move.w     disk_directory_filecount(a3),d7
+  subq.w     #1,d7
+  lea.l      disk_directory_sizeof(a3),a3
+.loop:
+  ; THIS CODE MUST BE CHANGED WHEN disk_file_sizeof CHANGES
+  move.l     (a3)+,(a4)+
+  move.l     (a3)+,(a4)+
+  move.w     (a3)+,(a4)+
+  dbf        d7,.loop
+
+  ; empty entry at end of list
+  clr.l      (a4)+
+  clr.l      (a4)+
+  clr.w      (a4)
+.rfl_exit:
+  movem.l    (sp)+,d1-d7/a0-a6
+  rts
+
+  endif                                                ; ifd USE_DISK_DMA
 
 ; cleans up at end of program
 disk_cleanup:
 
-  ; USE_TRACKDISK not necessary
+  ; USE_TRACKDISK and USE_DISK_DMA not necessary
 
   ; ***********************
   ; **** USE_DOS       ****
@@ -120,7 +173,7 @@ disk_cleanup:
 ; unlock DH0:
   move.l     dos_dh0_lock(pc),d1
   jsr        UnLock(a6)
-  endif                                               ; ifd DEBUG
+  endif                                                ; ifd DEBUG
 
 ; close dos.library
   move.l     ExecBase,a6
@@ -128,14 +181,15 @@ disk_cleanup:
   jsr        CloseLibrary(a6)
 
   movem.l    (sp)+,d0-d7/a0-a6
-  endif                                               ; ifd USE_DOS
+  endif                                                ; ifd USE_DOS
 
   rts
 
 ; reads file from floppy disk
 ; in:
+;   a2 - pointer to read buffer (must be in chip mem) / USE_TRACKDISK 512 byte, USE_DISK_DMA 12800+512 byte
 ;   a3 - pointer to target where file data will be stored (must be in chip mem)
-;   a4 - pointer to disk-struct (disk_sizeof for USE_TRACKDISK)
+;   a4 - pointer to disk-struct (disk_sizeof for USE_TRACKDISK and USE_DISK_DMA)
 ;   d4 - filename (first 4 chars before dot)
 ; out:
 ;   d0 - zero for success, other for error
@@ -165,7 +219,7 @@ disk_read_file:
 ; read data from file
   move.l     dos_file_handle(pc),d1
   move.l     d6,d2
-  move.l     #880*1024,d3                             ; max possible file size
+  move.l     #880*1024,d3                              ; max possible file size
   jsr        Read(a6)
   tst.l      d0
   blt.s      .error
@@ -173,7 +227,7 @@ disk_read_file:
 ; close file
   move.l     dos_file_handle(pc),d1
   jsr        Close(a6)
-  endif                                               ; ifd USE_DOS
+  endif                                                ; ifd USE_DOS
 
   ; ***********************
   ; **** USE_TRACKDISK ****
@@ -186,7 +240,7 @@ disk_read_file:
 .find_first_block_loop:
   move.l     (a1),d0
   tst.l      d0
-  beq.s      .error                                   ; file not found
+  beq.s      .error                                    ; file not found
   cmp.l      d0,d4
   beq.s      .file_found
   lea.l      disk_file_sizeof(a1),a1
@@ -200,7 +254,36 @@ disk_read_file:
   tst.l      d0
   bne.s      .error
 
-  endif                                               ; ifd USE_TRACKDISK
+  endif                                                ; ifd USE_TRACKDISK
+
+  ; ***********************
+  ; **** USE_DISK_DMA  ****
+  ; ***********************
+
+  ifd        USE_DISK_DMA
+
+  ; find first block of file
+  lea.l      disk_dat_files(a4),a1
+.find_first_block_loop:
+  move.l     (a1),d0
+  tst.l      d0
+  beq.s      .error                                    ; file not found
+  cmp.l      d0,d4
+  beq.s      .file_found
+  lea.l      disk_file_sizeof(a1),a1
+  bra.s      .find_first_block_loop
+.file_found:
+  moveq.l    #0,d0
+  moveq.l    #0,d1
+  move.w     disk_file_start_block(a1),d0
+  move.w     disk_file_num_blocks(a1),d1
+  move.l     a3,a0
+  move.l     a2,a1
+  bsr        dd_load_file
+  tst.l      d0
+  bne.s      .error
+
+  endif                                                ; ifd USE_DISK_DMA
 
 .success:
   movem.l    (sp)+,d1-d7/a0-a6
@@ -215,8 +298,8 @@ disk_read_file:
 
 ; initializes disk io
 ; in:
-;   a3 - pointer to 512 bytes in chip ram
-;   a4 - pointer to disk-struct (disk_sizeof for USE_TRACKDISK)
+;   a3 - pointer to read buffer (must be in chip mem) / USE_TRACKDISK 512 byte, USE_DISK_DMA 12800+512 byte
+;   a4 - pointer to disk-struct (disk_sizeof for USE_TRACKDISK and USE_DISK_DMA)
 ; out:
 ;   d0 - zero for success, other for error
 disk_begin_io:
@@ -273,7 +356,16 @@ disk_begin_io:
   dc.b       "trackdisk.device",0
   even
 
-  endif                                               ; ifd USE_TRACKDISK
+  endif                                                ; ifd USE_TRACKDISK
+
+  ; ***********************
+  ; **** USE_DISK_DMA  ****
+  ; ***********************
+
+  ifd        USE_DISK_DMA
+  move.w     drive(pc),d0
+  bsr        dd_init
+  endif                                                ; ifd USE_DISK_DMA
 
 .success:
   movem.l    (sp)+,d1-d7/a0-a6
@@ -288,7 +380,7 @@ disk_begin_io:
 
 ; cleans up after disk io
 ; in:
-;   a4 - pointer to disk-struct (disk_sizeof for USE_TRACKDISK)
+;   a4 - pointer to disk-struct (disk_sizeof for USE_TRACKDISK and USE_DISK_DMA)
 ; out:
 ;   d0 - zero for success, other for error
 disk_end_io:
@@ -320,7 +412,15 @@ disk_end_io:
   lea.l      disk_io_std_req(a4),a1
   jsr        CloseDevice(a6)
 
-  endif                                               ; ifd USE_TRACKDISK
+  endif                                                ; ifd USE_TRACKDISK
+
+  ; ***********************
+  ; **** USE_DISK_DMA ****
+  ; ***********************
+
+  ifd        USE_DISK_DMA
+  bsr        dd_cleanup
+  endif                                                ; ifd USE_DISK_DMA
 
 .success:
   movem.l    (sp)+,d1-d7/a0-a6
@@ -342,7 +442,7 @@ disk_end_io:
 ; FOR INTERNAL USE OF DISK.ASM ONLY
 ; in:
 ;   a3 - pointer to target buffer (must be in chip mem)
-;   a4 - pointer to disk-struct
+;   a4 - pointer to disk-struct (disk_sizeof for USE_TRACKDISK and USE_DISK_DMA)
 ;   d6 - number of first block
 ;   d7 - number of blocks to read
 ; out:
@@ -370,10 +470,10 @@ disk_internal_read_blocks:
 
 .error:
   movem.l    (sp)+,d1-d7/a0-a6
-  moveq.l    #0,d0                                    ; ignore error here, may be just a warning, program will not work if it is an error anyway
+  moveq.l    #0,d0                                     ; ignore error here, may be just a warning, program will not work if it is an error anyway
   rts
 
-  endif                                               ; ifd USE_TRACKDISK
+  endif                                                ; ifd USE_TRACKDISK
 
   ifnd       BOOTBLOCK
 
@@ -382,7 +482,7 @@ disk_internal_read_blocks:
 ; calculates size of file depending on metadata stored in file directory
 ; in:
 ;   d0 - filename
-;   a0 - pointer to disk-struct
+;   a0 - pointer to disk-struct (disk_sizeof for USE_TRACKDISK and USE_DISK_DMA)
 ; out:
 ;   d1 - size of file in bytes or -1 if file not found
 disk_get_file_size:
@@ -397,8 +497,8 @@ disk_get_file_size:
   move.w     disk_file_num_blocks(a0),d0
   move.w     disk_file_size_in_last_block(a0),d1
   subq.w     #1,d0
-  lsl.l      #8,d0                                    ; d0 * 512
-  add.l      d0,d0                                    ; d0 * 512
+  lsl.l      #8,d0                                     ; d0 * 512
+  add.l      d0,d0                                     ; d0 * 512
   add.l      d0,d1
   bra.s      .success
 .next:
@@ -411,14 +511,14 @@ disk_get_file_size:
   movem.l    (sp)+,a0/d0
   rts
 
-  endif                                               ; ifd USE_TRACKDISK
+  endif                                                ; ifd USE_TRACKDISK
 
 ; writes data to a single-block file
 ; in:
 ;   d4 - filename (first 4 chars before dot)
 ;   d7 - length of data in bytes
 ;   a3 - pointer to data to be written (must be in chip mem)
-;   a4 - pointer to disk-struct (disk_sizeof for USE_TRACKDISK)
+;   a4 - pointer to disk-struct (disk_sizeof for USE_TRACKDISK and USE_DISK_DMA)
 ; out:
 ;   d0 - zero for success, other for error
 disk_write_file:
@@ -458,7 +558,7 @@ disk_write_file:
   move.l     dos_file_handle(pc),d1
   jsr        Close(a6)
 
-  endif                                               ; ifd USE_DOS
+  endif                                                ; ifd USE_DOS
 
   ; ***********************
   ; **** USE_TRACKDISK ****
@@ -473,7 +573,7 @@ disk_write_file:
   jsr        DoIO(a6)
   tst.l      d0
   bne.s      .error
-  tst.l      IoSrActual(a1)                           ; zero = not write-protected ; non-zero = write-protected
+  tst.l      IoSrActual(a1)                            ; zero = not write-protected ; non-zero = write-protected
   bne.s      .error
 
   ; find data block of file
@@ -481,13 +581,13 @@ disk_write_file:
 .find_first_block_loop:
   move.l     (a1),d0
   tst.l      d0
-  beq.s      .error                                   ; file not found
+  beq.s      .error                                    ; file not found
   cmp.l      d0,d4
   beq.s      .file_found
   addq.l     #8,a1
   bra.s      .find_first_block_loop
 .file_found:
-  move.l     4(a1),d6                                 ; data block
+  move.l     4(a1),d6                                  ; data block
 
   ; read block from disk --- FIXME no longer necessary because NODOS disk is used (no need to preserve DOS block header)
   moveq.l    #1,d7
@@ -499,7 +599,7 @@ disk_write_file:
   subq.l     #1,d7
   move.l     a2,a0
   move.l     a3,a1
-  lea.l      24(a1),a1                                ; 24 bytes = size of data block header
+  lea.l      24(a1),a1                                 ; 24 bytes = size of data block header
 .copy_loop:
   move.b     (a0)+,(a1)+
   dbf        d7,.copy_loop
@@ -518,7 +618,17 @@ disk_write_file:
   tst.l      d0
   bne.s      .error
 
-  endif                                               ; ifd USE_TRACKDISK
+  endif                                                ; ifd USE_TRACKDISK
+
+  ; ***********************
+  ; **** USE_DISK_DMA ****
+  ; ***********************
+
+  ifd        USE_DISK_DMA
+.1:
+  move.w     #$0f00,$dff180
+  bra.s      .1
+  endif                                                ; ifd USE_DISK_DMA
 
 .success:
   movem.l    (sp)+,d1-d7/a0-a6
@@ -530,7 +640,7 @@ disk_write_file:
   moveq.l    #1,d0
   rts
 
-  endif                                               ; ifnd BOOTBLOCK
+  endif                                                ; ifnd BOOTBLOCK
 
   ; ***********************
   ; **** USE_DOS       ****
@@ -545,7 +655,7 @@ dos_base:
 dos_file_handle:
   dc.l       0
 dos_filename:
-  dc.b       0,0,0,0                                  ; space for filename before the dot
+  dc.b       0,0,0,0                                   ; space for filename before the dot
   dc.b       ".dat",0
   even
 
@@ -557,7 +667,14 @@ dos_dh0_lock:
   dc.l       0
 dos_old_curdir:
   dc.l       0
-  endif                                               ; ifd DEBUG
-  endif                                               ; ifd USE_DOS
+  endif                                                ; ifd DEBUG
+  endif                                                ; ifd USE_DOS
 
-  endif                                               ; ifnd DISK_ASM
+  ; ***********************
+  ; **** USE_DISK_DMA  ****
+  ; ***********************
+
+  ifd        USE_DISK_DMA
+  include    "../common/src/system/disk_direct.asm"
+  endif                                                ; ifd USE_DISK_DMA
+  endif                                                ; ifnd DISK_ASM
