@@ -178,7 +178,10 @@ exec_reboot:
   else                                               ; ifd USE_TRACKDISK
 
   ; exec is thrashed, just do nothing until user resets
+  lea.l      CustomBase,a6
 .1:
+  move.w     #%0000000111111111,DMACON(a6)           ; no dma at all
+  move.w     #$0000,COLOR00(a6)
   bra.s      .1
 
   endif                                              ; ifd USE_TRACKDISK

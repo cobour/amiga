@@ -68,8 +68,8 @@ DONE		set pointer to 12800+512 chip ram buffer before calling any routine in dis
 DONE		adjust mem sizes in exec_alloc_mem when using Mem1MB (chip $80000-$400, other $80000-STACK_SIZE-MAIN_CODE_SIZE) => better optional switch DD_1MB and TD_1MB => set in loader files
 DONE		cia timing in disk_direct.asm
 DONE		cleanup/refactor disk_direct.asm
+DONE		better solution for exec_reboot (black screen?, disable all dma?)
 			"loading" when loading => disk_init and disk_cleanup
-			better solution for exec_reboot (black screen?, disable all dma?)
 
 			DATA_TOOL: create whdload release package
 			does USE_TRACKDISK still work properly?
