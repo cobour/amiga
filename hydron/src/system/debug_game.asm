@@ -11,9 +11,9 @@ MEM_1MB_ALL_DEBUG equ 1                         ; signalling exec_alloc_mem that
 
   moveq.l    #-1,d0
   move.w     #DISK_DRIVE_BIT,d1
-  lea.l      track(pc),a0
+  lea.l      dd_track(pc),a0
   move.w     d0,(a0)
-  lea.l      drive(pc),a0
+  lea.l      dd_drive(pc),a0
   move.w     d1,(a0)
 
   lea.l      CustomBase,a6

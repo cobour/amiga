@@ -363,7 +363,7 @@ disk_begin_io:
   ; ***********************
 
   ifd        USE_DISK_DMA
-  move.w     drive(pc),d0
+  move.w     dd_drive(pc),d0
   bsr        dd_init
   endif                                                ; ifd USE_DISK_DMA
 

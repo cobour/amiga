@@ -79,12 +79,12 @@ load_main_code:
   lea.l      $50000,a1
   moveq.l    #MAIN_CODE_FILE_START_BLOCK,d0
   moveq.l    #MAIN_CODE_FILE_BLOCK_COUNT,d1
-  bsr.s      dd_load_file
+  bsr        dd_load_file
 
   bsr.s      dd_cleanup
 
-  move.w     track(pc),d0
-  move.w     drive(pc),d1
+  move.w     dd_track(pc),d0
+  move.w     dd_drive(pc),d1
   move.l     a0,a4
   add.l      #MAIN_CODE_SIZE,a4
   move.l     #$400,a5

@@ -30,7 +30,7 @@ DONE		DATA_TOOL: check if 1760 blocks or less => exception
 DONE		clean.sh
 DONE		dummy code should work now (all 5 launchers work, all 3 DEBUG-launchers are debuggable) => commit
 				
-DONE		disk.asm - calc_file_size (use directory block information => then asm_files_index.i not needed anymore because bootblock can calculate file length AND third step in Conversion.class of data_tool is not needed anymore also (boobblockFile attribute of targetfile obsolete too)
+DONE		disk.asm - calc_file_size (use directory block information) => then asm_files_index.i not needed anymore because bootblock can calculate file length AND third step in Conversion.class of data_tool is not needed anymore also (boobblockFile attribute of targetfile obsolete too)
 DONE		move defines for bootblock assembly into yaml
 
 DONE		test on real hardware
@@ -66,8 +66,10 @@ DONE		cleanup 3 loader sources (TODOs there)
 DONE		check every occurance of "a3 - pointer to 512 bytes in chip ram" in disk.asm
 DONE		set pointer to 12800+512 chip ram buffer before calling any routine in disk.asm
 DONE		adjust mem sizes in exec_alloc_mem when using Mem1MB (chip $80000-$400, other $80000-STACK_SIZE-MAIN_CODE_SIZE) => better optional switch DD_1MB and TD_1MB => set in loader files
-			better solution for exec_reboot (black screen?)
-			cleanup/refactor disk_direct.asm
+DONE		cia timing in disk_direct.asm
+DONE		cleanup/refactor disk_direct.asm
+			"loading" when loading => disk_init and disk_cleanup
+			better solution for exec_reboot (black screen?, disable all dma?)
 
 			DATA_TOOL: create whdload release package
 			does USE_TRACKDISK still work properly?

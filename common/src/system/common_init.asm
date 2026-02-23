@@ -18,9 +18,9 @@ common_init:
   bsr        exec_alloc_mem
   else                                 ; ifd STANDARD_EXE
   ifd        USE_DISK_DMA
-  lea.l      track(pc),a0
+  lea.l      dd_track(pc),a0
   move.w     d0,(a0)
-  lea.l      drive(pc),a0
+  lea.l      dd_drive(pc),a0
   move.w     d1,(a0)
   endif                                ; ifd USE_DISK_DMA
   endif                                ; ifd STANDARD_EXE
