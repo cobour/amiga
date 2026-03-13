@@ -71,6 +71,7 @@ DONE		cleanup/refactor disk_direct.asm
 DONE		better solution for exec_reboot (black screen?, disable all dma?)
 			"loading" when loading => disk_init and disk_cleanup
 
+			disk_direct.asm .read_blocks block 11 (0x0b) error
 			DATA_TOOL: create whdload release package
 			does USE_TRACKDISK still work properly?
 			

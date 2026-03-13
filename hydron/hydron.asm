@@ -46,5 +46,6 @@ main_code_start:
   include    "../common/src/system/disk.asm"
   include    "../common/src/system/control.asm"
   include    "src/ingame.asm"
+  include    "src/ingame/panel.asm"
   include    "../common/src/3rdparty/inflate.asm"
   include    "../common/src/3rdparty/ptplayer.asm"

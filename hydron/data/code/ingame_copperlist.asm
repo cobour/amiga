@@ -33,7 +33,7 @@
 ; bitplane config
   dc.w       BPLCON0,(IgScreenBitPlanes<<12)|BplColorOn
   dc.w       BPLCON1,$0000
-  dc.w       BPLCON2,$0000
+  dc.w       BPLCON2,%0000000000100100
   dc.w       BPL1MOD,IgScreenWidthBytes*(IgScreenBitPlanes-1)
   dc.w       BPL2MOD,IgScreenWidthBytes*(IgScreenBitPlanes-1)
   dc.w       DDFSTRT,(IgScreenStartX/2-DdfResolution)
@@ -75,5 +75,360 @@
   dc.w       COLOR29,$0000
   dc.w       COLOR30,$0000
   dc.w       COLOR31,$0000
+; panel (sprite 0 and 1, manual mode)
+  dc.w       SPR0CTL, $0000
+  dc.w       SPR0DATB,$0000
+  dc.w       SPR1CTL, $0000
+  dc.w       SPR1DATB,$0000
+  dc.w       $2c07,$fffe
+  dc.w       SPR0POS, $0050
+  dc.w       SPR0DATA,%0000000110000000
+  dc.w       $2c47,$fffe
+  dc.w       SPR1POS, $0058
+  dc.w       SPR1DATA,%1111111001111111
+  dc.w       $01fe,$0000
+  dc.w       $01fe,$0000
+  dc.w       SPR1POS, $0084
+  dc.w       SPR1DATA,%1111111001111111
+  dc.w       SPR0POS, $008c
+  dc.w       SPR0DATA,%0000000110000000
+  dc.w       SPR1POS, $0094
+  dc.w       SPR1DATA,%1111111001111111
+  dc.w       SPR0POS, $00b8
+  dc.w       SPR0DATA,%0000000110000000
+  dc.w       SPR1POS, $00c0
+  dc.w       SPR1DATA,%1111111001111111
+  dc.w       SPR0POS, $00c8
+  dc.w       SPR0DATA,%0000000110000000
+
+  dc.w       $2d07,$fffe
+  dc.w       SPR0POS, $0050
+  dc.w       SPR0DATA,%0000001111000000
+  dc.w       $2d47,$fffe
+  dc.w       SPR1POS, $0058
+  dc.w       SPR1DATA,%1111110000111111
+  dc.w       $01fe,$0000
+  dc.w       $01fe,$0000
+  dc.w       SPR1POS, $0084
+  dc.w       SPR1DATA,%1111110000111111
+  dc.w       SPR0POS, $008c
+  dc.w       SPR0DATA,%0000001111000000
+  dc.w       SPR1POS, $0094
+  dc.w       SPR1DATA,%1111110000111111
+  dc.w       SPR0POS, $00b8
+  dc.w       SPR0DATA,%0000001111000000
+  dc.w       SPR1POS, $00c0
+  dc.w       SPR1DATA,%1111110000111111
+  dc.w       SPR0POS, $00c8
+  dc.w       SPR0DATA,%0000001111000000
+
+  dc.w       $2e07,$fffe
+  dc.w       SPR0POS, $0050
+  dc.w       SPR0DATA,%0000011111100000
+  dc.w       $2e47,$fffe
+  dc.w       SPR1POS, $0058
+  dc.w       SPR1DATA,%1111100000011111
+  dc.w       $01fe,$0000
+  dc.w       $01fe,$0000
+  dc.w       SPR1POS, $0084
+  dc.w       SPR1DATA,%1111100000011111
+  dc.w       SPR0POS, $008c
+  dc.w       SPR0DATA,%0000011111100000
+  dc.w       SPR1POS, $0094
+  dc.w       SPR1DATA,%1111100000011111
+  dc.w       SPR0POS, $00b8
+  dc.w       SPR0DATA,%0000011111100000
+  dc.w       SPR1POS, $00c0
+  dc.w       SPR1DATA,%1111100000011111
+  dc.w       SPR0POS, $00c8
+  dc.w       SPR0DATA,%0000011111100000
+
+  dc.w       $2f07,$fffe
+  dc.w       SPR0POS, $0050
+  dc.w       SPR0DATA,%0000111111110000
+  dc.w       $2f47,$fffe
+  dc.w       SPR1POS, $0058
+  dc.w       SPR1DATA,%1111000000001111
+  dc.w       $01fe,$0000
+  dc.w       $01fe,$0000
+  dc.w       SPR1POS, $0084
+  dc.w       SPR1DATA,%1111000000001111
+  dc.w       SPR0POS, $008c
+  dc.w       SPR0DATA,%0000111111110000
+  dc.w       SPR1POS, $0094
+  dc.w       SPR1DATA,%1111000000001111
+  dc.w       SPR0POS, $00b8
+  dc.w       SPR0DATA,%0000111111110000
+  dc.w       SPR1POS, $00c0
+  dc.w       SPR1DATA,%1111000000001111
+  dc.w       SPR0POS, $00c8
+  dc.w       SPR0DATA,%0000111111110000
+
+  dc.w       $3007,$fffe
+  dc.w       SPR0POS, $0050
+  dc.w       SPR0DATA,%0001111111111000
+  dc.w       $3047,$fffe
+  dc.w       SPR1POS, $0058
+  dc.w       SPR1DATA,%1110000000000111
+  dc.w       $01fe,$0000
+  dc.w       $01fe,$0000
+  dc.w       SPR1POS, $0084
+  dc.w       SPR1DATA,%1110000000000111
+  dc.w       SPR0POS, $008c
+  dc.w       SPR0DATA,%0001111111111000
+  dc.w       SPR1POS, $0094
+  dc.w       SPR1DATA,%1110000000000111
+  dc.w       SPR0POS, $00b8
+  dc.w       SPR0DATA,%0001111111111000
+  dc.w       SPR1POS, $00c0
+  dc.w       SPR1DATA,%1110000000000111
+  dc.w       SPR0POS, $00c8
+  dc.w       SPR0DATA,%0001111111111000
+
+  dc.w       $3107,$fffe
+  dc.w       SPR0POS, $0050
+  dc.w       SPR0DATA,%0011111111111100
+  dc.w       $3147,$fffe
+  dc.w       SPR1POS, $0058
+  dc.w       SPR1DATA,%1100000000000011
+  dc.w       $01fe,$0000
+  dc.w       $01fe,$0000
+  dc.w       SPR1POS, $0084
+  dc.w       SPR1DATA,%1100000000000011
+  dc.w       SPR0POS, $008c
+  dc.w       SPR0DATA,%0011111111111100
+  dc.w       SPR1POS, $0094
+  dc.w       SPR1DATA,%1100000000000011
+  dc.w       SPR0POS, $00b8
+  dc.w       SPR0DATA,%0011111111111100
+  dc.w       SPR1POS, $00c0
+  dc.w       SPR1DATA,%1100000000000011
+  dc.w       SPR0POS, $00c8
+  dc.w       SPR0DATA,%0011111111111100
+
+  dc.w       $3207,$fffe
+  dc.w       SPR0POS, $0050
+  dc.w       SPR0DATA,%0111111111111110
+  dc.w       $3247,$fffe
+  dc.w       SPR1POS, $0058
+  dc.w       SPR1DATA,%1000000000000001
+  dc.w       $01fe,$0000
+  dc.w       $01fe,$0000
+  dc.w       SPR1POS, $0084
+  dc.w       SPR1DATA,%1000000000000001
+  dc.w       SPR0POS, $008c
+  dc.w       SPR0DATA,%0111111111111110
+  dc.w       SPR1POS, $0094
+  dc.w       SPR1DATA,%1000000000000001
+  dc.w       SPR0POS, $00b8
+  dc.w       SPR0DATA,%0111111111111110
+  dc.w       SPR1POS, $00c0
+  dc.w       SPR1DATA,%1000000000000001
+  dc.w       SPR0POS, $00c8
+  dc.w       SPR0DATA,%0111111111111110
+
+  dc.w       $3307,$fffe
+  dc.w       SPR0POS, $0050
+  dc.w       SPR0DATA,%1111111111111111
+  dc.w       $3347,$fffe
+  dc.w       SPR1POS, $0058
+  dc.w       SPR1DATA,%0000000000000000
+  dc.w       $01fe,$0000
+  dc.w       $01fe,$0000
+  dc.w       SPR1POS, $0084
+  dc.w       SPR1DATA,%0000000000000000
+  dc.w       SPR0POS, $008c
+  dc.w       SPR0DATA,%1111111111111111
+  dc.w       SPR1POS, $0094
+  dc.w       SPR1DATA,%0000000000000000
+  dc.w       SPR0POS, $00b8
+  dc.w       SPR0DATA,%1111111111111111
+  dc.w       SPR1POS, $00c0
+  dc.w       SPR1DATA,%0000000000000000
+  dc.w       SPR0POS, $00c8
+  dc.w       SPR0DATA,%1111111111111111
+
+  dc.w       $3407,$fffe
+  dc.w       SPR0POS, $0050
+  dc.w       SPR0DATA,%0000000110000000
+  dc.w       $3447,$fffe
+  dc.w       SPR1POS, $0058
+  dc.w       SPR1DATA,%1111111001111111
+  dc.w       $01fe,$0000
+  dc.w       $01fe,$0000
+  dc.w       SPR1POS, $0084
+  dc.w       SPR1DATA,%1111111001111111
+  dc.w       SPR0POS, $008c
+  dc.w       SPR0DATA,%0000000110000000
+  dc.w       SPR1POS, $0094
+  dc.w       SPR1DATA,%1111111001111111
+  dc.w       SPR0POS, $00b8
+  dc.w       SPR0DATA,%0000000110000000
+  dc.w       SPR1POS, $00c0
+  dc.w       SPR1DATA,%1111111001111111
+  dc.w       SPR0POS, $00c8
+  dc.w       SPR0DATA,%0000000110000000
+
+  dc.w       $3507,$fffe
+  dc.w       SPR0POS, $0050
+  dc.w       SPR0DATA,%0000001111000000
+  dc.w       $3547,$fffe
+  dc.w       SPR1POS, $0058
+  dc.w       SPR1DATA,%1111110000111111
+  dc.w       $01fe,$0000
+  dc.w       $01fe,$0000
+  dc.w       SPR1POS, $0084
+  dc.w       SPR1DATA,%1111110000111111
+  dc.w       SPR0POS, $008c
+  dc.w       SPR0DATA,%0000001111000000
+  dc.w       SPR1POS, $0094
+  dc.w       SPR1DATA,%1111110000111111
+  dc.w       SPR0POS, $00b8
+  dc.w       SPR0DATA,%0000001111000000
+  dc.w       SPR1POS, $00c0
+  dc.w       SPR1DATA,%1111110000111111
+  dc.w       SPR0POS, $00c8
+  dc.w       SPR0DATA,%0000001111000000
+
+  dc.w       $3607,$fffe
+  dc.w       SPR0POS, $0050
+  dc.w       SPR0DATA,%0000011111100000
+  dc.w       $3647,$fffe
+  dc.w       SPR1POS, $0058
+  dc.w       SPR1DATA,%1111100000011111
+  dc.w       $01fe,$0000
+  dc.w       $01fe,$0000
+  dc.w       SPR1POS, $0084
+  dc.w       SPR1DATA,%1111100000011111
+  dc.w       SPR0POS, $008c
+  dc.w       SPR0DATA,%0000011111100000
+  dc.w       SPR1POS, $0094
+  dc.w       SPR1DATA,%1111100000011111
+  dc.w       SPR0POS, $00b8
+  dc.w       SPR0DATA,%0000011111100000
+  dc.w       SPR1POS, $00c0
+  dc.w       SPR1DATA,%1111100000011111
+  dc.w       SPR0POS, $00c8
+  dc.w       SPR0DATA,%0000011111100000
+
+  dc.w       $3707,$fffe
+  dc.w       SPR0POS, $0050
+  dc.w       SPR0DATA,%0000111111110000
+  dc.w       $3747,$fffe
+  dc.w       SPR1POS, $0058
+  dc.w       SPR1DATA,%1111000000001111
+  dc.w       $01fe,$0000
+  dc.w       $01fe,$0000
+  dc.w       SPR1POS, $0084
+  dc.w       SPR1DATA,%1111000000001111
+  dc.w       SPR0POS, $008c
+  dc.w       SPR0DATA,%0000111111110000
+  dc.w       SPR1POS, $0094
+  dc.w       SPR1DATA,%1111000000001111
+  dc.w       SPR0POS, $00b8
+  dc.w       SPR0DATA,%0000111111110000
+  dc.w       SPR1POS, $00c0
+  dc.w       SPR1DATA,%1111000000001111
+  dc.w       SPR0POS, $00c8
+  dc.w       SPR0DATA,%0000111111110000
+
+  dc.w       $3807,$fffe
+  dc.w       SPR0POS, $0050
+  dc.w       SPR0DATA,%0001111111111000
+  dc.w       $3847,$fffe
+  dc.w       SPR1POS, $0058
+  dc.w       SPR1DATA,%1110000000000111
+  dc.w       $01fe,$0000
+  dc.w       $01fe,$0000
+  dc.w       SPR1POS, $0084
+  dc.w       SPR1DATA,%1110000000000111
+  dc.w       SPR0POS, $008c
+  dc.w       SPR0DATA,%0001111111111000
+  dc.w       SPR1POS, $0094
+  dc.w       SPR1DATA,%1110000000000111
+  dc.w       SPR0POS, $00b8
+  dc.w       SPR0DATA,%0001111111111000
+  dc.w       SPR1POS, $00c0
+  dc.w       SPR1DATA,%1110000000000111
+  dc.w       SPR0POS, $00c8
+  dc.w       SPR0DATA,%0001111111111000
+
+  dc.w       $3907,$fffe
+  dc.w       SPR0POS, $0050
+  dc.w       SPR0DATA,%0011111111111100
+  dc.w       $3947,$fffe
+  dc.w       SPR1POS, $0058
+  dc.w       SPR1DATA,%1100000000000011
+  dc.w       $01fe,$0000
+  dc.w       $01fe,$0000
+  dc.w       SPR1POS, $0084
+  dc.w       SPR1DATA,%1100000000000011
+  dc.w       SPR0POS, $008c
+  dc.w       SPR0DATA,%0011111111111100
+  dc.w       SPR1POS, $0094
+  dc.w       SPR1DATA,%1100000000000011
+  dc.w       SPR0POS, $00b8
+  dc.w       SPR0DATA,%0011111111111100
+  dc.w       SPR1POS, $00c0
+  dc.w       SPR1DATA,%1100000000000011
+  dc.w       SPR0POS, $00c8
+  dc.w       SPR0DATA,%0011111111111100
+
+  dc.w       $3a07,$fffe
+  dc.w       SPR0POS, $0050
+  dc.w       SPR0DATA,%0111111111111110
+  dc.w       $3a47,$fffe
+  dc.w       SPR1POS, $0058
+  dc.w       SPR1DATA,%1000000000000001
+  dc.w       $01fe,$0000
+  dc.w       $01fe,$0000
+  dc.w       SPR1POS, $0084
+  dc.w       SPR1DATA,%1000000000000001
+  dc.w       SPR0POS, $008c
+  dc.w       SPR0DATA,%0111111111111110
+  dc.w       SPR1POS, $0094
+  dc.w       SPR1DATA,%1000000000000001
+  dc.w       SPR0POS, $00b8
+  dc.w       SPR0DATA,%0111111111111110
+  dc.w       SPR1POS, $00c0
+  dc.w       SPR1DATA,%1000000000000001
+  dc.w       SPR0POS, $00c8
+  dc.w       SPR0DATA,%0111111111111110
+
+  dc.w       $3b07,$fffe
+  dc.w       SPR0POS, $0050
+  dc.w       SPR0DATA,%1111111111111111
+  dc.w       $3b47,$fffe
+  dc.w       SPR1POS, $0058
+  dc.w       SPR1DATA,%0000000000000000
+  dc.w       $01fe,$0000
+  dc.w       $01fe,$0000
+  dc.w       SPR1POS, $0084
+  dc.w       SPR1DATA,%0000000000000000
+  dc.w       SPR0POS, $008c
+  dc.w       SPR0DATA,%1111111111111111
+  dc.w       SPR1POS, $0094
+  dc.w       SPR1DATA,%0000000000000000
+  dc.w       SPR0POS, $00b8
+  dc.w       SPR0DATA,%1111111111111111
+  dc.w       SPR1POS, $00c0
+  dc.w       SPR1DATA,%0000000000000000
+  dc.w       SPR0POS, $00c8
+  dc.w       SPR0DATA,%1111111111111111
+
+  dc.w       $3c07,$fffe
+  dc.w       SPR0CTL, %0000000000000000                                             ; spr0 off
+  dc.w       SPR1CTL, %0000000000000000                                             ; spr1 off
+
+; reuse sprites used in panel
+  dc.w       SPR0PTH,$0000
+  dc.w       SPR0PTL,$0000
+  dc.w       SPR0POS,$0000
+  dc.w       SPR0CTL,$0000
+  dc.w       SPR1PTH,$0000
+  dc.w       SPR1PTL,$0000
+  dc.w       SPR1POS,$0000
+  dc.w       SPR1CTL,$0000
+
 ; end
   dc.w       $ffff,$fffe

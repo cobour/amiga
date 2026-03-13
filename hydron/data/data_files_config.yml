@@ -37,12 +37,16 @@ targetFiles:
     sources:
       - filename: music/revenge_of_earth.mod
         id: MS01
+      - filename: music/captivity.mod
+        id: MS02
       - filename: sfx/enter.wav
         id: SFX1
         volume: 64
         priority: 64
       - filename: code/ingame_copperlist.asm
         id: IGCL
+      - filename: code/auto_sprite.asm
+        id: AUTO
 
   - filename: F100
     description: ingame_other_2
@@ -51,6 +55,15 @@ targetFiles:
       - filename: gfx/background_tiles.iff
         id: COLS
         colorsOnly: true
+      - filename: gfx/panel_score.iff
+        id: PASC
+        withMask: false
+      - filename: gfx/panel_hiscore.iff
+        id: PAHI
+        withMask: false
+      - filename: gfx/panel_lives.iff
+        id: PALI
+        withMask: false
 
   - filename: F101
     description: ingame_other
@@ -70,6 +83,8 @@ targetFiles:
 #        flattenedReducedTileCount: 64
       - filename: music/revenge_of_earth.mod
         id: MP01
+      - filename: music/captivity.mod
+        id: MP02
 
 diskimageFiles:
   - filename: Hydron.adf

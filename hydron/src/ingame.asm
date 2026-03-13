@@ -24,15 +24,16 @@ ig_start:
 
   SETPTRS
   bsr        .init_copper_list
+  bsr        panel_init
   bsr        ctrl_take_system
   lea.l      lvl3_irq_handler(pc),a0
   bsr        ctrl_set_handler
   bsr        .set_copper_list
 
-  move.l     #"MS01",d0
+  move.l     #"MS02",d0
   bsr        datafiles_get_pointer
   move.l     df_idx_ptr_rawdata(a0),a1
-  move.l     #"MP01",d0
+  move.l     #"MP02",d0
   bsr        datafiles_get_pointer
   move.l     df_idx_ptr_rawdata(a0),a0
 
@@ -45,7 +46,7 @@ ig_start:
   move.l     #"SFX1",d0
   bsr        datafiles_get_pointer
   lea.l      df_idx_metadata(a0),a0
-  bsr        _mt_playfx
+  ;bsr        _mt_playfx
 
 .0:
   btst       #6,$bfe001
@@ -95,11 +96,51 @@ ig_start:
   addq.l     #4,a1
   dbf        d7,.icl2
 
+
+  ; init dummysprites - REMOVE ME - START
+  move.l     #"AUTO",d0
+  bsr        datafiles_get_pointer
+  move.l     df_idx_ptr_rawdata(a0),d0
+  move.l     d0,a0
+
+  lea.l      ig_cm_dummysprite1(a5),a1
+  move.l     (a0),(a1)
+  move.l     4(a0),4(a1)
+  move.l     8(a0),8(a1)
+  move.l     12(a0),12(a1)
+  move.l     16(a0),16(a1)
+  move.l     20(a0),20(a1)
+  move.l     24(a0),24(a1)
+
+  lea.l      ig_cm_cl_reuse_sprites(a2),a1
+  addq.l     #4,d0                            ; skip control words
+  move.w     d0,6(a1)
+  swap       d0
+  move.w     d0,2(a1)
+  move.w     (a0),10(a1)
+  move.w     2(a0),14(a1)
+
+  lea.l      ig_cm_dummysprite1(a5),a3
+  move.l     a3,d0
+  addq.l     #4,d0
+  move.w     d0,22(a1)
+  swap       d0
+  move.w     d0,18(a1)
+  move.w     (a3),26(a1)
+  add.w      #$0010,26(a1)
+  move.w     2(a3),30(a1)
+  ; init dummysprites - REMOVE ME - END
+
   rts
 
 .set_copper_list
+  movem.l    d0/a0/a6,-(sp)
+  move.l     #"IGCL",d0
+  bsr        datafiles_get_pointer
+  move.l     df_idx_ptr_rawdata(a0),a0
   lea.l      CustomBase,a6
-  move.l     a2,COP1LC(a6)
+  move.l     a0,COP1LC(a6)
+  movem.l    (sp)+,d0/a0/a6
   rts
 
 lvl3_irq_handler:
