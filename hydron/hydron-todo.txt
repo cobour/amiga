@@ -70,9 +70,9 @@ DONE		cia timing in disk_direct.asm
 DONE		cleanup/refactor disk_direct.asm
 DONE		better solution for exec_reboot (black screen?, disable all dma?)
 
-			disk_direct.asm .read_blocks block 11 (0x0b) error
+DONE		disk_direct.asm .read_blocks block 11 (0x0b) error
+DONE		are there enough cycles between two panel rows for resetting all 6 bitplane pointers (needed for scrolling with splitted buffers) ??  => yes
 
-			are there enough cycles between two panel rows for resetting all 6 bitplane pointers (needed for scrolling with splitted buffers) ??
 			player sprite (4-7), palette change
 			player movement
 			player sideguns

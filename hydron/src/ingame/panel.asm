@@ -9,7 +9,7 @@ panel_init:
   move.l     #"IGCL",d0
   bsr        datafiles_get_pointer
   move.l     df_idx_ptr_rawdata(a0),a3
-  lea.l      ig_cm_cl_panel+20(a3),a3
+  lea.l      ig_cm_cl_panel+4(a3),a3
 
   move.l     #"PAHI",d0
   bsr        datafiles_get_pointer
@@ -36,7 +36,7 @@ panel_init:
   move.w     (a2)+,66(a3)
   move.w     (a2)+,74(a3)
 
-  lea.l      80(a3),a3
+  lea.l      132(a3),a3
   dbf        d7,.pi_loop
 
   movem.l    (sp)+,d0/d7/a0-a3

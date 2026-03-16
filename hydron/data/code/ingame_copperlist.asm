@@ -17,6 +17,11 @@
   dc.w       SPR6PTL,$0000
   dc.w       SPR7PTH,$0000
   dc.w       SPR7PTL,$0000
+; sprite 0+1 init
+  dc.w       SPR0CTL, $0000
+  dc.w       SPR0DATB,$0000
+  dc.w       SPR1CTL, $0000
+  dc.w       SPR1DATB,$0000
 ; bitplane pointer
   dc.w       BPL1PTH,$0000
   dc.w       BPL1PTL,$0000
@@ -76,10 +81,6 @@
   dc.w       COLOR30,$0000
   dc.w       COLOR31,$0000
 ; panel (sprite 0 and 1, manual mode)
-  dc.w       SPR0CTL, $0000
-  dc.w       SPR0DATB,$0000
-  dc.w       SPR1CTL, $0000
-  dc.w       SPR1DATB,$0000
   dc.w       $2c07,$fffe
   dc.w       SPR0POS, $0050
   dc.w       SPR0DATA,$0000
@@ -100,6 +101,21 @@
   dc.w       SPR1DATA,$0000
   dc.w       SPR0POS, $00c8
   dc.w       SPR0DATA,$0000
+
+  ; placeholder copper moves for re-setting the bitplane-pointers (will be one copper wait and 12 copper moves)
+  dc.w       $01fe,$0000
+  dc.w       $01fe,$0000
+  dc.w       $01fe,$0000
+  dc.w       $01fe,$0000
+  dc.w       $01fe,$0000
+  dc.w       $01fe,$0000
+  dc.w       $01fe,$0000
+  dc.w       $01fe,$0000
+  dc.w       $01fe,$0000
+  dc.w       $01fe,$0000
+  dc.w       $01fe,$0000
+  dc.w       $01fe,$0000
+  dc.w       $01fe,$0000
 
   dc.w       $2d07,$fffe
   dc.w       SPR0POS, $0050
@@ -122,6 +138,21 @@
   dc.w       SPR0POS, $00c8
   dc.w       SPR0DATA,$0000
 
+  ; placeholder copper moves for re-setting the bitplane-pointers (will be one copper wait and 12 copper moves)
+  dc.w       $01fe,$0000
+  dc.w       $01fe,$0000
+  dc.w       $01fe,$0000
+  dc.w       $01fe,$0000
+  dc.w       $01fe,$0000
+  dc.w       $01fe,$0000
+  dc.w       $01fe,$0000
+  dc.w       $01fe,$0000
+  dc.w       $01fe,$0000
+  dc.w       $01fe,$0000
+  dc.w       $01fe,$0000
+  dc.w       $01fe,$0000
+  dc.w       $01fe,$0000
+
   dc.w       $2e07,$fffe
   dc.w       SPR0POS, $0050
   dc.w       SPR0DATA,$0000
@@ -142,6 +173,21 @@
   dc.w       SPR1DATA,$0000
   dc.w       SPR0POS, $00c8
   dc.w       SPR0DATA,$0000
+
+  ; placeholder copper moves for re-setting the bitplane-pointers (will be one copper wait and 12 copper moves)
+  dc.w       $01fe,$0000
+  dc.w       $01fe,$0000
+  dc.w       $01fe,$0000
+  dc.w       $01fe,$0000
+  dc.w       $01fe,$0000
+  dc.w       $01fe,$0000
+  dc.w       $01fe,$0000
+  dc.w       $01fe,$0000
+  dc.w       $01fe,$0000
+  dc.w       $01fe,$0000
+  dc.w       $01fe,$0000
+  dc.w       $01fe,$0000
+  dc.w       $01fe,$0000
 
   dc.w       $2f07,$fffe
   dc.w       SPR0POS, $0050
@@ -164,6 +210,21 @@
   dc.w       SPR0POS, $00c8
   dc.w       SPR0DATA,$0000
 
+  ; placeholder copper moves for re-setting the bitplane-pointers (will be one copper wait and 12 copper moves)
+  dc.w       $01fe,$0000
+  dc.w       $01fe,$0000
+  dc.w       $01fe,$0000
+  dc.w       $01fe,$0000
+  dc.w       $01fe,$0000
+  dc.w       $01fe,$0000
+  dc.w       $01fe,$0000
+  dc.w       $01fe,$0000
+  dc.w       $01fe,$0000
+  dc.w       $01fe,$0000
+  dc.w       $01fe,$0000
+  dc.w       $01fe,$0000
+  dc.w       $01fe,$0000
+
   dc.w       $3007,$fffe
   dc.w       SPR0POS, $0050
   dc.w       SPR0DATA,$0000
@@ -184,6 +245,21 @@
   dc.w       SPR1DATA,$0000
   dc.w       SPR0POS, $00c8
   dc.w       SPR0DATA,$0000
+
+  ; placeholder copper moves for re-setting the bitplane-pointers (will be one copper wait and 12 copper moves)
+  dc.w       $01fe,$0000
+  dc.w       $01fe,$0000
+  dc.w       $01fe,$0000
+  dc.w       $01fe,$0000
+  dc.w       $01fe,$0000
+  dc.w       $01fe,$0000
+  dc.w       $01fe,$0000
+  dc.w       $01fe,$0000
+  dc.w       $01fe,$0000
+  dc.w       $01fe,$0000
+  dc.w       $01fe,$0000
+  dc.w       $01fe,$0000
+  dc.w       $01fe,$0000
 
   dc.w       $3107,$fffe
   dc.w       SPR0POS, $0050
@@ -206,6 +282,21 @@
   dc.w       SPR0POS, $00c8
   dc.w       SPR0DATA,$0000
 
+  ; placeholder copper moves for re-setting the bitplane-pointers (will be one copper wait and 12 copper moves)
+  dc.w       $01fe,$0000
+  dc.w       $01fe,$0000
+  dc.w       $01fe,$0000
+  dc.w       $01fe,$0000
+  dc.w       $01fe,$0000
+  dc.w       $01fe,$0000
+  dc.w       $01fe,$0000
+  dc.w       $01fe,$0000
+  dc.w       $01fe,$0000
+  dc.w       $01fe,$0000
+  dc.w       $01fe,$0000
+  dc.w       $01fe,$0000
+  dc.w       $01fe,$0000
+
   dc.w       $3207,$fffe
   dc.w       SPR0POS, $0050
   dc.w       SPR0DATA,$0000
@@ -226,6 +317,21 @@
   dc.w       SPR1DATA,$0000
   dc.w       SPR0POS, $00c8
   dc.w       SPR0DATA,$0000
+
+  ; placeholder copper moves for re-setting the bitplane-pointers (will be one copper wait and 12 copper moves)
+  dc.w       $01fe,$0000
+  dc.w       $01fe,$0000
+  dc.w       $01fe,$0000
+  dc.w       $01fe,$0000
+  dc.w       $01fe,$0000
+  dc.w       $01fe,$0000
+  dc.w       $01fe,$0000
+  dc.w       $01fe,$0000
+  dc.w       $01fe,$0000
+  dc.w       $01fe,$0000
+  dc.w       $01fe,$0000
+  dc.w       $01fe,$0000
+  dc.w       $01fe,$0000
 
   dc.w       $3307,$fffe
   dc.w       SPR0POS, $0050
@@ -248,6 +354,21 @@
   dc.w       SPR0POS, $00c8
   dc.w       SPR0DATA,$0000
 
+  ; placeholder copper moves for re-setting the bitplane-pointers (will be one copper wait and 12 copper moves)
+  dc.w       $01fe,$0000
+  dc.w       $01fe,$0000
+  dc.w       $01fe,$0000
+  dc.w       $01fe,$0000
+  dc.w       $01fe,$0000
+  dc.w       $01fe,$0000
+  dc.w       $01fe,$0000
+  dc.w       $01fe,$0000
+  dc.w       $01fe,$0000
+  dc.w       $01fe,$0000
+  dc.w       $01fe,$0000
+  dc.w       $01fe,$0000
+  dc.w       $01fe,$0000
+
   dc.w       $3407,$fffe
   dc.w       SPR0POS, $0050
   dc.w       SPR0DATA,$0000
@@ -268,6 +389,21 @@
   dc.w       SPR1DATA,$0000
   dc.w       SPR0POS, $00c8
   dc.w       SPR0DATA,$0000
+
+  ; placeholder copper moves for re-setting the bitplane-pointers (will be one copper wait and 12 copper moves)
+  dc.w       $01fe,$0000
+  dc.w       $01fe,$0000
+  dc.w       $01fe,$0000
+  dc.w       $01fe,$0000
+  dc.w       $01fe,$0000
+  dc.w       $01fe,$0000
+  dc.w       $01fe,$0000
+  dc.w       $01fe,$0000
+  dc.w       $01fe,$0000
+  dc.w       $01fe,$0000
+  dc.w       $01fe,$0000
+  dc.w       $01fe,$0000
+  dc.w       $01fe,$0000
 
   dc.w       $3507,$fffe
   dc.w       SPR0POS, $0050
@@ -290,6 +426,21 @@
   dc.w       SPR0POS, $00c8
   dc.w       SPR0DATA,$0000
 
+  ; placeholder copper moves for re-setting the bitplane-pointers (will be one copper wait and 12 copper moves)
+  dc.w       $01fe,$0000
+  dc.w       $01fe,$0000
+  dc.w       $01fe,$0000
+  dc.w       $01fe,$0000
+  dc.w       $01fe,$0000
+  dc.w       $01fe,$0000
+  dc.w       $01fe,$0000
+  dc.w       $01fe,$0000
+  dc.w       $01fe,$0000
+  dc.w       $01fe,$0000
+  dc.w       $01fe,$0000
+  dc.w       $01fe,$0000
+  dc.w       $01fe,$0000
+
   dc.w       $3607,$fffe
   dc.w       SPR0POS, $0050
   dc.w       SPR0DATA,$0000
@@ -310,6 +461,21 @@
   dc.w       SPR1DATA,$0000
   dc.w       SPR0POS, $00c8
   dc.w       SPR0DATA,$0000
+
+  ; placeholder copper moves for re-setting the bitplane-pointers (will be one copper wait and 12 copper moves)
+  dc.w       $01fe,$0000
+  dc.w       $01fe,$0000
+  dc.w       $01fe,$0000
+  dc.w       $01fe,$0000
+  dc.w       $01fe,$0000
+  dc.w       $01fe,$0000
+  dc.w       $01fe,$0000
+  dc.w       $01fe,$0000
+  dc.w       $01fe,$0000
+  dc.w       $01fe,$0000
+  dc.w       $01fe,$0000
+  dc.w       $01fe,$0000
+  dc.w       $01fe,$0000
 
   dc.w       $3707,$fffe
   dc.w       SPR0POS, $0050
@@ -332,6 +498,21 @@
   dc.w       SPR0POS, $00c8
   dc.w       SPR0DATA,$0000
 
+  ; placeholder copper moves for re-setting the bitplane-pointers (will be one copper wait and 12 copper moves)
+  dc.w       $01fe,$0000
+  dc.w       $01fe,$0000
+  dc.w       $01fe,$0000
+  dc.w       $01fe,$0000
+  dc.w       $01fe,$0000
+  dc.w       $01fe,$0000
+  dc.w       $01fe,$0000
+  dc.w       $01fe,$0000
+  dc.w       $01fe,$0000
+  dc.w       $01fe,$0000
+  dc.w       $01fe,$0000
+  dc.w       $01fe,$0000
+  dc.w       $01fe,$0000
+
   dc.w       $3807,$fffe
   dc.w       SPR0POS, $0050
   dc.w       SPR0DATA,$0000
@@ -352,6 +533,21 @@
   dc.w       SPR1DATA,$0000
   dc.w       SPR0POS, $00c8
   dc.w       SPR0DATA,$0000
+
+  ; placeholder copper moves for re-setting the bitplane-pointers (will be one copper wait and 12 copper moves)
+  dc.w       $01fe,$0000
+  dc.w       $01fe,$0000
+  dc.w       $01fe,$0000
+  dc.w       $01fe,$0000
+  dc.w       $01fe,$0000
+  dc.w       $01fe,$0000
+  dc.w       $01fe,$0000
+  dc.w       $01fe,$0000
+  dc.w       $01fe,$0000
+  dc.w       $01fe,$0000
+  dc.w       $01fe,$0000
+  dc.w       $01fe,$0000
+  dc.w       $01fe,$0000
 
   dc.w       $3907,$fffe
   dc.w       SPR0POS, $0050
@@ -374,6 +570,21 @@
   dc.w       SPR0POS, $00c8
   dc.w       SPR0DATA,$0000
 
+  ; placeholder copper moves for re-setting the bitplane-pointers (will be one copper wait and 12 copper moves)
+  dc.w       $01fe,$0000
+  dc.w       $01fe,$0000
+  dc.w       $01fe,$0000
+  dc.w       $01fe,$0000
+  dc.w       $01fe,$0000
+  dc.w       $01fe,$0000
+  dc.w       $01fe,$0000
+  dc.w       $01fe,$0000
+  dc.w       $01fe,$0000
+  dc.w       $01fe,$0000
+  dc.w       $01fe,$0000
+  dc.w       $01fe,$0000
+  dc.w       $01fe,$0000
+
   dc.w       $3a07,$fffe
   dc.w       SPR0POS, $0050
   dc.w       SPR0DATA,$0000
@@ -395,6 +606,21 @@
   dc.w       SPR0POS, $00c8
   dc.w       SPR0DATA,$0000
 
+  ; placeholder copper moves for re-setting the bitplane-pointers (will be one copper wait and 12 copper moves)
+  dc.w       $01fe,$0000
+  dc.w       $01fe,$0000
+  dc.w       $01fe,$0000
+  dc.w       $01fe,$0000
+  dc.w       $01fe,$0000
+  dc.w       $01fe,$0000
+  dc.w       $01fe,$0000
+  dc.w       $01fe,$0000
+  dc.w       $01fe,$0000
+  dc.w       $01fe,$0000
+  dc.w       $01fe,$0000
+  dc.w       $01fe,$0000
+  dc.w       $01fe,$0000
+
   dc.w       $3b07,$fffe
   dc.w       SPR0POS, $0050
   dc.w       SPR0DATA,$0000
@@ -415,6 +641,21 @@
   dc.w       SPR1DATA,$0000
   dc.w       SPR0POS, $00c8
   dc.w       SPR0DATA,$0000
+
+  ; placeholder copper moves for re-setting the bitplane-pointers (will be one copper wait and 12 copper moves)
+  dc.w       $01fe,$0000
+  dc.w       $01fe,$0000
+  dc.w       $01fe,$0000
+  dc.w       $01fe,$0000
+  dc.w       $01fe,$0000
+  dc.w       $01fe,$0000
+  dc.w       $01fe,$0000
+  dc.w       $01fe,$0000
+  dc.w       $01fe,$0000
+  dc.w       $01fe,$0000
+  dc.w       $01fe,$0000
+  dc.w       $01fe,$0000
+  dc.w       $01fe,$0000
 
   dc.w       $3c07,$fffe
   dc.w       SPR0CTL, $0000                                                         ; spr0 off
