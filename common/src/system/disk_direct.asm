@@ -115,10 +115,10 @@ dd_load_file:
   bra.s      .next_track
 .track_loop:   
   tst.l      (a1)
-  beq.s      .try_to_fix_error
+  beq.s      .reseek
   move.w     dd_track(pc),d1
   cmp.b      1(a1),d1                           ; correct track?
-  bne.s      .try_to_fix_error
+  bne.s      .reseek
   cmp.b      2(a1),d7                           ; block found?
   bne.s      .next_block
   moveq.l    #127,d6
@@ -152,7 +152,7 @@ dd_load_file:
   lea        512+4(a1),a1
   bra.s      .track_loop
 
-.try_to_fix_error:
+.reseek:
   move.w     dd_track(pc),-(sp)
   moveq      #0,d6
   bsr        .seek_track
