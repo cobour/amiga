@@ -127,7 +127,17 @@ dd_load_file:
   move.l     (a1)+,(a0)+
   dbf        d6,.block_copy_loop
 
-  addq.w     #1,d7                              ; FIXME: under very rare circumstances here may the result be 0x0b what leads to infinite retries
+  cmp.b      #10,d7
+  bne.s      .no_step
+  ; step to next track and begin with first block of that track
+  move.w     dd_track(pc),d6
+  addq.w     #1,d6
+  moveq.l    #0,d5
+  move.l     d5,d7
+  bsr        .seek
+
+.no_step:
+  addq.w     #1,d7
 .next_track: 
   move.l     a4,a1
   dbf        d0,.track_loop

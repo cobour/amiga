@@ -69,9 +69,16 @@ DONE		adjust mem sizes in exec_alloc_mem when using Mem1MB (chip $80000-$400, ot
 DONE		cia timing in disk_direct.asm
 DONE		cleanup/refactor disk_direct.asm
 DONE		better solution for exec_reboot (black screen?, disable all dma?)
-			"loading" when loading => disk_init and disk_cleanup
 
 			disk_direct.asm .read_blocks block 11 (0x0b) error
+
+			are there enough cycles between two panel rows for resetting all 6 bitplane pointers (needed for scrolling with splitted buffers) ??
+			player sprite (4-7), palette change
+			player movement
+			player sideguns
+			playershots
+
+			"loading" when loading => disk_init and disk_cleanup
 			DATA_TOOL: create whdload release package
 			does USE_TRACKDISK still work properly?
 			
