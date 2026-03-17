@@ -30,27 +30,11 @@ targetFiles:
       - filename: gfx/test_ehb_256x256.iff
         id: TSTB
         withMask: false
-      - filename: sfx/tone.wav
-        id: TON0
-        volume: 64
-        priority: 64
-      - filename: sfx/tone2.wav
-        id: TON1
-        volume: 64
-        priority: 64
 
   - filename: F001
     description: ingame_chip_2
     memoryType: CHIP
     sources:      
-      - filename: sfx/tone.wav
-        id: TON2
-        volume: 64
-        priority: 64
-      - filename: sfx/tone2.wav
-        id: TON3
-        volume: 64
-        priority: 64
       - filename: music/captivity.mod
         id: MS02
       - filename: code/ingame_copperlist.asm
