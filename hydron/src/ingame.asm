@@ -25,6 +25,8 @@ ig_start:
   SETPTRS
   bsr        .init_copper_list
   bsr        panel_init
+  bsr        player_init
+  bsr        player_update                    ; update here once
   bsr        ctrl_take_system
   lea.l      lvl3_irq_handler(pc),a0
   bsr        ctrl_set_handler
@@ -130,42 +132,6 @@ ig_start:
   move.l     20(a0),20(a1)
   move.l     24(a0),24(a1)
 
-  lea.l      ig_cm_dummysprite4(a5),a1
-  move.l     (a0),(a1)
-  move.l     4(a0),4(a1)
-  move.l     8(a0),8(a1)
-  move.l     12(a0),12(a1)
-  move.l     16(a0),16(a1)
-  move.l     20(a0),20(a1)
-  move.l     24(a0),24(a1)
-
-  lea.l      ig_cm_dummysprite5(a5),a1
-  move.l     (a0),(a1)
-  move.l     4(a0),4(a1)
-  move.l     8(a0),8(a1)
-  move.l     12(a0),12(a1)
-  move.l     16(a0),16(a1)
-  move.l     20(a0),20(a1)
-  move.l     24(a0),24(a1)
-
-  lea.l      ig_cm_dummysprite6(a5),a1
-  move.l     (a0),(a1)
-  move.l     4(a0),4(a1)
-  move.l     8(a0),8(a1)
-  move.l     12(a0),12(a1)
-  move.l     16(a0),16(a1)
-  move.l     20(a0),20(a1)
-  move.l     24(a0),24(a1)
-
-  lea.l      ig_cm_dummysprite7(a5),a1
-  move.l     (a0),(a1)
-  move.l     4(a0),4(a1)
-  move.l     8(a0),8(a1)
-  move.l     12(a0),12(a1)
-  move.l     16(a0),16(a1)
-  move.l     20(a0),20(a1)
-  move.l     24(a0),24(a1)
-
   lea.l      ig_cm_cl_reuse_sprites(a2),a1
   addq.l     #4,d0                            ; skip control words
   move.w     d0,6(a1)
@@ -199,38 +165,6 @@ ig_start:
   swap       d0
   move.w     d0,10(a1)
   move.w     #$3a84,(a3)
-  move.w     #$3f00,2(a3)
-
-  lea.l      ig_cm_dummysprite4(a5),a3
-  move.l     a3,d0
-  move.w     d0,22(a1)
-  swap       d0
-  move.w     d0,18(a1)
-  move.w     #$3a94,(a3)
-  move.w     #$3f00,2(a3)
-
-  lea.l      ig_cm_dummysprite5(a5),a3
-  move.l     a3,d0
-  move.w     d0,30(a1)
-  swap       d0
-  move.w     d0,26(a1)
-  move.w     #$3aa4,(a3)
-  move.w     #$3f00,2(a3)
-
-  lea.l      ig_cm_dummysprite6(a5),a3
-  move.l     a3,d0
-  move.w     d0,38(a1)
-  swap       d0
-  move.w     d0,34(a1)
-  move.w     #$3ab4,(a3)
-  move.w     #$3f00,2(a3)
-
-  lea.l      ig_cm_dummysprite7(a5),a3
-  move.l     a3,d0
-  move.w     d0,46(a1)
-  swap       d0
-  move.w     d0,42(a1)
-  move.w     #$3ac4,(a3)
   move.w     #$3f00,2(a3)
 
   ; init dummysprites - REMOVE ME - END

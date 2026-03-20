@@ -46,7 +46,7 @@ targetFiles:
     description: ingame_other_2
     memoryType: OTHER
     sources:
-      - filename: gfx/background_tiles.iff
+      - filename: gfx/test_ehb_256x256.iff
         id: COLS
         colorsOnly: true
       - filename: gfx/panel_score.iff
