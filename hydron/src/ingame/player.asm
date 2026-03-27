@@ -11,7 +11,7 @@ player_init:
   move.l     #"PLYR",d0
   bsr        datafiles_get_pointer
   move.l     df_idx_ptr_rawdata(a0),ig_om_player_gfx_ptr(a4)
-  clr.l      ig_om_player_anim_offset(a4)                               ; clear once, after this move.b is sufficient
+  clr.l      ig_om_player_anim_offset(a4)                                         ; clear once, after this move.b is sufficient
   move.b     #PlayerShipAnimCentered,ig_om_player_anim_offset+3(a4)
   lea.l      df_idx_metadata(a0),a0
   move.w     df_iff_width(a0),d0
@@ -25,6 +25,7 @@ player_init:
   move.w     #$010c,ig_om_player_max_ypos(a4)
   clr.w      ig_om_player_left_for_frames(a4)
   clr.w      ig_om_player_right_for_frames(a4)
+  clr.w      ig_om_player_centered_for_frames(a4)
 
   ; set sprite pointers in copperlist
   move.l     #"IGCL",d0
@@ -36,19 +37,19 @@ player_init:
   lea.l      ig_cm_cl_reuse_sprites(a0),a1
   move.l     a5,d0
   add.l      #ig_cm_player_sprite0,d0
-  move.w     d0,6(a1)                                                   ; SPR0PTL
+  move.w     d0,6(a1)                                                             ; SPR0PTL
   swap       d0
-  move.w     d0,2(a1)                                                   ; SPR0PTH
+  move.w     d0,2(a1)                                                             ; SPR0PTH
   move.l     a5,d0
   add.l      #ig_cm_player_sprite1,d0
-  move.w     d0,22(a1)                                                  ; SPR1PTL
+  move.w     d0,22(a1)                                                            ; SPR1PTL
   swap       d0
-  move.w     d0,18(a1)                                                  ; SPR1PTH
+  move.w     d0,18(a1)                                                            ; SPR1PTH
   moveq.l    #0,d0
-  move.w     d0,10(a1)                                                  ; SPR0POS
-  move.w     d0,14(a1)                                                  ; SPR0CTL
-  move.w     d0,26(a1)                                                  ; SPR1POS
-  move.w     d0,30(a1)                                                  ; SPR1CTL
+  move.w     d0,10(a1)                                                            ; SPR0POS
+  move.w     d0,14(a1)                                                            ; SPR0CTL
+  move.w     d0,26(a1)                                                            ; SPR1POS
+  move.w     d0,30(a1)                                                            ; SPR1CTL
   ; sprites 2-3
   lea.l      ig_cm_cl_sprites(a0),a1
   move.l     a5,d0
@@ -114,6 +115,7 @@ player_update:
   subq.w     #1,d4
   add.w      #1,ig_om_player_left_for_frames(a4)
   clr.w      ig_om_player_right_for_frames(a4)
+  clr.w      ig_om_player_centered_for_frames(a4)
   cmp.w      ig_om_player_min_xpos(a4),d4
   bge.s      .test_right
   move.w     ig_om_player_min_xpos(a4),d4
@@ -123,6 +125,7 @@ player_update:
   addq.w     #1,d4
   add.w      #1,ig_om_player_right_for_frames(a4)
   clr.w      ig_om_player_left_for_frames(a4)
+  clr.w      ig_om_player_centered_for_frames(a4)
   cmp.w      ig_om_player_max_xpos(a4),d4
   ble.s      .test_end
   move.w     ig_om_player_max_xpos(a4),d4
@@ -132,14 +135,29 @@ player_update:
   and.b      #1<<JsLeft|1<<JsRight,d0
   tst.b      d0
   bne.s      .not_centered
-  ; TODO move back softly (when it was hard right or hard left, then switch to right or left first)
+
+  ; choose anim step for player ship when joystick is centered
+  ; move back softly (when it was hard right or hard left, then switch to right or left first)
   clr.w      ig_om_player_left_for_frames(a4)
   clr.w      ig_om_player_right_for_frames(a4)
+  add.w      #1,ig_om_player_centered_for_frames(a4)
+  cmp.w      #PlayerShipAnimSwitchDelay/2,ig_om_player_centered_for_frames(a4)
+  ble.s      .centered_soft_back
+  move.b     #PlayerShipAnimCentered,ig_om_player_anim_offset+3(a4)               ; default
+  bra.s      .anim_chosen
+.centered_soft_back:
+  cmp.b      #PlayerShipAnimHardLeft,ig_om_player_anim_offset+3(a4)
+  bne.s      .centered_check_hard_right
+  move.b     #PlayerShipAnimLeft,ig_om_player_anim_offset+3(a4)
+  bra.s      .anim_chosen
+.centered_check_hard_right:
+  cmp.b      #PlayerShipAnimHardRight,ig_om_player_anim_offset+3(a4)
+  bne.s      .not_centered
+  move.b     #PlayerShipAnimRight,ig_om_player_anim_offset+3(a4)
+  bra.s      .anim_chosen
 .not_centered:
 
-  ; choose anim step for player ship
-  move.b     #PlayerShipAnimCentered,ig_om_player_anim_offset+3(a4)     ; default
-
+  ; choose anim step for player ship when joystick is left or right
   move.w     ig_om_player_left_for_frames(a4),d0
   tst.w      d0
   beq.s      .not_left
@@ -168,23 +186,23 @@ player_update:
   ; player ship
   bsr        .calc_pos_ctl
   move.l     ig_om_player_anim_offset(a4),d3
-  lea.l      ig_cm_player_sprite4(a5),a2                                ; target pointer SPR4
-  lea.l      ig_cm_player_sprite5(a5),a3                                ; target pointer SPR5
+  lea.l      ig_cm_player_sprite4(a5),a2                                          ; target pointer SPR4
+  lea.l      ig_cm_player_sprite5(a5),a3                                          ; target pointer SPR5
   bsr.s      .pu_sub
 
-  add.w      #16,d4                                                     ; 6+7 are placed exactly to the right of 4+5
+  add.w      #16,d4                                                               ; 6+7 are placed exactly to the right of 4+5
   bsr        .calc_pos_ctl
-  moveq.l    #2,d3                                                      ; 6+7 are placed exactly to the right of 4+5
+  moveq.l    #2,d3                                                                ; 6+7 are placed exactly to the right of 4+5
   add.l      ig_om_player_anim_offset(a4),d3
-  lea.l      ig_cm_player_sprite6(a5),a2                                ; target pointer SPR4
-  lea.l      ig_cm_player_sprite7(a5),a3                                ; target pointer SPR5
+  lea.l      ig_cm_player_sprite6(a5),a2                                          ; target pointer SPR4
+  lea.l      ig_cm_player_sprite7(a5),a3                                          ; target pointer SPR5
   ; fall-through intended
 
 .pu_sub:
   ; control words
   move.w     d1,(a2)+
   move.w     d2,(a2)+
-  add.b      #$80,d2                                                    ; attach bit
+  add.b      #$80,d2                                                              ; attach bit
   move.w     d1,(a3)+
   move.w     d2,(a3)+
 
@@ -222,26 +240,26 @@ player_update:
   lsl.w      #8,d1
   move.w     d4,d0
   lsr.w      #1,d0
-  add.w      d0,d1                                                      ; SPRxPOS
+  add.w      d0,d1                                                                ; SPRxPOS
   move.w     d5,d0
-  add.w      #32,d0                                                     ; vstop
+  add.w      #32,d0                                                               ; vstop
   move.w     d0,d2
   and.w      #$00ff,d2
-  lsl.w      #8,d2                                                      ; SPRxCTL
+  lsl.w      #8,d2                                                                ; SPRxCTL
 
   cmp.w      #$0100,d5
   blt.s      .no_v8_v_start
-  bset       #2,d2                                                      ; SPRxCTL
+  bset       #2,d2                                                                ; SPRxCTL
 .no_v8_v_start: 
   cmp.w      #$0100,d0
   blt.s      .no_v8_v_stop
-  bset       #1,d2                                                      ; SPRxCTL
+  bset       #1,d2                                                                ; SPRxCTL
 .no_v8_v_stop:
   btst       #0,d4
   beq.s      .no_h0_h_start
-  bset       #0,d2                                                      ; SPRxCTL
+  bset       #0,d2                                                                ; SPRxCTL
 .no_h0_h_start:
 
   rts
 
-  endif                                                                 ; ifnd INGAME_PLAYER_ASM
+  endif                                                                           ; ifnd INGAME_PLAYER_ASM
