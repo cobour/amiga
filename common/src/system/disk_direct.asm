@@ -39,7 +39,7 @@ dd_init:
 dd_cleanup:
   movem.l    d0-d1/a0,-(sp)
   lea.l      CIAB+CIACRA,a0
-  move.b     dd_cia,(a0)
+  move.b     dd_cia(pc),(a0)
   move.w     dd_drive(pc),d0
   move.b     #%11111111,d1
   lea.l      CIAB+CIAPRB,a0

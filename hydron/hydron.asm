@@ -45,6 +45,7 @@ main_code_start:
   include    "../common/src/system/datafiles.asm"
   include    "../common/src/system/disk.asm"
   include    "../common/src/system/control.asm"
+  include    "../common/src/system/joystick.asm"
   include    "src/ingame.asm"
   include    "src/ingame/panel.asm"
   include    "src/ingame/player.asm"

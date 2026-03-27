@@ -39,8 +39,6 @@ targetFiles:
         id: MS02
       - filename: code/ingame_copperlist.asm
         id: IGCL
-      - filename: code/auto_sprite.asm
-        id: AUTO
 
   - filename: F100
     description: ingame_other_2
