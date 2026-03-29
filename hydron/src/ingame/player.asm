@@ -190,21 +190,21 @@ player_update:
   lea.l      ig_cm_player_sprite5(a5),a3                                          ; target pointer SPR5
   bsr.s      .pu_sub
 
-  add.w      #16,d4                                                               ; 6+7 are placed exactly to the right of 4+5
-  bsr        .calc_pos_ctl
+  addq.w     #8,d1                                                                ; 6+7 are placed exactly to the right of 4+5
   moveq.l    #2,d3                                                                ; 6+7 are placed exactly to the right of 4+5
   add.l      ig_om_player_anim_offset(a4),d3
-  lea.l      ig_cm_player_sprite6(a5),a2                                          ; target pointer SPR4
-  lea.l      ig_cm_player_sprite7(a5),a3                                          ; target pointer SPR5
+  lea.l      ig_cm_player_sprite6(a5),a2                                          ; target pointer SPR6
+  lea.l      ig_cm_player_sprite7(a5),a3                                          ; target pointer SPR7
   ; fall-through intended
 
 .pu_sub:
   ; control words
   move.w     d1,(a2)+
   move.w     d2,(a2)+
-  add.b      #$80,d2                                                              ; attach bit
+  bset       #7,d2                                                                ; set attach bit
   move.w     d1,(a3)+
   move.w     d2,(a3)+
+  bclr       #7,d2                                                                ; clear attach bit
 
   ; bitmap data
   moveq.l    #0,d0
