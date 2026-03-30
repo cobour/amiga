@@ -28,13 +28,6 @@ LOADER_DD_ASM equ 1
   cmp.w      d0,d1
   bne.s      error
 
-  ; do we have 512kb fast ram?
-  lea.l      $27fffe,a0
-  move.w     d0,(a0)
-  move.w     (a0),d1
-  cmp.w      d0,d1
-  beq.s      .other_mem_found
-
   ; do we have 512kb slow ram?
   lea.l      $c7fffe,a0
   move.w     d0,(a0)
@@ -52,7 +45,6 @@ LOADER_DD_ASM equ 1
 .other_mem_found:
   sub.l      #$7fffe,a0                                ; a0 -  beginning of other mem block of 512kb
 
-  lea.l      $c00000,a0                                ; TODO HYD-10 - ram detection produces sprite errors (and possibly even more problems) => maybe just skip fast ram detection?
 ; from now on we may use the first 512kb chip mem and 512kb other mem (pointer in a0)
 
 ; set stack pointer to beginning of other mem
