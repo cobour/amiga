@@ -26,7 +26,7 @@ ctrl_save_orig_system_state:
   lea.l      graphics_base(pc),a0
   move.l     d0,(a0)
 
-  endif                                            ; ifnd USE_DISK_DMA
+  endif                                                ; ifnd USE_DISK_DMA
 
   lea.l      CustomBase,a6
 
@@ -47,11 +47,13 @@ ctrl_save_orig_system_state:
 
   WAITVB2
 
+  move.l     ctrl_vbr(pc),a1
+
   lea.l      ctrl_cur_lvl2hdl(pc),a0
-  move.l     Level2Handler,(a0)
+  move.l     Level2Handler(a1),(a0)
 
   lea.l      ctrl_cur_lvl3hdl(pc),a0
-  move.l     Level3Handler,(a0)
+  move.l     Level3Handler(a1),(a0)
 
   ifnd       USE_DISK_DMA
  
@@ -66,7 +68,7 @@ ctrl_save_orig_system_state:
   sub.l      a1,a1
   jsr        LoadView(a6)
 
-  endif                                            ; ifnd USE_DISK_DMA
+  endif                                                ; ifnd USE_DISK_DMA
 
   movem.l    (sp)+,d0-d7/a0-a6
   rts
@@ -91,7 +93,7 @@ ctrl_restore_screen:
   move.l     graphics_base(pc),a1
   jsr        CloseLibrary(a6)
 
-  endif                                            ; ifnd USE_DISK_DMA
+  endif                                                ; ifnd USE_DISK_DMA
  
   movem.l    (sp)+,d0-d7/a0-a6
   rts
@@ -156,9 +158,10 @@ ctrl_free_system:
   move.w     d0,INTENA(a6)
   move.w     d0,INTREQ(a6)
 
+  move.l     ctrl_vbr(pc),a1
   move.w     ctrl_cur_dmacon(pc),DMACON(a6)
-  move.l     ctrl_cur_lvl2hdl(pc),Level2Handler
-  move.l     ctrl_cur_lvl3hdl(pc),Level3Handler
+  move.l     ctrl_cur_lvl2hdl(pc),Level2Handler(a1)
+  move.l     ctrl_cur_lvl3hdl(pc),Level3Handler(a1)
   move.w     ctrl_cur_intena(pc),INTENA(a6)
   move.w     ctrl_cur_intreq(pc),INTREQ(a6)
 
@@ -169,15 +172,33 @@ ctrl_free_system:
 ; in:
 ;   a0 - points to handler code
 ctrl_set_handler:
-  move.l     a6,-(sp)
+  movem.l    a1/a6,-(sp)
   lea.l      CustomBase,a6
 
-  move.w     #%0111111111111111,INTENA(a6)         ; disable ALL IRQ's
-  move.l     a0,Level3Handler
-  move.w     #%1110000000010000,INTENA(a6)         ; Copper-IRQ (for our code) and External-IRQ (for ptplayer) only
+  move.w     #%0111111111111111,INTENA(a6)             ; disable ALL IRQ's
+  move.l     ctrl_vbr(pc),a1
+  move.l     a0,Level3Handler(a1)
+  move.w     #%1110000000010000,INTENA(a6)             ; Copper-IRQ (for our code) and External-IRQ (for ptplayer) only
 
-  move.l     (sp)+,a6
+  movem.l    (sp)+,a1/a6
   rts
+
+; gets and saves vbr for later use
+ctrl_get_vbr:
+  moveq.l    #0,d0
+  move.l     ExecBase,a6
+  btst       #0,297(a6)                                ; 68010 or greater?
+  beq.s      .just_68000
+  lea.l      .get_vbr_handler(pc),a5
+  jsr        -30(a6)                                   ; Supervisor
+.just_68000:
+  lea.l      ctrl_vbr(pc),a0
+  move.l     d0,(a0)
+  rts
+
+.get_vbr_handler:
+  dc.l       $4e7a0801                                 ; = movec vbr,d0
+  rte
 
 graphics_name:
   dc.b       "graphics.library",0
@@ -207,5 +228,8 @@ ctrl_cur_lvl2hdl:
 ctrl_cur_lvl3hdl:
   dc.l       0
 
-  endif                                            ; ifnd CONTROL_ASM
+ctrl_vbr:
+  dc.l       0
+
+  endif                                                ; ifnd CONTROL_ASM
  

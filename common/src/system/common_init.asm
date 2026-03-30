@@ -14,6 +14,7 @@ common_init:
 
 
   ifd        STANDARD_EXE
+  bsr        ctrl_get_vbr
   moveq.l    #Mem1MB,d0
   bsr        exec_alloc_mem
   else                                 ; ifd STANDARD_EXE
@@ -22,6 +23,8 @@ common_init:
   move.w     d0,(a0)
   lea.l      dd_drive(pc),a0
   move.w     d1,(a0)
+  lea.l      ctrl_vbr(pc),a0           ; control.asm
+  move.l     d2,(a0)
   endif                                ; ifd USE_DISK_DMA
   endif                                ; ifd STANDARD_EXE
 

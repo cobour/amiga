@@ -4,11 +4,19 @@ LOADER_DD_ASM equ 1
   include    "main_code.i"
   include    "../common/src/system/loader.i"
 
-  ; set first 4 colors to black
-  lea.l      $dff180,a0
-  moveq.l    #0,d0
-  move.l     d0,(a0)+
-  move.l     d0,(a0)
+  ; check cpu type and get vbr
+  move.l     $4.w,a6
+  btst       #0,297(a6)                                ; 68010 or greater?
+  beq.s      .just_68000
+  lea.l      .get_vbr_handler(pc),a5
+  jsr        -30(a6)                                   ; Supervisor
+  bra.s      .check_cpu_type_end
+.get_vbr_handler:
+  dc.l       $4e7a2801                                 ; = movec vbr,d2
+  rte
+.just_68000:
+  moveq.l    #0,d2
+.check_cpu_type_end:
 
 ; first of all check memory requirements
 
@@ -44,6 +52,7 @@ LOADER_DD_ASM equ 1
 .other_mem_found:
   sub.l      #$7fffe,a0                                ; a0 -  beginning of other mem block of 512kb
 
+  lea.l      $c00000,a0                                ; TODO HYD-10 - ram detection produces sprite errors (and possibly even more problems) => maybe just skip fast ram detection?
 ; from now on we may use the first 512kb chip mem and 512kb other mem (pointer in a0)
 
 ; set stack pointer to beginning of other mem
@@ -69,8 +78,9 @@ error:
 load_main_code:
 
   lea.l      $dff000,a6
-  move.w     #%0011111111111111,$9A(a6)                ; no ints
-  move.w     #%0011111111111111,$9C(a6)                ; at all
+  clr.w      $180(a6)
+  move.w     #%0011111111111111,$9a(a6)                ; no ints
+  move.w     #%0011111111111111,$9c(a6)                ; at all
 
   moveq.l    #DISK_DRIVE_BIT,d0
   bsr.s      dd_init

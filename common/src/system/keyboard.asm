@@ -8,7 +8,7 @@ KEYBOARD_ASM equ 1
 
 ; Inits keyboard handler (must be called after ctrl_take_system and ctrl_set_handler)
 keyboard_init:
-  movem.l    d0/a1-a2/a6,-(sp)
+  movem.l    d0/a1-a3/a6,-(sp)
   lea.l      CIAA,a2
   lea.l      CustomBase,a6
 
@@ -24,7 +24,8 @@ keyboard_init:
 
   ; set level 2 handler
   lea.l      keyboard_handler(pc),a1
-  move.l     a1,Level2Handler
+  move.l     ctrl_vbr(pc),a3
+  move.l     a1,Level2Handler(a3)
 
 	; enable PORTS interrupts and CIA-A SP interupt for the keyboard
   move.w     #$c008,INTENA(a6)
