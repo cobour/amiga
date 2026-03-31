@@ -1,5 +1,7 @@
   include    "src/ingame.i"
 
+; trigger Copper-IRQ
+  dc.w       INTREQ,%1000000000010000
 ; sprite pointer
   dc.w       SPR0PTH,$0000
   dc.w       SPR0PTL,$0000
@@ -45,8 +47,6 @@
   dc.w       DDFSTOP,(IgScreenStartX/2-DdfResolution)+(8*((IgScreenWidth/16)-1))
   dc.w       DIWSTRT,(IgScreenStartY<<8)|IgScreenStartX
   dc.w       DIWSTOP,((IgScreenStopY-256)<<8)|(IgScreenStopX-256)
-; trigger Copper-IRQ after all bitplane and sprite registers are set => irq routine can safely modify copperlist for next frame
-  dc.w       $01fe,$0000                                                            ; IRQ currently not needed, was: dc.w       INTREQ,%1000000000010000
 ; colors
   dc.w       COLOR00,$0000
   dc.w       COLOR01,$0000

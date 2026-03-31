@@ -26,8 +26,12 @@ ig_start:
   bsr        .init_music
 
 .main_loop:
+  clr.b      c_om_vbl(a4)
   bsr        player_update
-  WAITVB
+.ml_wait_vbl:
+  tst.b      c_om_vbl(a4)
+  beq.s      .ml_wait_vbl
+  ; for now: quit on mouse click
   btst       #6,$bfe001
   bne.s      .main_loop
 
@@ -115,13 +119,17 @@ ig_start:
   bra        datafiles_load_and_unzip           ; implicit rts
 
 lvl3_irq_handler:
-  movem.l    d0-d7/a0-a6,-(sp)
+  movem.l    a4/a6,-(sp)
 
   ; clear Copper-IRQ-Bit
   lea.l      CUSTOM,a6
   move.w     #%0000000000010000,INTREQ(a6)
 
-  movem.l    (sp)+,d0-d7/a0-a6
+  ; set vbl flag in common om struct
+  move.l     other_mem_ptr(pc),a4
+  move.b     #1,c_om_vbl(a4)
+
+  movem.l    (sp)+,a4/a6
   rte
 
 
