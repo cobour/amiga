@@ -34,6 +34,8 @@ dd_init:
   bne.s      .wait_ready
   rts
 
+  ifnd       BOOTBLOCK
+
 ; does cleanup
 ; field "drive" must have been set before calling
 dd_cleanup:
@@ -50,6 +52,8 @@ dd_cleanup:
   move.b     d1,(a0)
   movem.l    (sp)+,d0-d1/a0
   rts
+
+  endif                                         ; ifnd BOOTBLOCK
 
 ; loads file
 ; in:
@@ -185,7 +189,11 @@ dd_load_file:
   move.w     d0,DSKLEN(a6)
 
   ; wait for dma to finish
-  bsr        .wait_dma
+  move.w     #$0002,INTREQ(a6)
+.wait_dma_loop:   
+  btst       #1,INTREQR+1(a6)
+  beq.s      .wait_dma_loop
+  move.w     #$0000,DSKLEN(a6)
 
   ; mfm decode
   subq.l     #2,a0
@@ -388,23 +396,6 @@ dd_load_file:
 .short_delay_loop:
   btst       #0,CIAICR-CIAPRB(a5)
   beq.s      .short_delay_loop
-  rts
-
-; waits for end of disk dma
-.wait_dma:     
-  movem.l    d1-a6,-(sp)
-
-  move.l     #$00020000,d0
-  move.w     #$0002,INTREQ(a6)
-.wait_dma_loop:   
-  btst       #1,INTREQR+1(a6)
-  bne.s      .wait_dma_exit
-  subq.l     #1,d0
-  bne.s      .wait_dma_loop
-.wait_dma_exit: 
-  move.w     #$0000,DSKLEN(a6)
-
-  movem.l    (sp)+,d1-a6
   rts
 
 ; waits for disk operation to finish, drive be ready again

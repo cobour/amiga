@@ -77,13 +77,11 @@ load_main_code:
   moveq.l    #DISK_DRIVE_BIT,d0
   bsr.s      dd_init
 
-  ; a0 points to begin of other-mem (right behind 1kb stack)
+  ; a0 points to begin of other-mem (exactly behind stack)
   lea.l      $50000,a1
   moveq.l    #MAIN_CODE_FILE_START_BLOCK,d0
   moveq.l    #MAIN_CODE_FILE_BLOCK_COUNT,d1
   bsr        dd_load_file
-
-  bsr.s      dd_cleanup
 
   move.w     dd_track(pc),d0
   move.w     dd_drive(pc),d1

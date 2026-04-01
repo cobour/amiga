@@ -36,9 +36,9 @@ main_code_start:
   rts
   endif                                                ; ifd STANDARD_EXE
 
-  ifd        BOOTBLOCK
+  ifd        USE_TRACKDISK
   bsr        exec_reboot
-  endif                                                ; ifd BOOTBLOCK
+  endif                                                ; ifd USE_TRACKDISK
 
   include    "../common/src/system/common_init.asm"
   include    "../common/src/system/exec.asm"

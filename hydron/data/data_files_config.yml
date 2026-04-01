@@ -19,7 +19,6 @@ targetFiles:
       - filename: ../hydron.asm
         id: HYDR
         defines:
-          - BOOTBLOCK
           - RELEASE
           - USE_DISK_DMA
 
