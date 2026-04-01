@@ -3,6 +3,7 @@ LOADER_DD_ASM equ 1
 
   include    "main_code.i"
   include    "../common/src/system/loader.i"
+  include    "../common/src/system/screen.i"
 
   ; check cpu type and get vbr
   move.l     $4.w,a6
@@ -18,7 +19,25 @@ LOADER_DD_ASM equ 1
   moveq.l    #0,d2
 .check_cpu_type_end:
 
-; first of all check memory requirements
+  ; fade color zero to black on KS 1.x
+  clr.w      d1
+  move.w     20(a6),d0                                 ; version of exec.library
+  lea.l      $dff000,a6
+  cmp.b      #36,d0                                    ; KS 2.x or greater
+  bge.s      .fade_out_end
+  move.w     #$0eee,d1
+.fade_out_loop:
+  move.w     d1,$180(a6)
+  beq.s      .fade_out_end
+.fade_out_wait_vbl:  
+  move.w     INTREQR(a6),d0
+  btst       #5,d0
+  beq.s      .fade_out_wait_vbl
+  sub.w      #$0111,d1
+  bra.s      .fade_out_loop
+.fade_out_end:
+
+  ; check memory requirements
 
   ; do we have 512kb chip ram?
   move.w     #$1887,d0
@@ -69,8 +88,6 @@ error:
 ; restart point after jmp (a1)
 load_main_code:
 
-  lea.l      $dff000,a6
-  clr.w      $180(a6)
   move.w     #%0011111111111111,$9a(a6)                ; no ints
   move.w     #%0011111111111111,$9c(a6)                ; at all
 
