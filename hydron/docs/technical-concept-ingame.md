@@ -40,6 +40,8 @@ All playershots are drawn only above the playersprite initially and because shot
 | 33-48   | EHB pseudo colors ; automatically changed each level by "master-colors" 01-16               |
 | 49-63   | EHB pseudo colors ; automatically set by "master-colors" 17-31 ; stay the same each level   |
 
+![palette usage](HYDRON_Usage-of-color-palette.png)
+
 # Backgrounds
 
 The backgrounds will be built of 16x16 pixels blocks and put together with Tiled. May use full color palette (00-63) giving massive options for design.
