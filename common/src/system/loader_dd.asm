@@ -3,7 +3,7 @@ LOADER_DD_ASM equ 1
 
   include    "main_code.i"
   include    "../common/src/system/loader.i"
-  include    "../common/src/system/screen.i"
+  include    "../common/src/system/custom.i"
 
   ; check cpu type and get vbr
   move.l     $4.w,a6
@@ -20,20 +20,28 @@ LOADER_DD_ASM equ 1
 .check_cpu_type_end:
 
   ; fade color zero to black on KS 1.x
-  clr.w      d1
   move.w     20(a6),d0                                 ; version of exec.library
-  lea.l      $dff000,a6
+  lea.l      CUSTOM,a6
+  move.w     #%0011111111111111,INTENA(a6)             ; no ints
+  move.w     #%0011111111111111,INTREQ(a6)             ; at all
   cmp.b      #36,d0                                    ; KS 2.x or greater
   bge.s      .fade_out_end
   move.w     #$0eee,d1
+  move.l     #$1ff00,d3
 .fade_out_loop:
   move.w     d1,$180(a6)
   beq.s      .fade_out_end
 .fade_out_wait_vbl:  
-  move.w     INTREQR(a6),d0
-  btst       #5,d0
-  beq.s      .fade_out_wait_vbl
+  move.l     VPOSR(a6),d0
+  and.l      d3,d0
+  cmp.l      #300<<8,d0
+  bne.s      .fade_out_wait_vbl
   sub.w      #$0111,d1
+.fade_out_wait_vbl2:  
+  move.l     VPOSR(a6),d0
+  and.l      d3,d0
+  cmp.l      #302<<8,d0
+  bne.s      .fade_out_wait_vbl2
   bra.s      .fade_out_loop
 .fade_out_end:
 
@@ -82,15 +90,11 @@ LOADER_DD_ASM equ 1
   jmp        (a1)
 
 error:
-  move.w     #$f00,$180(a5)
+  move.w     #$f00,COLOR00(a6)
   bra.s      error
 
 ; restart point after jmp (a1)
 load_main_code:
-
-  move.w     #%0011111111111111,$9a(a6)                ; no ints
-  move.w     #%0011111111111111,$9c(a6)                ; at all
-
   moveq.l    #DISK_DRIVE_BIT,d0
   bsr.s      dd_init
 
