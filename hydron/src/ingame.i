@@ -30,8 +30,8 @@ ig_cm_cl_sizeof:                   rs.b       0
 ig_cm_common:                      rs.b       c_cm_sizeof
 ig_cm_copperlist:                  rs.b       ig_cm_cl_sizeof
 ; ingame/player.asm
-ig_cm_player_sprite0:              rs.l       1                  ; player satellites / player shots --- just empty for now
-ig_cm_player_sprite1:              rs.l       1                  ; player satellites / player shots --- just empty for now
+ig_cm_player_sprite0:              rs.l       1                  ; player satellites --- just empty for now
+ig_cm_player_sprite1:              rs.l       1                  ; player satellites --- just empty for now
 ig_cm_player_sprite2:              rs.l       1                  ; player satellites / player shots --- just empty for now
 ig_cm_player_sprite3:              rs.l       1                  ; player satellites / player shots --- just empty for now
 ig_cm_player_sprite4:              rs.l       34                 ; player ship / player shots
@@ -52,12 +52,13 @@ ig_om_common:                      rs.b       c_om_sizeof
 ig_om_player_gfx_ptr:              rs.l       1                  ; pointer to the beginning of the gfx rawdata
 ig_om_player_anim_offset:          rs.l       1                  ; offset to the current anim step (to be added to ig_om_player_gfx_ptr)
 ig_om_player_gfx_width_bytes:      rs.w       1                  ; width of the source graphics in bytes
-ig_om_player_xpos:                 rs.w       1                  ; current xpos of player ship in beam coordinates
-ig_om_player_ypos:                 rs.w       1                  ; current ypos of player ship in beam coordinates
-ig_om_player_min_xpos:             rs.w       1                  ; minimum valid xpos of player ship in beam coordinates
-ig_om_player_min_ypos:             rs.w       1                  ; minimum valid ypos of player ship in beam coordinates
-ig_om_player_max_xpos:             rs.w       1                  ; maximum valid xpos of player ship in beam coordinates
-ig_om_player_max_ypos:             rs.w       1                  ; maximum valid ypos of player ship in beam coordinates
+ig_om_player_speed:                rs.l       1                  ; current speed of player ship as fixed-point 16/16 value
+ig_om_player_xpos:                 rs.l       1                  ; current xpos of player ship in screen coordinates as fixed-point 16/16 value
+ig_om_player_ypos:                 rs.l       1                  ; current ypos of player ship in screen coordinates as fixed-point 16/16 value
+ig_om_player_min_xpos:             rs.w       1                  ; minimum valid xpos of player ship in screen coordinates as fixed-point 16/16 value
+ig_om_player_min_ypos:             rs.w       1                  ; minimum valid ypos of player ship in screen coordinates as fixed-point 16/16 value
+ig_om_player_max_xpos:             rs.w       1                  ; maximum valid xpos of player ship in screen coordinates as fixed-point 16/16 value
+ig_om_player_max_ypos:             rs.w       1                  ; maximum valid ypos of player ship in screen coordinates as fixed-point 16/16 value
 ig_om_player_left_for_frames:      rs.w       1                  ; player is moving left for x number of frames (for decision which animation frame to show)
 ig_om_player_right_for_frames:     rs.w       1                  ; player is moving right for x number of frames (for decision which animation frame to show)
 ig_om_player_centered_for_frames:  rs.w       1                  ; player is centered for x number of frames (for decision which animation frame to show)

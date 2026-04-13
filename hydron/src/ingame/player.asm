@@ -17,12 +17,13 @@ player_init:
   move.w     df_iff_width(a0),d0
   lsr.w      #3,d0
   move.w     d0,ig_om_player_gfx_width_bytes(a4)
-  move.w     #$0111,ig_om_player_xpos(a4)
-  move.w     #$009c,ig_om_player_ypos(a4)
-  move.w     #$00a1,ig_om_player_min_xpos(a4)
-  move.w     #$002c,ig_om_player_min_ypos(a4)
-  move.w     #$0181,ig_om_player_max_xpos(a4)
-  move.w     #$010c,ig_om_player_max_ypos(a4)
+  move.l     #$00010000,ig_om_player_speed(a4)                                    ; alternatively move 1 and a half pixel per frame with #$00018000
+  move.l     #$00700000,ig_om_player_xpos(a4)
+  move.l     #$00700000,ig_om_player_ypos(a4)
+  clr.l      ig_om_player_min_xpos(a4)
+  clr.l      ig_om_player_min_ypos(a4)
+  move.l     #$00e00000,ig_om_player_max_xpos(a4)
+  move.l     #$00e00000,ig_om_player_max_ypos(a4)
   clr.w      ig_om_player_left_for_frames(a4)
   clr.w      ig_om_player_right_for_frames(a4)
   clr.w      ig_om_player_centered_for_frames(a4)
@@ -91,47 +92,47 @@ player_init:
 
 player_update:
 
-  move.w     ig_om_player_xpos(a4),d4
-  move.w     ig_om_player_ypos(a4),d5
+  move.l     ig_om_player_xpos(a4),d4
+  move.l     ig_om_player_ypos(a4),d5
 
   ; read joystick, update player position and check against boundaries
   bsr        joystick_read
   btst       #JsDown,d0
   beq.s      .test_up
-  addq.w     #1,d5
-  cmp.w      ig_om_player_max_ypos(a4),d5
+  add.l      ig_om_player_speed(a4),d5
+  cmp.l      ig_om_player_max_ypos(a4),d5
   ble.s      .test_up
-  move.w     ig_om_player_max_ypos(a4),d5
+  move.l     ig_om_player_max_ypos(a4),d5
 .test_up:
   btst       #JsUp,d0
   beq.s      .test_left
-  subq.w     #1,d5
-  cmp.w      ig_om_player_min_ypos(a4),d5
+  sub.l      ig_om_player_speed(a4),d5
+  cmp.l      ig_om_player_min_ypos(a4),d5
   bge.s      .test_left
-  move.w     ig_om_player_min_ypos(a4),d5
+  move.l     ig_om_player_min_ypos(a4),d5
 .test_left:
   btst       #JsLeft,d0
   beq.s      .test_right
-  subq.w     #1,d4
+  sub.l      ig_om_player_speed(a4),d4
   add.w      #1,ig_om_player_left_for_frames(a4)
   clr.w      ig_om_player_right_for_frames(a4)
   clr.w      ig_om_player_centered_for_frames(a4)
-  cmp.w      ig_om_player_min_xpos(a4),d4
+  cmp.l      ig_om_player_min_xpos(a4),d4
   bge.s      .test_right
-  move.w     ig_om_player_min_xpos(a4),d4
+  move.l     ig_om_player_min_xpos(a4),d4
 .test_right:
   btst       #JsRight,d0
   beq.s      .test_end
-  addq.w     #1,d4
+  add.l      ig_om_player_speed(a4),d4
   add.w      #1,ig_om_player_right_for_frames(a4)
   clr.w      ig_om_player_left_for_frames(a4)
   clr.w      ig_om_player_centered_for_frames(a4)
-  cmp.w      ig_om_player_max_xpos(a4),d4
+  cmp.l      ig_om_player_max_xpos(a4),d4
   ble.s      .test_end
-  move.w     ig_om_player_max_xpos(a4),d4
+  move.l     ig_om_player_max_xpos(a4),d4
 .test_end:
-  move.w     d4,ig_om_player_xpos(a4)
-  move.w     d5,ig_om_player_ypos(a4)
+  move.l     d4,ig_om_player_xpos(a4)
+  move.l     d5,ig_om_player_ypos(a4)
   and.b      #1<<JsLeft|1<<JsRight,d0
   tst.b      d0
   bne.s      .not_centered
@@ -184,6 +185,12 @@ player_update:
 
 
   ; player ship
+
+  swap       d4                                                                   ; no fraction needed anymore
+  swap       d5                                                                   ; no fraction needed anymore
+  add.w      #IgScreenStartX,d4                                                   ; add beam start pos
+  add.w      #IgScreenStartY,d5                                                   ; add beam start pos
+
   bsr        .calc_pos_ctl
   move.l     ig_om_player_anim_offset(a4),d3
   lea.l      ig_cm_player_sprite4(a5),a2                                          ; target pointer SPR4
