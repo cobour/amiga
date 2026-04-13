@@ -55,6 +55,9 @@ targetFiles:
       - filename: gfx/panel_lives.iff
         id: PALI
         withMask: false
+      - filename: gfx/panel_font.iff
+        id: PAFO
+        withMask: false
 
   - filename: F101
     description: ingame_other
