@@ -34,7 +34,7 @@ targetFiles:
     description: ingame_chip_2
     memoryType: CHIP
     sources:      
-      - filename: music/captivity.mod
+      - filename: music/vision.mod
         id: MS02
       - filename: code/ingame_copperlist.asm
         id: IGCL
@@ -75,7 +75,7 @@ targetFiles:
 #        withMask: false
 #        flattenedTileFormat: 16x16
 #        flattenedReducedTileCount: 64
-      - filename: music/captivity.mod
+      - filename: music/vision.mod
         id: MP02
       - filename: gfx/player.iff
         id: PLYR
