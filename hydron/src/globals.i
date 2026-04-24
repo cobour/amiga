@@ -24,7 +24,9 @@ c_cm_sizeof:                rs.b       0
                             rsreset
 c_om_disk:                  rs.b       disk_sizeof
 c_om_vbl:                   rs.b       1                                  ; set to 1 when vbl occurred (by irq handlers of game parts)
-c_om_padding_byte:          rs.b       1
+c_om_lives:                 rs.b       1                                  ; lives of player as bcd
+c_om_score:                 rs.l       1                                  ; current score of player as bcd
+c_om_hiscore:               rs.l       1                                  ; hiscore as bcd
 c_om_sizeof:                rs.b       0
 
                             endif                                         ; ifnd GLOBALS_I

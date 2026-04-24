@@ -62,6 +62,11 @@ ig_om_player_max_ypos:             rs.w       1                  ; maximum valid
 ig_om_player_left_for_frames:      rs.w       1                  ; player is moving left for x number of frames (for decision which animation frame to show)
 ig_om_player_right_for_frames:     rs.w       1                  ; player is moving right for x number of frames (for decision which animation frame to show)
 ig_om_player_centered_for_frames:  rs.w       1                  ; player is centered for x number of frames (for decision which animation frame to show)
+; ingame/panel.asm
+ig_om_panel_font_pointer:          rs.l       1                  ; pointer to the font rawdata
+ig_om_panel_cl_pointer:            rs.l       1                  ; pointer to the area of the copperlist where the panel values must be drawn
+ig_om_panel_redraw_lives:          rs.b       1                  ; boolean / must lives counter be drawn?
+ig_om_panel_redraw_score:          rs.b       1                  ; boolean / must score be drawn? (if new score is higher than old hiscore => update and redraw hiscore as well)
 ; data files area
 ig_om_datfile:                     rs.b       0                  ; variable filesizes, therefore this MUST be the last entry in this struct
 ig_om_sizeof:                      rs.b       0

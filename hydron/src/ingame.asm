@@ -15,6 +15,13 @@ ig_start:
   bne        .error
 
   SETPTRS
+
+  ; REMOVE ME - test values
+  move.b     #$05,c_om_lives(a4)
+  move.l     #$012345,c_om_score(a4)
+  move.l     #$123456,c_om_hiscore(a4)
+  ; REMOVE ME - test values
+
   bsr        .init_copper_list
   bsr        panel_init
   bsr        player_init
@@ -28,6 +35,7 @@ ig_start:
 .main_loop:
   clr.b      c_om_vbl(a4)
   bsr        player_update
+  bsr        panel_update
 .ml_wait_vbl:
   tst.b      c_om_vbl(a4)
   beq.s      .ml_wait_vbl
