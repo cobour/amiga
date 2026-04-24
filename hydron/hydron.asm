@@ -38,6 +38,9 @@ main_code_start:
 
   ifd        USE_TRACKDISK
   bsr        exec_reboot
+  else                                                 ; ifd USE_TRACKDISK
+.loop_forever:
+  bra.s      .loop_forever
   endif                                                ; ifd USE_TRACKDISK
 
   include    "../common/src/system/common_init.asm"
@@ -46,6 +49,7 @@ main_code_start:
   include    "../common/src/system/disk.asm"
   include    "../common/src/system/control.asm"
   include    "../common/src/system/joystick.asm"
+  include    "../common/src/system/bcd.asm"
   include    "src/ingame.asm"
   include    "src/ingame/panel.asm"
   include    "src/ingame/player.asm"
