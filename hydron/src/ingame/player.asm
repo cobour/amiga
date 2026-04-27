@@ -27,6 +27,10 @@ player_init:
   clr.w      ig_om_player_left_for_frames(a4)
   clr.w      ig_om_player_right_for_frames(a4)
   clr.w      ig_om_player_centered_for_frames(a4)
+  clr.l      ig_cm_player_sprite0(a5)
+  clr.l      ig_cm_player_sprite1(a5)
+  clr.l      ig_cm_player_sprite2(a5)
+  clr.l      ig_cm_player_sprite3(a5)
 
   ; set sprite pointers in copperlist
   move.l     ig_om_copperlist_front(a4),a0
@@ -53,38 +57,38 @@ player_init:
   lea.l      ig_cm_cl_sprites(a0),a1
   move.l     a5,d0
   add.l      #ig_cm_player_sprite2,d0
-  move.w     d0,22(a0)
+  move.w     d0,22(a1)
   swap       d0
-  move.w     d0,18(a0)
+  move.w     d0,18(a1)
   move.l     a5,d0
   add.l      #ig_cm_player_sprite3,d0
-  move.w     d0,30(a0)
+  move.w     d0,30(a1)
   swap       d0
-  move.w     d0,26(a0)
+  move.w     d0,26(a1)
 
   ; player ship (playershots first when visible)
   ; sprites 4-7
-  lea.l      ig_cm_cl_sprites+16(a0),a0
+  lea.l      ig_cm_cl_sprites(a0),a0
   move.l     a5,d0
   add.l      #ig_cm_player_sprite4,d0
-  move.w     d0,22(a0)
-  swap       d0
-  move.w     d0,18(a0)
-  move.l     a5,d0
-  add.l      #ig_cm_player_sprite5,d0
-  move.w     d0,30(a0)
-  swap       d0
-  move.w     d0,26(a0)
-  move.l     a5,d0
-  add.l      #ig_cm_player_sprite6,d0
   move.w     d0,38(a0)
   swap       d0
   move.w     d0,34(a0)
   move.l     a5,d0
-  add.l      #ig_cm_player_sprite7,d0
+  add.l      #ig_cm_player_sprite5,d0
   move.w     d0,46(a0)
   swap       d0
   move.w     d0,42(a0)
+  move.l     a5,d0
+  add.l      #ig_cm_player_sprite6,d0
+  move.w     d0,54(a0)
+  swap       d0
+  move.w     d0,50(a0)
+  move.l     a5,d0
+  add.l      #ig_cm_player_sprite7,d0
+  move.w     d0,62(a0)
+  swap       d0
+  move.w     d0,58(a0)
 
   rts
 

@@ -1,7 +1,5 @@
   include    "src/ingame.i"
 
-  dc.w       $01fe,$0000                                                            ; REMOVE ME
-
 ; sprite pointer
   dc.w       SPR0PTH,$0000
   dc.w       SPR0PTL,$0000

@@ -14,7 +14,6 @@ IgScreenStopY      equ IgScreenStartY+IgScreenHeight
 
 ; Ingame copperlist struct
                                    rsreset
-ig_cm_cl_dummy:                    rs.l       1                  ; REMOVE ME
 ig_cm_cl_sprites:                  rs.l       16
 ig_cm_cl_sprite01_init:            rs.l       4
 ig_cm_cl_bitplanes:                rs.l       12
