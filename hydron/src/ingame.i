@@ -14,7 +14,7 @@ IgScreenStopY      equ IgScreenStartY+IgScreenHeight
 
 ; Ingame copperlist struct
                                    rsreset
-ig_cm_cl_irq:                      rs.l       1
+ig_cm_cl_dummy:                    rs.l       1                  ; REMOVE ME
 ig_cm_cl_sprites:                  rs.l       16
 ig_cm_cl_sprite01_init:            rs.l       4
 ig_cm_cl_bitplanes:                rs.l       12
@@ -22,13 +22,15 @@ ig_cm_cl_bpl_config:               rs.l       9
 ig_cm_cl_colors:                   rs.l       32
 ig_cm_cl_panel:                    rs.l       531                ; includes re-setting bitplane pointers at end of each panel row
 ig_cm_cl_reuse_sprites:            rs.l       8
+ig_cm_cl_irq:                      rs.l       3
 ig_cm_cl_end:                      rs.l       1
 ig_cm_cl_sizeof:                   rs.b       0
 
 ; Ingame chip mem struct
                                    rsreset
 ig_cm_common:                      rs.b       c_cm_sizeof
-ig_cm_copperlist:                  rs.b       ig_cm_cl_sizeof
+; ingame/buffers.asm
+ig_cm_copperlist:                  rs.b       ig_cm_cl_sizeof    ; second copperlist (first one is inside loaded file)
 ; ingame/player.asm
 ig_cm_player_sprite0:              rs.l       1                  ; player satellites --- just empty for now
 ig_cm_player_sprite1:              rs.l       1                  ; player satellites --- just empty for now
@@ -67,6 +69,9 @@ ig_om_panel_font_pointer:          rs.l       1                  ; pointer to th
 ig_om_panel_cl_pointer:            rs.l       1                  ; pointer to the area of the copperlist where the panel values must be drawn
 ig_om_panel_redraw_lives:          rs.b       1                  ; boolean / must lives counter be drawn?
 ig_om_panel_redraw_score:          rs.b       1                  ; boolean / must score be drawn? (if new score is higher than old hiscore => update and redraw hiscore as well)
+; ingame/buffers.asm
+ig_om_copperlist_front:            rs.l       1                  ; pointer to copperlist of frame that is actually on-screen
+ig_om_copperlist_back:             rs.l       1                  ; pointer to copperlist of frame that is currently composed in the background
 ; data files area
 ig_om_datfile:                     rs.b       0                  ; variable filesizes, therefore this MUST be the last entry in this struct
 ig_om_sizeof:                      rs.b       0

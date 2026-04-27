@@ -29,9 +29,7 @@ player_init:
   clr.w      ig_om_player_centered_for_frames(a4)
 
   ; set sprite pointers in copperlist
-  move.l     #"IGCL",d0
-  bsr        datafiles_get_pointer
-  move.l     df_idx_ptr_rawdata(a0),a0
+  move.l     ig_om_copperlist_front(a4),a0
 
   ; external guns / satellites (playershots first when visible)
   ; reuse sprites 0-1

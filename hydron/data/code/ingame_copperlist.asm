@@ -1,7 +1,7 @@
   include    "src/ingame.i"
 
-; trigger Copper-IRQ
-  dc.w       INTREQ,%1000000000010000
+  dc.w       $01fe,$0000                                                            ; REMOVE ME
+
 ; sprite pointer
   dc.w       SPR0PTH,$0000
   dc.w       SPR0PTL,$0000
@@ -670,6 +670,13 @@
   dc.w       SPR1PTL,$0000
   dc.w       SPR1POS,$0000
   dc.w       SPR1CTL,$0000
+
+; wait till raster beam is directly behind visible area
+  dc.w       $ffdf,$fffe
+  dc.w       $2bd1,$fffe
+
+; trigger Copper-IRQ
+  dc.w       INTREQ,%1000000000010000
 
 ; end
   dc.w       $ffff,$fffe

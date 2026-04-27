@@ -8,9 +8,7 @@ panel_init:
   movem.l    d0-a6,-(sp)
 
   ; init label texts
-  move.l     #"IGCL",d0
-  bsr        datafiles_get_pointer
-  move.l     df_idx_ptr_rawdata(a0),a3
+  move.l     ig_om_copperlist_front(a4),a3
   lea.l      ig_cm_cl_panel+4(a3),a3
 
   move.l     #"PAHI",d0

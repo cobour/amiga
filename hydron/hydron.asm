@@ -25,12 +25,11 @@ main_code_start:
 .end:
   bsr        disk_cleanup
 
+; end-of-game code
   ifd        STANDARD_EXE
-
   bsr        exec_free_mem
   moveq.l    #0,d0
   rts
-.error
   bsr        exec_free_mem
   moveq.l    #1,d0
   rts
@@ -38,10 +37,12 @@ main_code_start:
 
   ifd        USE_TRACKDISK
   bsr        exec_reboot
-  else                                                 ; ifd USE_TRACKDISK
+  endif                                                ; ifd USE_TRACKDISK
+
+  ifd        USE_DISK_DMA
 .loop_forever:
   bra.s      .loop_forever
-  endif                                                ; ifd USE_TRACKDISK
+  endif                                                ; ifd USE_DISK_DMA
 
   include    "../common/src/system/common_init.asm"
   include    "../common/src/system/exec.asm"
@@ -51,6 +52,7 @@ main_code_start:
   include    "../common/src/system/joystick.asm"
   include    "../common/src/system/bcd.asm"
   include    "src/ingame.asm"
+  include    "src/ingame/buffers.asm"
   include    "src/ingame/panel.asm"
   include    "src/ingame/player.asm"
   include    "../common/src/3rdparty/inflate.asm"

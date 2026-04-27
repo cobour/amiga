@@ -8,8 +8,8 @@ INGAME_ASM equ 1
 ; a4 - other mem pointer
 ; a5 - chip mem pointer
 ig_start:
-; load and inflate files, TODO: just dummy data
 
+; load and inflate files, TODO: just dummy data
   bsr        .load_datafiles
   tst.l      d0
   bne        .error
@@ -22,14 +22,14 @@ ig_start:
   move.l     #$123456,c_om_hiscore(a4)
   ; REMOVE ME - test values
 
-  bsr        .init_copper_list
+  bsr        buffers_init_vars                  ; MUST be called BEFORE the other inits
   bsr        panel_init
   bsr        player_init
   bsr        player_update                      ; update here once => init sprite data
   bsr        ctrl_take_system
   lea.l      lvl3_irq_handler(pc),a0
   bsr        ctrl_set_handler
-  bsr        .set_copper_list
+  bsr        buffers_init                       ; MUST be called AFTER all other inits (copperlist must have been initialised by them)
   bsr        .init_music
 
 .main_loop:
@@ -39,6 +39,7 @@ ig_start:
 .ml_wait_vbl:
   tst.b      c_om_vbl(a4)
   beq.s      .ml_wait_vbl
+  bsr        buffers_swap
   ; for now: quit on mouse click
   btst       #6,$bfe001
   bne.s      .main_loop
@@ -47,57 +48,6 @@ ig_start:
   bsr        ctrl_set_black_screen
 
 .error:
-  rts
-
-.init_copper_list:
-; get pointer to copperlist in chip mem
-  move.l     #"IGCL",d0
-  bsr        datafiles_get_pointer
-  move.l     df_idx_ptr_rawdata(a0),a2
-
-; set bitplane pointer
-  move.l     #"TSTB",d0
-  bsr        datafiles_get_pointer
-  move.l     df_idx_ptr_rawdata(a0),a0
-  move.l     a0,d0
-
-  move.l     a2,a0
-  lea.l      ig_cm_cl_bitplanes(a0),a0
-
-  moveq.l    #5,d7
-.icl1
-  move.w     d0,6(a0)
-  swap       d0
-  move.w     d0,2(a0)
-  swap       d0
-  add.l      #IgScreenWidthBytes,d0
-  addq.l     #8,a0
-  dbf        d7,.icl1
-
-; set colors
-  move.l     #"COLS",d0
-  bsr        datafiles_get_pointer
-  lea.l      df_idx_metadata(a0),a1
-  move.w     df_cols_count(a1),d7
-  subq.w     #1,d7
-  move.l     df_idx_ptr_rawdata(a0),a0
-  move.l     a2,a1
-  lea.l      ig_cm_cl_colors+2(a1),a1
-.icl2:
-  move.w     (a0)+,(a1)
-  addq.l     #4,a1
-  dbf        d7,.icl2
-
-  rts
-
-.set_copper_list
-  movem.l    d0/a0/a6,-(sp)
-  move.l     #"IGCL",d0
-  bsr        datafiles_get_pointer
-  move.l     df_idx_ptr_rawdata(a0),a0
-  lea.l      CustomBase,a6
-  move.l     a0,COP1LC(a6)
-  movem.l    (sp)+,d0/a0/a6
   rts
 
 .init_music:
@@ -111,7 +61,6 @@ ig_start:
   bsr        _mt_init
   lea.l      _mt_Enable(pc),a0
   move.b     #1,(a0)
-
   rts
 
 .load_datafiles:
