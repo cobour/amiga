@@ -19,7 +19,8 @@ ig_cm_cl_sprite01_init:            rs.l       4
 ig_cm_cl_bitplanes:                rs.l       12
 ig_cm_cl_bpl_config:               rs.l       9
 ig_cm_cl_colors:                   rs.l       32
-ig_cm_cl_panel:                    rs.l       531                ; includes re-setting bitplane pointers at end of each panel row
+ig_cm_cl_panel:                    rs.l       547                ; includes re-setting bitplane pointers at end of each panel row
+ig_cm_cl_reset_color17:            rs.l       1
 ig_cm_cl_reuse_sprites:            rs.l       8
 ig_cm_cl_irq:                      rs.l       3
 ig_cm_cl_end:                      rs.l       1

@@ -14,7 +14,7 @@ buffers_init_vars:
 buffers_init:
   bsr.s      .init_copper_list
   bsr.s      .copy_copperlist
-  bra.s      .set_copper_list                                     ; implicit rts
+  bra        .set_copper_list                                     ; implicit rts
 
 .init_copper_list:
 ; get pointer to copperlist in chip mem
@@ -46,6 +46,11 @@ buffers_init:
   move.w     df_cols_count(a1),d7
   subq.w     #1,d7
   move.l     df_idx_ptr_rawdata(a0),a0
+  ; reset color 17 below panel
+  move.l     a2,a1
+  lea.l      ig_cm_cl_reset_color17+2(a1),a1
+  move.w     34(a0),(a1)
+  ; set color block
   move.l     a2,a1
   lea.l      ig_cm_cl_colors+2(a1),a1
 .icl2:

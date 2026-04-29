@@ -58,6 +58,8 @@ targetFiles:
       - filename: gfx/panel_font.iff
         id: PAFO
         withMask: false
+      - filename: code/ingame_panel_copper_colors.asm
+        id: PACO
 
   - filename: F101
     description: ingame_other
