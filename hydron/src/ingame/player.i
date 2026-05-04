@@ -11,4 +11,7 @@ PlayerShipAnimHardRight   equ 16
 ; delay in frames between e.g. left and hard left
 PlayerShipAnimSwitchDelay equ 10
 
+; height of player ship in pixels
+PlayerShipHeight          equ 22
+
   endif                       ; ifnd INGAME_PLAYER_I

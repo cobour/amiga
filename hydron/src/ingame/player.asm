@@ -21,9 +21,9 @@ player_init:
   move.l     #$00700000,ig_om_player_xpos(a4)
   move.l     #$00700000,ig_om_player_ypos(a4)
   clr.l      ig_om_player_min_xpos(a4)
-  clr.l      ig_om_player_min_ypos(a4)
+  move.l     #$00100000,ig_om_player_min_ypos(a4)
   move.l     #$00e00000,ig_om_player_max_xpos(a4)
-  move.l     #$00e00000,ig_om_player_max_ypos(a4)
+  move.l     #$00ea0000,ig_om_player_max_ypos(a4)
   clr.w      ig_om_player_left_for_frames(a4)
   clr.w      ig_om_player_right_for_frames(a4)
   clr.w      ig_om_player_centered_for_frames(a4)
@@ -35,8 +35,8 @@ player_init:
   ; set sprite pointers in copperlist
   move.l     ig_om_copperlist_front(a4),a0
 
-  ; external guns / satellites (playershots first when visible)
-  ; reuse sprites 0-1
+  ; external guns / satellites (no playershots)
+  ; reuse sprites 0-1 from panel
   lea.l      ig_cm_cl_reuse_sprites(a0),a1
   move.l     a5,d0
   add.l      #ig_cm_player_sprite0,d0
@@ -53,6 +53,8 @@ player_init:
   move.w     d0,14(a1)                                                            ; SPR0CTL
   move.w     d0,26(a1)                                                            ; SPR1POS
   move.w     d0,30(a1)                                                            ; SPR1CTL
+
+  ; external guns / satellites (playershots first when visible)
   ; sprites 2-3
   lea.l      ig_cm_cl_sprites(a0),a1
   move.l     a5,d0
@@ -220,7 +222,7 @@ player_update:
   move.w     ig_om_player_gfx_width_bytes(a4),d0
   move.l     ig_om_player_gfx_ptr(a4),a1
   lea.l      (a1,d3.w),a1
-  moveq.l    #32-1,d7
+  moveq.l    #PlayerShipHeight-1,d7
 .copy_loop:
   move.w     (a1),(a2)+
   add.l      d0,a1
@@ -251,7 +253,7 @@ player_update:
   lsr.w      #1,d0
   add.w      d0,d1                                                                ; SPRxPOS
   move.w     d5,d0
-  add.w      #32,d0                                                               ; vstop
+  add.w      #PlayerShipHeight,d0                                                 ; vstop
   move.w     d0,d2
   and.w      #$00ff,d2
   lsl.w      #8,d2                                                                ; SPRxCTL
