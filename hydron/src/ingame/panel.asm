@@ -5,13 +5,19 @@ INGAME_PANEL_ASM equ 1
 
 ; inits panel (should be called once before game loop)
 panel_init:
-  movem.l    d0-a6,-(sp)
+  move.l     ig_om_buffer_front+ig_buffers_copperlist_pointer(a4),a1
+  bsr.s      .init_sub
+  move.l     ig_om_buffer_back+ig_buffers_copperlist_pointer(a4),a1
+  ; intended fall-through
+
+.init_sub:
+  move.l     a1,a3
+  move.l     a1,-(sp)
 
   ; init copper colors
   move.l     #"PACO",d0
   bsr        datafiles_get_pointer
   move.l     df_idx_ptr_rawdata(a0),a0
-  move.l     ig_om_buffer_front+ig_buffers_copperlist_pointer(a4),a1
   lea.l      ig_cm_cl_panel+6(a1),a1
   moveq.l    #15,d7
 .pi_cols_loop:
@@ -20,7 +26,6 @@ panel_init:
   dbf        d7,.pi_cols_loop
 
   ; init label texts
-  move.l     ig_om_buffer_front+ig_buffers_copperlist_pointer(a4),a3    ; FIXME: init both copperlists
   lea.l      ig_cm_cl_panel(a3),a3
 
   move.l     #"PAHI",d0
@@ -50,7 +55,9 @@ panel_init:
 
   lea.l      panel_clrow_sizeof(a3),a3
   dbf        d7,.pi_loop
-  move.l     a3,ig_om_panel_cl_pointer(a4)
+  move.l     (sp)+,a1
+  sub.l      a1,a3
+  move.l     a3,ig_om_panel_cl_offset(a4)                               ; offset in copperlist is needed, not absolute address
   
   ; init data
   move.l     #"PAFO",d0
@@ -60,12 +67,14 @@ panel_init:
   clr.b      ig_om_panel_redraw_lives(a4)
   clr.b      ig_om_panel_redraw_score(a4)
 
-  ; initial draw of values  
+  ; initial draw of values
+  move.l     a1,-(sp)
   bsr        panel_draw_lives
+  move.l     (sp),a1
   bsr        panel_draw_score
+  move.l     (sp)+,a1
   bsr        panel_draw_hiscore
 
-  movem.l    (sp)+,d0-a6
   rts
 
 ; updates panel values if necessary (should be called each frame)
@@ -74,17 +83,20 @@ panel_update:
 
   tst.b      ig_om_panel_redraw_lives(a4)
   beq.s      .check_score
+  move.l     ig_om_buffer_back+ig_buffers_copperlist_pointer(a4),a1
   bsr.s      panel_draw_lives
   clr.b      ig_om_panel_redraw_lives(a4)
 
 .check_score:
   tst.b      ig_om_panel_redraw_score(a4)
   beq.s      .exit
+  move.l     ig_om_buffer_back+ig_buffers_copperlist_pointer(a4),a1
   bsr        panel_draw_score
   move.l     c_om_hiscore(a4),d0
   cmp.l      c_om_score(a4),d0
   bge.s      .no_hiscore_update
   move.l     c_om_score(a4),c_om_hiscore(a4)
+  move.l     ig_om_buffer_back+ig_buffers_copperlist_pointer(a4),a1
   bsr        panel_draw_hiscore
 .no_hiscore_update:
   clr.b      ig_om_panel_redraw_score(a4)
@@ -99,7 +111,7 @@ panel_draw_lives:
   bsr        bcd_to_string_of_2                                         ; string in a0
 
   move.l     ig_om_panel_font_pointer(a4),d0
-  move.l     ig_om_panel_cl_pointer(a4),a1
+  add.l      ig_om_panel_cl_offset(a4),a1
   moveq.l    #10,d1                                                     ; modulo of font
   moveq.l    #0,d2
 
@@ -119,7 +131,7 @@ panel_draw_score:
   bsr        bcd_to_string_of_6                                         ; string in a0
 
   move.l     ig_om_panel_font_pointer(a4),d0
-  move.l     ig_om_panel_cl_pointer(a4),a1
+  add.l      ig_om_panel_cl_offset(a4),a1
   moveq.l    #10,d1                                                     ; modulo of font
   moveq.l    #0,d2
 
@@ -155,7 +167,7 @@ panel_draw_hiscore:
   bsr        bcd_to_string_of_6                                         ; string in a0
 
   move.l     ig_om_panel_font_pointer(a4),d0
-  move.l     ig_om_panel_cl_pointer(a4),a1
+  add.l      ig_om_panel_cl_offset(a4),a1
   moveq.l    #10,d1                                                     ; modulo of font
   moveq.l    #0,d2
 

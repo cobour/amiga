@@ -63,7 +63,7 @@ ig_om_player_right_for_frames:     rs.w       1                          ; playe
 ig_om_player_centered_for_frames:  rs.w       1                          ; player is centered for x number of frames (for decision which animation frame to show)
 ; ingame/panel.asm
 ig_om_panel_font_pointer:          rs.l       1                          ; pointer to the font rawdata
-ig_om_panel_cl_pointer:            rs.l       1                          ; pointer to the area of the copperlist where the panel values must be drawn
+ig_om_panel_cl_offset:             rs.l       1                          ; offset to the area of the copperlist where the panel values must be drawn
 ig_om_panel_redraw_lives:          rs.b       1                          ; boolean / must lives counter be drawn?
 ig_om_panel_redraw_score:          rs.b       1                          ; boolean / must score be drawn? (if new score is higher than old hiscore => update and redraw hiscore as well)
 ; ingame/buffers.asm

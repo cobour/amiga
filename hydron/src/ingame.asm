@@ -22,9 +22,8 @@ ig_start:
   move.l     #$123456,c_om_hiscore(a4)
   ; REMOVE ME - test values
 
-  bsr        buffers_init_vars                  ; MUST be called BEFORE the other inits
+  bsr        buffers_init                       ; MUST be called FIRST, because sets vars needed by other inits
   bsr        panel_init
-  bsr        buffers_init                       ; MUST be called AFTER panel_init (because then panel data is copied) - TODO: let panel_init init both copperlists, then this call can be moved up
   bsr        player_init
   bsr        player_update                      ; update here once => init sprite data
   bsr        ctrl_take_system

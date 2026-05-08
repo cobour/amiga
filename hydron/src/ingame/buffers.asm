@@ -3,23 +3,21 @@ INGAME_BUFFERS_ASM equ 1
 
   include    "src/ingame.i"
 
-buffers_init_vars:
-  ; copperlist
+buffers_init:
+  ; copperlist vars
   move.l     #"IGCL",d0
   bsr        datafiles_get_pointer
   move.l     df_idx_ptr_rawdata(a0),ig_om_buffer_front+ig_buffers_copperlist_pointer(a4)
   lea.l      ig_cm_copperlist(a5),a0
   move.l     a0,ig_om_buffer_back+ig_buffers_copperlist_pointer(a4)
 
-  ; sprites
+  ; sprites vars
   lea.l      ig_cm_player_sprites_buffer_0(a5),a0
   move.l     a0,ig_om_buffer_front+ig_buffers_sprites_pointer(a4)
   lea.l      ig_cm_player_sprites_buffer_1(a5),a0
   move.l     a0,ig_om_buffer_back+ig_buffers_sprites_pointer(a4)
 
-  rts
-
-buffers_init:
+  ; copperlists
   bsr.s      .init_copper_list
   bsr.s      .copy_copperlist
   bra        .set_copper_list                                                               ; implicit rts
