@@ -88,7 +88,7 @@ buffers_init:
 buffers_swap:
   movem.l    d0/a0-a1,-(sp)
 
-  ; TODO: do not swap the pointers between the two structs, but have a pointer to the structs and swap just these
+  ; TODO: do not swap the pointers between the two structs, but have a pointer to the structs and swap just these (work on this once there are real buffers that are moved and swapped)
 
   ; swap and set copperlist pointer
   move.l     ig_om_buffer_front+ig_buffers_copperlist_pointer(a4),a0
