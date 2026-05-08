@@ -2,7 +2,6 @@
 INGAME_PLAYER_ASM equ 1
 
   include    "src/ingame.i"
-  include    "src/ingame/player.i"
   include    "../common/src/system/joystick.i"
 
 player_init:
@@ -27,24 +26,34 @@ player_init:
   clr.w      ig_om_player_left_for_frames(a4)
   clr.w      ig_om_player_right_for_frames(a4)
   clr.w      ig_om_player_centered_for_frames(a4)
-  clr.l      ig_cm_player_sprite0(a5)
-  clr.l      ig_cm_player_sprite1(a5)
-  clr.l      ig_cm_player_sprite2(a5)
-  clr.l      ig_cm_player_sprite3(a5)
+  clr.l      ig_cm_player_sprites_buffer_0+ig_player_sprite0(a5)
+  clr.l      ig_cm_player_sprites_buffer_0+ig_player_sprite1(a5)
+  clr.l      ig_cm_player_sprites_buffer_0+ig_player_sprite2(a5)
+  clr.l      ig_cm_player_sprites_buffer_0+ig_player_sprite3(a5)
+  clr.l      ig_cm_player_sprites_buffer_1+ig_player_sprite0(a5)
+  clr.l      ig_cm_player_sprites_buffer_1+ig_player_sprite1(a5)
+  clr.l      ig_cm_player_sprites_buffer_1+ig_player_sprite2(a5)
+  clr.l      ig_cm_player_sprites_buffer_1+ig_player_sprite3(a5)
 
   ; set sprite pointers in copperlist
-  move.l     ig_om_copperlist_front(a4),a0
+  move.l     ig_om_buffer_front+ig_buffers_copperlist_pointer(a4),a0
+  lea.l      ig_cm_player_sprites_buffer_0(a5),a3
+  bsr.s      .set_pointers_in_copperlist
+  move.l     ig_om_buffer_back+ig_buffers_copperlist_pointer(a4),a0
+  lea.l      ig_cm_player_sprites_buffer_1(a5),a3
+  ; fall-through intended
 
+.set_pointers_in_copperlist
   ; external guns / satellites (no playershots)
   ; reuse sprites 0-1 from panel
   lea.l      ig_cm_cl_reuse_sprites(a0),a1
-  move.l     a5,d0
-  add.l      #ig_cm_player_sprite0,d0
+  move.l     a3,d0
+  add.l      #ig_player_sprite0,d0
   move.w     d0,6(a1)                                                             ; SPR0PTL
   swap       d0
   move.w     d0,2(a1)                                                             ; SPR0PTH
-  move.l     a5,d0
-  add.l      #ig_cm_player_sprite1,d0
+  move.l     a3,d0
+  add.l      #ig_player_sprite1,d0
   move.w     d0,22(a1)                                                            ; SPR1PTL
   swap       d0
   move.w     d0,18(a1)                                                            ; SPR1PTH
@@ -57,13 +66,13 @@ player_init:
   ; external guns / satellites (playershots first when visible)
   ; sprites 2-3
   lea.l      ig_cm_cl_sprites(a0),a1
-  move.l     a5,d0
-  add.l      #ig_cm_player_sprite2,d0
+  move.l     a3,d0
+  add.l      #ig_player_sprite2,d0
   move.w     d0,22(a1)
   swap       d0
   move.w     d0,18(a1)
-  move.l     a5,d0
-  add.l      #ig_cm_player_sprite3,d0
+  move.l     a3,d0
+  add.l      #ig_player_sprite3,d0
   move.w     d0,30(a1)
   swap       d0
   move.w     d0,26(a1)
@@ -71,23 +80,23 @@ player_init:
   ; player ship (playershots first when visible)
   ; sprites 4-7
   lea.l      ig_cm_cl_sprites(a0),a0
-  move.l     a5,d0
-  add.l      #ig_cm_player_sprite4,d0
+  move.l     a3,d0
+  add.l      #ig_player_sprite4,d0
   move.w     d0,38(a0)
   swap       d0
   move.w     d0,34(a0)
-  move.l     a5,d0
-  add.l      #ig_cm_player_sprite5,d0
+  move.l     a3,d0
+  add.l      #ig_player_sprite5,d0
   move.w     d0,46(a0)
   swap       d0
   move.w     d0,42(a0)
-  move.l     a5,d0
-  add.l      #ig_cm_player_sprite6,d0
+  move.l     a3,d0
+  add.l      #ig_player_sprite6,d0
   move.w     d0,54(a0)
   swap       d0
   move.w     d0,50(a0)
-  move.l     a5,d0
-  add.l      #ig_cm_player_sprite7,d0
+  move.l     a3,d0
+  add.l      #ig_player_sprite7,d0
   move.w     d0,62(a0)
   swap       d0
   move.w     d0,58(a0)
@@ -197,15 +206,19 @@ player_update:
 
   bsr        .calc_pos_ctl
   move.l     ig_om_player_anim_offset(a4),d3
-  lea.l      ig_cm_player_sprite4(a5),a2                                          ; target pointer SPR4
-  lea.l      ig_cm_player_sprite5(a5),a3                                          ; target pointer SPR5
+  move.l     ig_om_buffer_back+ig_buffers_sprites_pointer(a4),a2
+  move.l     a2,a3
+  lea.l      ig_player_sprite4(a2),a2                                             ; target pointer SPR4
+  lea.l      ig_player_sprite5(a3),a3                                             ; target pointer SPR5
   bsr.s      .pu_sub
 
   addq.w     #8,d1                                                                ; 6+7 are placed exactly to the right of 4+5
   moveq.l    #2,d3                                                                ; 6+7 are placed exactly to the right of 4+5
   add.l      ig_om_player_anim_offset(a4),d3
-  lea.l      ig_cm_player_sprite6(a5),a2                                          ; target pointer SPR6
-  lea.l      ig_cm_player_sprite7(a5),a3                                          ; target pointer SPR7
+  move.l     ig_om_buffer_back+ig_buffers_sprites_pointer(a4),a2
+  move.l     a2,a3
+  lea.l      ig_player_sprite6(a2),a2                                             ; target pointer SPR6
+  lea.l      ig_player_sprite7(a3),a3                                             ; target pointer SPR7
   ; fall-through intended
 
 .pu_sub:

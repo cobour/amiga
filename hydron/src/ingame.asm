@@ -9,7 +9,7 @@ INGAME_ASM equ 1
 ; a5 - chip mem pointer
 ig_start:
 
-; load and inflate files, TODO: just dummy data
+; load and inflate files
   bsr        .load_datafiles
   tst.l      d0
   bne        .error
@@ -24,12 +24,12 @@ ig_start:
 
   bsr        buffers_init_vars                  ; MUST be called BEFORE the other inits
   bsr        panel_init
+  bsr        buffers_init                       ; MUST be called AFTER panel_init (because then panel data is copied) - TODO: let panel_init init both copperlists, then this call can be moved up
   bsr        player_init
   bsr        player_update                      ; update here once => init sprite data
   bsr        ctrl_take_system
   lea.l      lvl3_irq_handler(pc),a0
   bsr        ctrl_set_handler
-  bsr        buffers_init                       ; MUST be called AFTER all other inits (copperlist must have been initialised by them)
   bsr        .init_music
 
 .main_loop:

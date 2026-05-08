@@ -4,23 +4,31 @@ INGAME_BUFFERS_ASM equ 1
   include    "src/ingame.i"
 
 buffers_init_vars:
+  ; copperlist
   move.l     #"IGCL",d0
   bsr        datafiles_get_pointer
-  move.l     df_idx_ptr_rawdata(a0),ig_om_copperlist_front(a4)
+  move.l     df_idx_ptr_rawdata(a0),ig_om_buffer_front+ig_buffers_copperlist_pointer(a4)
   lea.l      ig_cm_copperlist(a5),a0
-  move.l     a0,ig_om_copperlist_back(a4)
+  move.l     a0,ig_om_buffer_back+ig_buffers_copperlist_pointer(a4)
+
+  ; sprites
+  lea.l      ig_cm_player_sprites_buffer_0(a5),a0
+  move.l     a0,ig_om_buffer_front+ig_buffers_sprites_pointer(a4)
+  lea.l      ig_cm_player_sprites_buffer_1(a5),a0
+  move.l     a0,ig_om_buffer_back+ig_buffers_sprites_pointer(a4)
+
   rts
 
 buffers_init:
   bsr.s      .init_copper_list
   bsr.s      .copy_copperlist
-  bra        .set_copper_list                                     ; implicit rts
+  bra        .set_copper_list                                                               ; implicit rts
 
 .init_copper_list:
 ; get pointer to copperlist in chip mem
-  move.l     ig_om_copperlist_front(a4),a2
+  move.l     ig_om_buffer_front+ig_buffers_copperlist_pointer(a4),a2
 
-; set bitplane pointer
+; set bitplane pointer - REFACTOR: let this be set by upcoming playfield.asm for both buffers
   move.l     #"TSTB",d0
   bsr        datafiles_get_pointer
   move.l     df_idx_ptr_rawdata(a0),a0
@@ -62,8 +70,8 @@ buffers_init:
 
 .copy_copperlist
   movem.l    a0-a1/d7,-(sp)
-  move.l     ig_om_copperlist_front(a4),a0
-  move.l     ig_om_copperlist_back(a4),a1
+  move.l     ig_om_buffer_front+ig_buffers_copperlist_pointer(a4),a0
+  move.l     ig_om_buffer_back+ig_buffers_copperlist_pointer(a4),a1
   move.w     #(ig_cm_cl_sizeof/4)-1,d7
 .ccl_loop:
   move.l     (a0)+,(a1)+
@@ -73,7 +81,7 @@ buffers_init:
 
 .set_copper_list
   movem.l    d0/a0,-(sp)
-  move.l     ig_om_copperlist_front(a4),a0
+  move.l     ig_om_buffer_front+ig_buffers_copperlist_pointer(a4),a0
   move.l     a0,COP1LC(a6)
   move.w     #$0000,COPJMP1(a6)
   movem.l    (sp)+,d0/a0
@@ -81,14 +89,24 @@ buffers_init:
 
 buffers_swap:
   movem.l    d0/a0-a1,-(sp)
-  move.l     ig_om_copperlist_front(a4),a0
-  move.l     ig_om_copperlist_back(a4),a1
+
+  ; TODO: do not swap the pointers between the two structs, but have a pointer to the structs and swap just these
+
+  ; swap and set copperlist pointer
+  move.l     ig_om_buffer_front+ig_buffers_copperlist_pointer(a4),a0
+  move.l     ig_om_buffer_back+ig_buffers_copperlist_pointer(a4),a1
   move.l     a1,COP1LC(a6)
   ; no COMJMP1, because we do not know at which beam position this is executed
-  move.l     a0,ig_om_copperlist_back(a4)
-  move.l     a1,ig_om_copperlist_front(a4)
+  move.l     a0,ig_om_buffer_back+ig_buffers_copperlist_pointer(a4)
+  move.l     a1,ig_om_buffer_front+ig_buffers_copperlist_pointer(a4)
+
+  ; swap sprites pointer
+  move.l     ig_om_buffer_front+ig_buffers_sprites_pointer(a4),a0
+  move.l     ig_om_buffer_back+ig_buffers_sprites_pointer(a4),a1
+  move.l     a0,ig_om_buffer_back+ig_buffers_sprites_pointer(a4)
+  move.l     a1,ig_om_buffer_front+ig_buffers_sprites_pointer(a4)
+
   movem.l    (sp)+,d0/a0-a1
   rts
-  rts
 
-  endif                                                           ; ifnd INGAME_BUFFERS_ASM
+  endif                                                                                     ; ifnd INGAME_BUFFERS_ASM
