@@ -1,29 +1,62 @@
-                          ifnd       INGAME_PLAYER_I
-INGAME_PLAYER_I           equ 1
+                                ifnd       INGAME_PLAYER_I
+INGAME_PLAYER_I              equ 1
 
 ; anim steps player ship (byte offsets)
-PlayerShipAnimHardLeft    equ 0
-PlayerShipAnimLeft        equ 4
-PlayerShipAnimCentered    equ 8
-PlayerShipAnimRight       equ 12
-PlayerShipAnimHardRight   equ 16
+PlayerShipAnimHardLeft       equ 0
+PlayerShipAnimLeft           equ 4
+PlayerShipAnimCentered       equ 8
+PlayerShipAnimRight          equ 12
+PlayerShipAnimHardRight      equ 16
 
 ; delay in frames between e.g. left and hard left
-PlayerShipAnimSwitchDelay equ 10
+PlayerShipAnimSwitchDelay    equ 10
 
 ; height of player ship in pixels
-PlayerShipHeight          equ 22
+PlayerShipHeight             equ 22
+
+; player bullets (must be updated when new weapons are added)
+PlayerBulletsMaxHeight       equ 16
+PlayerBulletsMaxCountStacked equ 4                                                                                           ; maximum number of bullets that are displayed in one stack (player bullets are shown in max 3 stacks)
 
 ; struct holding data for hardware sprites
-                          rsreset
-ig_player_sprite0:        rs.l       1                     ; player satellites --- just empty for now
-ig_player_sprite1:        rs.l       1                     ; player satellites --- just empty for now
-ig_player_sprite2:        rs.l       1                     ; player satellites / player shots --- just empty for now
-ig_player_sprite3:        rs.l       1                     ; player satellites / player shots --- just empty for now
-ig_player_sprite4:        rs.l       PlayerShipHeight+2    ; player ship / player shots
-ig_player_sprite5:        rs.l       PlayerShipHeight+2    ; player ship / player shots
-ig_player_sprite6:        rs.l       PlayerShipHeight+2    ; player ship / player shots
-ig_player_sprite7:        rs.l       PlayerShipHeight+2    ; player ship / player shots
-ig_player_sprite_sizeof:  rs.b       0
+                                rsreset                                                                                      ; contains one long for each control word pair and another long at the end for null bytes
+ig_player_sprite0:              rs.l       1                                                                                 ; player satellites --- just empty for now
+ig_player_sprite1:              rs.l       1                                                                                 ; player satellites --- just empty for now
+ig_player_sprite2:              rs.l       ((1+PlayerBulletsMaxHeight)*PlayerBulletsMaxCountStacked)+1                       ; player satellites / player bullets
+ig_player_sprite3:              rs.l       ((1+PlayerBulletsMaxHeight)*PlayerBulletsMaxCountStacked)+1                       ; player satellites / player bullets
+ig_player_sprite4:              rs.l       ((1+PlayerBulletsMaxHeight)*PlayerBulletsMaxCountStacked)+1+PlayerShipHeight+1    ; player ship / player bullets
+ig_player_sprite5:              rs.l       ((1+PlayerBulletsMaxHeight)*PlayerBulletsMaxCountStacked)+1+PlayerShipHeight+1    ; player ship / player bullets
+ig_player_sprite6:              rs.l       ((1+PlayerBulletsMaxHeight)*PlayerBulletsMaxCountStacked)+1+PlayerShipHeight+1    ; player ship / player bullets
+ig_player_sprite7:              rs.l       ((1+PlayerBulletsMaxHeight)*PlayerBulletsMaxCountStacked)+1+PlayerShipHeight+1    ; player ship / player bullets
+ig_player_sprite_sizeof:        rs.b       0
 
-                          endif                            ; ifnd INGAME_PLAYER_I
+; struct holding metadata for bullets of a specific weapon type - each change MUST be reflected in descriptors in player.asm AND player_bullet_add_to_stack
+                                rsreset
+ig_player_bullettype_rel_xpos:  rs.l       1                                                                                 ; xpos in screen coordinates as fixed-point 16/16 value relative to player position
+ig_player_bullettype_rel_ypos:  rs.l       1                                                                                 ; ypos in screen coordinates as fixed-point 16/16 value relative to player position
+ig_player_bullettype_speed_x:   rs.l       1                                                                                 ; xpos-add in screen coordinates as fixed-point 16/16 value
+ig_player_bullettype_speed_y:   rs.l       1                                                                                 ; ypos-add in screen coordinates as fixed-point 16/16 value
+ig_player_bullettype_min_xpos:  rs.w       1                                                                                 ; minimum valid xpos of bullet as int value (no fraction), delete bullet when current xpos is lower than this value
+ig_player_bullettype_max_xpos:  rs.w       1                                                                                 ; maximum valid xpos of bullet as int value (no fraction), delete bullet when current xpos is greater than this value
+ig_player_bullettype_min_ypos:  rs.w       1                                                                                 ; minimum valid ypos of bullet as int value (no fraction), delete bullet when current ypos is lower than this value
+ig_player_bullettype_max_ypos:  rs.w       1                                                                                 ; maximum valid ypos of bullet as int value (no fraction), delete bullet when current ypos is greater than this value
+ig_player_bullettype_sizeof:    rs.b       0
+
+; struct defining one player bullet
+                                rsreset
+ig_player_bullet_active:        rs.b       1                                                                                 ; boolean
+ig_player_bullet_dummy:         rs.b       1
+ig_player_bullet_xpos:          rs.l       1                                                                                 ; xpos in screen coordinates as fixed-point 16/16 value
+ig_player_bullet_ypos:          rs.l       1                                                                                 ; ypos in screen coordinates as fixed-point 16/16 value
+; values must match ig_player_bullettype_xxx - begin
+ig_player_bullet_speed_x:       rs.l       1                                                                                 ; xpos-add in screen coordinates as fixed-point 16/16 value
+ig_player_bullet_speed_y:       rs.l       1                                                                                 ; ypos-add in screen coordinates as fixed-point 16/16 value
+ig_player_bullet_min_xpos:      rs.w       1                                                                                 ; minimum valid xpos of bullet as int value (no fraction), delete bullet when current xpos is lower than this value
+ig_player_bullet_max_xpos:      rs.w       1                                                                                 ; maximum valid xpos of bullet as int value (no fraction), delete bullet when current xpos is greater than this value
+ig_player_bullet_min_ypos:      rs.w       1                                                                                 ; minimum valid ypos of bullet as int value (no fraction), delete bullet when current ypos is lower than this value
+ig_player_bullet_max_ypos:      rs.w       1                                                                                 ; maximum valid ypos of bullet as int value (no fraction), delete bullet when current ypos is greater than this value
+; values must match ig_player_bullettype_xxx - end
+ig_player_bullet_sizeof:        rs.b       0
+
+
+                                endif                                                                                        ; ifnd INGAME_PLAYER_I

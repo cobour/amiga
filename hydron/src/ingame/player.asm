@@ -35,6 +35,41 @@ player_init:
   clr.l      ig_cm_player_sprites_buffer_1+ig_player_sprite2(a5)
   clr.l      ig_cm_player_sprites_buffer_1+ig_player_sprite3(a5)
 
+  ; init bullet structs and lists
+  lea.l      ig_om_player_bullets_stack_0(a4),a0
+  lea.l      ig_om_player_bullets_stack_0_list(a4),a1
+  moveq.l    #ig_player_bullet_sizeof,d0
+  moveq.l    #PlayerBulletsMaxCountStacked-1,d7
+.bullets_loop_0:
+  clr.w      ig_player_bullet_active(a0)
+  add.l      d0,a0
+  clr.l      (a1)+
+  dbf        d7,.bullets_loop_0
+
+  lea.l      ig_om_player_bullets_stack_1(a4),a0
+  lea.l      ig_om_player_bullets_stack_1_list(a4),a1
+  moveq.l    #ig_player_bullet_sizeof,d0
+  moveq.l    #PlayerBulletsMaxCountStacked-1,d7
+.bullets_loop_1:
+  clr.w      ig_player_bullet_active(a0)
+  add.l      d0,a0
+  clr.l      (a1)+
+  dbf        d7,.bullets_loop_1
+
+  lea.l      ig_om_player_bullets_stack_2(a4),a0
+  lea.l      ig_om_player_bullets_stack_2_list(a4),a1
+  moveq.l    #ig_player_bullet_sizeof,d0
+  moveq.l    #PlayerBulletsMaxCountStacked-1,d7
+.bullets_loop_2:
+  clr.w      ig_player_bullet_active(a0)
+  add.l      d0,a0
+  clr.l      (a1)+
+  dbf        d7,.bullets_loop_2
+
+  ; init bullet/firing values
+  move.w     #30,ig_om_player_bullets_fire_delay(a4)
+  move.w     #30,ig_om_player_bullets_fire_delay_count(a4)                        ; so bullet can be fired immediately
+
   ; set sprite pointers in copperlist
   move.l     ig_om_buffer_front+ig_buffers_copperlist_pointer(a4),a0
   lea.l      ig_cm_player_sprites_buffer_0(a5),a3
@@ -135,17 +170,23 @@ player_update:
   move.l     ig_om_player_min_xpos(a4),d4
 .test_right:
   btst       #JsRight,d0
-  beq.s      .test_end
+  beq.s      .test_fire
   add.l      ig_om_player_speed(a4),d4
   add.w      #1,ig_om_player_right_for_frames(a4)
   clr.w      ig_om_player_left_for_frames(a4)
   clr.w      ig_om_player_centered_for_frames(a4)
   cmp.l      ig_om_player_max_xpos(a4),d4
-  ble.s      .test_end
+  ble.s      .test_fire
   move.l     ig_om_player_max_xpos(a4),d4
-.test_end:
+.test_fire:
   move.l     d4,ig_om_player_xpos(a4)
   move.l     d5,ig_om_player_ypos(a4)
+  add.w      #1,ig_om_player_bullets_fire_delay_count(a4)                         ; increment fire delay counter
+  btst       #JsFire,d0
+  beq.s      .test_end
+  bsr        player_weapon_fire
+.test_end:
+
   and.b      #1<<JsLeft|1<<JsRight,d0
   tst.b      d0
   bne.s      .not_centered
@@ -196,6 +237,7 @@ player_update:
 .not_right:
 .anim_chosen:
 
+  bsr        player_weapon_update
 
   ; player ship
 
@@ -285,5 +327,190 @@ player_update:
 .no_h0_h_start:
 
   rts
+
+player_weapon_fire:
+  movem.l    d0-d1/d4-d5,-(sp)
+
+  ; check fire delay
+  move.w     ig_om_player_bullets_fire_delay_count(a4),d1                         ; DELETE ME
+  move.w     ig_om_player_bullets_fire_delay(a4),d0
+  cmp.w      ig_om_player_bullets_fire_delay_count(a4),d0
+  bgt.s      .exit
+
+  ; spawn new bullet
+  bsr        player_weapon_fire_simple                                            ; TODO: jsr to pointer when multiple weapons are available
+
+  ; reset fire delay counter
+  clr.w      ig_om_player_bullets_fire_delay_count(a4)
+
+.exit:
+  movem.l    (sp)+,d0-d1/d4-d5
+  rts
+
+player_weapon_update:
+  movem.l    d0-d1/d4-d5,-(sp)
+
+  ; update all bullet positions
+  lea.l      ig_om_player_bullets_stack_0(a4),a0
+  bsr.s      .position_update_per_stack
+  lea.l      ig_om_player_bullets_stack_1(a4),a0
+  bsr.s      .position_update_per_stack
+  lea.l      ig_om_player_bullets_stack_2(a4),a0
+  bsr.s      .position_update_per_stack
+
+  ; check visibility of all bullets
+  lea.l      ig_om_player_bullets_stack_0_list(a4),a0
+  bsr.s      .bullet_still_visible_check_per_stack
+  lea.l      ig_om_player_bullets_stack_1_list(a4),a0
+  bsr.s      .bullet_still_visible_check_per_stack
+  lea.l      ig_om_player_bullets_stack_2_list(a4),a0
+  bsr.s      .bullet_still_visible_check_per_stack
+
+  nop                                                                             ; TODO: jsr to pointer when multiple weapons are available
+
+  movem.l    (sp)+,d0-d1/d4-d5
+  rts
+
+.position_update_per_stack:
+  moveq.l    #PlayerBulletsMaxCountStacked-1,d7
+  moveq.l    #ig_player_bullet_sizeof,d6
+.position_update_per_stack_loop:
+  tst.b      ig_player_bullet_active(a0)
+  beq.s      .position_update_per_stack_loop_next
+  move.l     ig_player_bullet_speed_x(a0),d0
+  add.l      d0,ig_player_bullet_xpos(a0)
+  move.l     ig_player_bullet_speed_y(a0),d0
+  add.l      d0,ig_player_bullet_ypos(a0)
+.position_update_per_stack_loop_next:
+  add.l      d6,a0
+  dbf        d7,.position_update_per_stack_loop
+  rts
+
+.bullet_still_visible_check_per_stack:
+  moveq.l    #PlayerBulletsMaxCountStacked-1,d7
+.bullet_still_visible_check_per_stack_loop:
+  move.l     (a0),d0
+  tst.l      d0
+  beq.s      .bullet_still_visible_check_per_stack_loop_next
+  move.l     d0,a1
+  move.w     ig_player_bullet_xpos(a1),d0
+  cmp.w      ig_player_bullet_min_xpos(a1),d0
+  blt.s      .bullet_still_visible_check_per_stack_loop_remove_bullet
+  cmp.w      ig_player_bullet_max_xpos(a1),d0
+  bgt.s      .bullet_still_visible_check_per_stack_loop_remove_bullet
+  move.w     ig_player_bullet_ypos(a1),d0
+  cmp.w      ig_player_bullet_min_ypos(a1),d0
+  blt.s      .bullet_still_visible_check_per_stack_loop_remove_bullet
+  cmp.w      ig_player_bullet_max_ypos(a1),d0
+  bgt.s      .bullet_still_visible_check_per_stack_loop_remove_bullet
+  bra.s      .bullet_still_visible_check_per_stack_loop_next
+.bullet_still_visible_check_per_stack_loop_remove_bullet:
+  clr.l      (a0)
+  clr.b      ig_player_bullet_active(a1)
+.bullet_still_visible_check_per_stack_loop_next:
+  addq.l     #4,a0
+  dbf        d7,.bullet_still_visible_check_per_stack_loop
+  rts
+
+; TODO: for now no flexibility regarding 1-3 bullets and strength of 1-3 and speed-x and speed-y
+player_weapon_fire_simple:
+  lea.l      player_bullettype_simple_for_stack_0(pc),a1
+  lea.l      ig_om_player_bullets_stack_0(a4),a2
+  lea.l      ig_om_player_bullets_stack_0_list(a4),a3
+  bsr        player_bullet_add_to_stack
+
+  lea.l      player_bullettype_simple_for_stack_1(pc),a1
+  lea.l      ig_om_player_bullets_stack_1(a4),a2
+  lea.l      ig_om_player_bullets_stack_1_list(a4),a3
+  bsr        player_bullet_add_to_stack
+
+  lea.l      player_bullettype_simple_for_stack_2(pc),a1
+  lea.l      ig_om_player_bullets_stack_2(a4),a2
+  lea.l      ig_om_player_bullets_stack_2_list(a4),a3
+  bsr        player_bullet_add_to_stack
+
+  rts
+
+; in:
+;   a1 - pointer to struct ig_player_bullettype
+;   a2 - pointer to ig_om_player_bullets_stack_XX
+;   a3 - pointer to ig_om_player_bullets_stack_XX_list
+; TODO: for now no flexibility regarding 1-3 bullets and strength of 1-3 and speed-x and speed-y
+player_bullet_add_to_stack:
+
+  ; check if empty slot is available
+  moveq.l    #PlayerBulletsMaxCountStacked-1,d7
+  moveq.l    #ig_player_bullet_sizeof,d6
+  move.l     a2,a0
+.check_loop:
+  tst.b      ig_player_bullet_active(a0)
+  beq.s      .found_empty_slot
+  add.l      d6,a0
+  dbf        d7,.check_loop
+
+.no_empty_slot:
+  rts
+
+.found_empty_slot:
+  move.l     a1,d6                                                                ; save a1 parameter
+  ; move pointers up in sorted list
+  moveq.l    #PlayerBulletsMaxCountStacked-2,d7
+  move.l     a3,a1
+.move_pointers_up_loop:
+  move.l     4(a1),(a1)+
+  dbf        d7,.move_pointers_up_loop
+
+  ; add pointer to sorted list
+  move.l     a0,(a1)
+
+  ; init struct ig_player_bullet - MUST be changed accordingly when struct is changed
+  move.l     d6,a1                                                                ; restore a1 parameter
+  move.w     #$0100,(a0)+
+  move.l     ig_om_player_xpos(a4),d0
+  add.l      (a1)+,d0
+  move.l     d0,(a0)+
+  move.l     ig_om_player_ypos(a4),d0
+  add.l      (a1)+,d0
+  move.l     d0,(a0)+
+  move.l     (a1)+,(a0)+
+  move.l     (a1)+,(a0)+
+  move.w     (a1)+,(a0)+
+  move.w     (a1)+,(a0)+
+  move.w     (a1)+,(a0)+
+  move.w     (a1),(a0)
+  rts
+
+; must match struct ig_player_bullettype
+player_bullettype_simple_for_stack_0:
+  dc.w       0,0                                                                  ; xpos in screen coordinates as fixed-point 16/16 value relative to player position
+  dc.w       -18,0                                                                ; ypos in screen coordinates as fixed-point 16/16 value relative to player position
+  dc.w       -2,0                                                                 ; xpos-add in screen coordinates as fixed-point 16/16 value
+  dc.w       -8,0                                                                 ; ypos-add in screen coordinates as fixed-point 16/16 value
+  dc.w       -15                                                                  ; minimum valid xpos of bullet as int value (no fraction), delete bullet when current xpos is lower than this value
+  dc.w       IgScreenWidth+15                                                     ; maximum valid xpos of bullet as int value (no fraction), delete bullet when current xpos is greater than this value
+  dc.w       -15                                                                  ; minimum valid ypos of bullet as int value (no fraction), delete bullet when current ypos is lower than this value
+  dc.w       IgScreenHeight+15                                                    ; maximum valid ypos of bullet as int value (no fraction), delete bullet when current ypos is greater than this value
+
+; must match struct ig_player_bullettype
+player_bullettype_simple_for_stack_1:
+  dc.w       8,0                                                                  ; xpos in screen coordinates as fixed-point 16/16 value relative to player position
+  dc.w       -18,0                                                                ; ypos in screen coordinates as fixed-point 16/16 value relative to player position
+  dc.w       0,0                                                                  ; xpos-add in screen coordinates as fixed-point 16/16 value
+  dc.w       -8,0                                                                 ; ypos-add in screen coordinates as fixed-point 16/16 value
+  dc.w       -15                                                                  ; minimum valid xpos of bullet as int value (no fraction), delete bullet when current xpos is lower than this value
+  dc.w       IgScreenWidth+15                                                     ; maximum valid xpos of bullet as int value (no fraction), delete bullet when current xpos is greater than this value
+  dc.w       -15                                                                  ; minimum valid ypos of bullet as int value (no fraction), delete bullet when current ypos is lower than this value
+  dc.w       IgScreenHeight+15                                                    ; maximum valid ypos of bullet as int value (no fraction), delete bullet when current ypos is greater than this value
+
+; must match struct ig_player_bullettype
+player_bullettype_simple_for_stack_2:
+  dc.w       16,0                                                                 ; xpos in screen coordinates as fixed-point 16/16 value relative to player position
+  dc.w       -18,0                                                                ; ypos in screen coordinates as fixed-point 16/16 value relative to player position
+  dc.w       2,0                                                                  ; xpos-add in screen coordinates as fixed-point 16/16 value
+  dc.w       -8,0                                                                 ; ypos-add in screen coordinates as fixed-point 16/16 value
+  dc.w       -15                                                                  ; minimum valid xpos of bullet as int value (no fraction), delete bullet when current xpos is lower than this value
+  dc.w       IgScreenWidth+15                                                     ; maximum valid xpos of bullet as int value (no fraction), delete bullet when current xpos is greater than this value
+  dc.w       -15                                                                  ; minimum valid ypos of bullet as int value (no fraction), delete bullet when current ypos is lower than this value
+  dc.w       IgScreenHeight+15                                                    ; maximum valid ypos of bullet as int value (no fraction), delete bullet when current ypos is greater than this value
 
   endif                                                                           ; ifnd INGAME_PLAYER_ASM

@@ -60,6 +60,9 @@ targetFiles:
         withMask: false
       - filename: code/ingame_panel_copper_colors.asm
         id: PACO
+      - filename: gfx/player_bullets_0.iff
+        id: PBU0
+        withMask: false
 
   - filename: F101
     description: ingame_other
