@@ -12,7 +12,7 @@ PlayerShipAnimHardRight      equ 16
 PlayerShipAnimSwitchDelay    equ 10
 
 ; delay between two bullets are fired
-PlayerFireDelay              equ 30
+PlayerFireDelay              equ 8
 
 ; height of player ship in pixels
 PlayerShipHeight             equ 22
