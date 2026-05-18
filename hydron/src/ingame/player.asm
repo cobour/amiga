@@ -281,7 +281,7 @@ player_update:
   move.l     a2,(a3)
   
   ; draw bullet stack 0 bullets to SPR2+SPR3
-  lea.l      ig_om_player_bullets_stack_0(a4),a0
+  lea.l      ig_om_player_bullets_stack_0_list(a4),a1
   move.l     ig_om_player_sprite_2_work_pointer(a4),a2
   move.l     ig_om_player_sprite_3_work_pointer(a4),a3
   bsr        .draw_bullet_stack
@@ -289,7 +289,7 @@ player_update:
   move.l     a3,ig_om_player_sprite_3_work_pointer(a4)
 
   ; draw bullet stack 1 bullets to SPR4+SPR5
-  lea.l      ig_om_player_bullets_stack_1(a4),a0
+  lea.l      ig_om_player_bullets_stack_1_list(a4),a1
   move.l     ig_om_player_sprite_4_work_pointer(a4),a2
   move.l     ig_om_player_sprite_5_work_pointer(a4),a3
   bsr        .draw_bullet_stack
@@ -297,7 +297,7 @@ player_update:
   move.l     a3,ig_om_player_sprite_5_work_pointer(a4)
 
   ; draw bullet stack 2 bullets to SPR6+SPR7
-  lea.l      ig_om_player_bullets_stack_2(a4),a0
+  lea.l      ig_om_player_bullets_stack_2_list(a4),a1
   move.l     ig_om_player_sprite_6_work_pointer(a4),a2
   move.l     ig_om_player_sprite_7_work_pointer(a4),a3
   bsr        .draw_bullet_stack
@@ -421,16 +421,19 @@ player_update:
   rts
 
 ; in:
-;   a0 - pointer to bullet stack struct
+;   a1 - pointer to bullet stack struct
 ;   a2 - pointer to first sprite data
 ;   a3 - pointer to second sprite data
 .draw_bullet_stack:
   moveq.l    #PlayerBulletsMaxCountStacked-1,d7
 .draw_bullets_stack_loop:
+  move.l     (a1)+,a0
+  cmp.l      #0,a0
+  beq.s      .draw_bullets_stack_loop_next
   tst.b      ig_player_bullet_active(a0)
   beq.s      .draw_bullets_stack_loop_next
   ; actually active bullet
-  movem.l    d7/a0,-(sp)
+  movem.l    d7/a0-a1,-(sp)
   move.w     ig_player_bullet_xpos(a0),d4                                         ; no fraction needed
   move.w     ig_player_bullet_ypos(a0),d5                                         ; no fraction needed
   move.w     ig_player_bullet_height(a0),d6
@@ -439,9 +442,9 @@ player_update:
   move.w     ig_player_bullet_anim_offset(a0),d3
   move.l     ig_player_bullet_gfx_pointer(a0),a1
   bsr        .write_control_words_and_gfx_to_sprite_data
-  movem.l    (sp)+,d7/a0
+  movem.l    (sp)+,d7/a0-a1
 .draw_bullets_stack_loop_next:
-  lea.l      ig_player_bullet_sizeof(a0),a0
+  addq.l     #4,a0
   dbf        d7,.draw_bullets_stack_loop
   rts
 
