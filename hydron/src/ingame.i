@@ -69,6 +69,7 @@ ig_om_player_bullets_fire_delay_count:  rs.w       1                            
 ig_om_player_bullets_stack_0_list:      rs.l       PlayerBulletsMaxCountStacked                            ; list of pointers to active bullets, sorted top-down (ypos), for stack 0
 ig_om_player_bullets_stack_1_list:      rs.l       PlayerBulletsMaxCountStacked                            ; list of pointers to active bullets, sorted top-down (ypos), for stack 1
 ig_om_player_bullets_stack_2_list:      rs.l       PlayerBulletsMaxCountStacked                            ; list of pointers to active bullets, sorted top-down (ypos), for stack 2
+ig_om_player_fire_sfx:                  rs.l       1                                                       ; pointer to metadata struct for playback with ptplayer
 ig_om_player_sprite_0_work_pointer:     rs.l       1                                                       ; temporary pointers used during drawing all sprite data (bullets, satellites, player ship)
 ig_om_player_sprite_1_work_pointer:     rs.l       1                                                       ; temporary pointers used during drawing all sprite data (bullets, satellites, player ship)
 ig_om_player_sprite_2_work_pointer:     rs.l       1                                                       ; temporary pointers used during drawing all sprite data (bullets, satellites, player ship)

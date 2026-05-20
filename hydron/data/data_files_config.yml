@@ -36,6 +36,10 @@ targetFiles:
     sources:      
       - filename: music/vision.mod
         id: MS02
+      - filename: sfx/player_bullets_0.wav      # volume amplified to 20db
+        id: SBU0
+        volume: 64
+        priority: 32
       - filename: code/ingame_copperlist.asm
         id: IGCL
 

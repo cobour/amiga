@@ -35,6 +35,12 @@ player_init:
   clr.l      ig_cm_player_sprites_buffer_1+ig_player_sprite2(a5)
   clr.l      ig_cm_player_sprites_buffer_1+ig_player_sprite3(a5)
 
+  ; init player fire sfx
+  move.l     #"SBU0",d0
+  bsr        datafiles_get_pointer
+  lea.l      df_idx_metadata(a0),a0
+  move.l     a0,ig_om_player_fire_sfx(a4)
+
   ; init player bullet gfx
   move.l     #"PBU0",d0
   bsr        datafiles_get_pointer
@@ -547,6 +553,9 @@ player_weapon_fire_simple:
   lea.l      ig_om_player_bullets_stack_2(a4),a2
   lea.l      ig_om_player_bullets_stack_2_list(a4),a3
   bsr        player_bullet_add_to_stack
+
+  move.l     ig_om_player_fire_sfx(a4),a0
+  bsr        _mt_playfx
 
   rts
 
