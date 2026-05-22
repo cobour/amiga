@@ -1,12 +1,15 @@
 # source, temp and target folders are relative to folder of this config file
 sourceFolder: ./
-tempFolder: ./converted
+tempFolder: ./_converted
 targetFolder: ../uae/dh0
 diskimageFolder: ../dist
+
 # asmWorkingFolder is relative to amiga/common/data-tool/app folder
 asmWorkingFolder: ../../../hydron
+
 # include filenames are relative to folder of this config file
 mainCodeIncludeFilename: ../main_code.i
+
 # filenames of source files are relative to sourceFolder
 targetFiles:
 
@@ -23,70 +26,70 @@ targetFiles:
           - USE_DISK_DMA
 
   - filename: F000
-    description: ingame_chip_1
+    description: ingame_chip_common
     memoryType: CHIP
     sources:
-      - filename: gfx/test_ehb_256x256.iff
+      - filename: ingame/common/player_bullets_0.wav      # volume amplified to 20db
+        id: SBU0
+        volume: 64
+        priority: 32
+      - filename: ingame/common/ingame_copperlist.asm
+        id: IGCL
+      - filename: ingame/test_ehb_256x256.iff
         id: TSTB
         withMask: false
 
   - filename: F001
-    description: ingame_chip_2
+    description: ingame_chip_level_0
     memoryType: CHIP
     sources:      
-      - filename: music/vision.mod
+      - filename: ingame/level_0/vision.mod
         id: MS02
-      - filename: sfx/player_bullets_0.wav      # volume amplified to 20db
-        id: SBU0
-        volume: 64
-        priority: 32
-      - filename: code/ingame_copperlist.asm
-        id: IGCL
 
   - filename: F100
-    description: ingame_other_2
+    description: ingame_other_level_0
     memoryType: OTHER
     sources:
-      - filename: gfx/test_ehb_256x256.iff
+      - filename: ingame/level_0/vision.mod
+        id: MP02
+      - filename: ingame/test_ehb_256x256.iff
         id: COLS
         colorsOnly: true
-      - filename: gfx/panel_score.iff
-        id: PASC
-        withMask: false
-      - filename: gfx/panel_hiscore.iff
-        id: PAHI
-        withMask: false
-      - filename: gfx/panel_lives.iff
-        id: PALI
-        withMask: false
-      - filename: gfx/panel_font.iff
-        id: PAFO
-        withMask: false
-      - filename: code/ingame_panel_copper_colors.asm
-        id: PACO
-      - filename: gfx/player_bullets_0.iff
-        id: PBU0
-        withMask: false
+#      - filename: _tiled/level_1.tmx
+#        id: LVLO
+#        reversedVertically: true
+#      - filename: ingame/background_tiles.iff
+#        id: LVLT
+#        withMask: false
+#        flattenedTileFormat: 16x16
+#        flattenedReducedTileCount: 64
 
   - filename: F101
-    description: ingame_other
+    description: ingame_other_common
     memoryType: OTHER
     relatedFiles: # all related files must have been already defined! all om-files first, then all cm-files!
       - F100
       - F001
       - F000
     sources:
-#      - filename: tiled/level_1.tmx
-#        id: LVLO
-#        reversedVertically: true
-#      - filename: gfx/background_tiles.iff
-#        id: LVLT
-#        withMask: false
-#        flattenedTileFormat: 16x16
-#        flattenedReducedTileCount: 64
-      - filename: music/vision.mod
-        id: MP02
-      - filename: gfx/player.iff
+      - filename: ingame/common/panel_score.iff
+        id: PASC
+        withMask: false
+      - filename: ingame/common/panel_hiscore.iff
+        id: PAHI
+        withMask: false
+      - filename: ingame/common/panel_lives.iff
+        id: PALI
+        withMask: false
+      - filename: ingame/common/panel_font.iff
+        id: PAFO
+        withMask: false
+      - filename: ingame/common/ingame_panel_copper_colors.asm
+        id: PACO
+      - filename: ingame/common/player_bullets_0.iff
+        id: PBU0
+        withMask: false
+      - filename: ingame/common/player.iff
         id: PLYR
         withMask: false
 
