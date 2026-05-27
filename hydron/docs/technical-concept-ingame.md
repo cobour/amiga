@@ -29,16 +29,20 @@ All playershots are drawn only above the playersprite initially and because shot
 
 # Usage of color palette
 
-| Color   | Usage                                                                                       |
-| ------- | ------------------------------------------------------------------------------------------- |
-| 00      | always black and transparent                                                                |
-| 01-15   | usable for backgrounds, enemies, enemyshots ; may change each level for unique color design |
+| Color   | Usage                                                                                           |
+| ------- | ----------------------------------------------------------------------------------------------- |
+| 00      | always black and transparent                                                                    |
+| 01-15   | usable for backgrounds, enemies, enemyshots ; may change each level for unique color design     |
 | 16      | transparent color for attached hardware sprites and sprite 0 and 1 for panel. usable for backgrounds, enemies, enemyshots ; may change each level for unique color design |
-| 17-19   | for panel sprites and for player and playershots ; may NOT change each level                |
-| 20-31   | for player and playershots sprites ; may NOT change each level                              |
-| 32      | EHB pseudo color  ; always black and solid                                                  |
-| 33-48   | EHB pseudo colors ; automatically changed each level by "master-colors" 01-16               |
-| 49-63   | EHB pseudo colors ; automatically set by "master-colors" 17-31 ; stay the same each level   |
+| 17      | reserved for panel copper effect ; may be used for player ship and satellites but NOT elsewhere |
+| 18-31   | for player ship, player satellites and playershots sprites ; may NOT change each level          |
+| 32      | EHB pseudo color  ; always black and solid                                                      |
+| 33-48   | EHB pseudo colors ; automatically changed each level by "master-colors" 01-16                   |
+| 49      | EHB pseudo color  ; automatically set by "master-color" 17 ; reserved for panel copper effect ; may NOT be used elsewhere |
+| 50-63   | EHB pseudo colors ; automatically set by "master-colors" 18-31 ; stay the same each level       |
+
+IFF files for 16-color hardware sprites (player ship, player satellites, player bullets) must have a palette with color 00 as transparent/black and colors 01-15 that match colors 17-31 from the table above.  
+IFF files for panel just have 2 colors, where color 00 is transparent/black and color 01 may be any color (set in the game by copper effect for each scanline).
 
 ![palette usage](HYDRON_Usage-of-color-palette.png)
 
