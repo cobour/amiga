@@ -32,14 +32,14 @@ ig_cm_cl_sizeof:                        rs.b       0
 ; Ingame chip mem struct
                                         rsreset
 ig_cm_common:                           rs.b       c_cm_sizeof
-; ingame/buffers.asm
-ig_cm_copperlist:                       rs.b       ig_cm_cl_sizeof                                         ; second copperlist (first one is inside loaded file)
 ; ingame/player.asm
 ig_cm_player_sprites_buffer_0:          rs.b       ig_player_sprite_sizeof                                 ; buffer for hardware sprite data
 ig_cm_player_sprites_buffer_1:          rs.b       ig_player_sprite_sizeof                                 ; buffer for hardware sprite data
-;
-ig_cm_filebuffer:                       rs.b       100000                                                  ; TODO: inside framebuffer
-ig_cm_dmabuffer:                        rs.b       15000                                                   ; TODO: inside framebuffer
+; ingame/buffers.asm - should be last before data files area (because framebuffers are very large and otherwise e.g. "move.l ig_cm_xxx(a4),d0" would be out of range)
+ig_cm_copperlist:                       rs.b       ig_cm_cl_sizeof                                         ; second copperlist (first one is inside loaded file)
+ig_cm_framebuffer_one:                  rs.b       IgFrameBufferSize                                       ; first framebuffer  - MUST be placed one after another without anything between them
+ig_cm_framebuffer_two:                  rs.b       IgFrameBufferSize                                       ; second framebuffer - MUST be placed one after another without anything between them
+ig_cm_framebuffer_three:                rs.b       IgFrameBufferSize                                       ; third framebuffer  - MUST be placed one after another without anything between them
 ; data files area
 ig_cm_datfile:                          rs.b       0                                                       ; variable filesizes, therefore this MUST be the last entry in this struct
 ig_cm_sizeof:                           rs.b       0
@@ -87,6 +87,7 @@ ig_om_panel_redraw_score:               rs.b       1                            
 ig_om_buffers_framecount:               rs.l       1                                                       ; counts the displayed frames (means drawn and manually swapped frames, not real monitor frames; should be the same, but when gameplay gets busy, maybe it will take two monitor frames to draw one game frame)
 ig_om_buffer_one:                       rs.b       ig_buffers_sizeof                                       ; buffers-struct of buffer one (display swaps between one and two)
 ig_om_buffer_two:                       rs.b       ig_buffers_sizeof                                       ; buffers-struct of buffer two (display swaps between one and two)
+ig_om_buffer_three:                     rs.l       1                                                       ; pointer to third buffer; used only for restoring background of bobs
 ; data files area
 ig_om_datfile:                          rs.b       0                                                       ; variable filesizes, therefore this MUST be the last entry in this struct
 ig_om_sizeof:                           rs.b       0

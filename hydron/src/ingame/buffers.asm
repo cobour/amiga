@@ -6,6 +6,17 @@ INGAME_BUFFERS_ASM equ 1
 buffers_init:
   clr.l      ig_om_buffers_framecount(a4)
 
+  ; framebuffer pointers
+  move.l     a5,d0
+  add.l      #ig_cm_framebuffer_one,d0
+  move.l     d0,ig_om_buffer_one+ig_buffers_framebuffer_pointer(a4)
+  move.l     a5,d0
+  add.l      #ig_cm_framebuffer_two,d0
+  move.l     d0,ig_om_buffer_two+ig_buffers_framebuffer_pointer(a4)
+  move.l     a5,d0
+  add.l      #ig_cm_framebuffer_three,d0
+  move.l     d0,ig_om_buffer_three(a4)                                                    ; just framebuffer pointer
+
   ; copperlist vars
   move.l     #"IGCL",d0
   bsr        datafiles_get_pointer

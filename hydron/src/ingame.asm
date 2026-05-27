@@ -65,11 +65,11 @@ ig_start:
 .load_datafiles:
   move.l     #"F101",d1
   move.l     chip_mem_ptr(pc),d6
-  add.l      #ig_cm_filebuffer,d6               ; TODO: inside framebuffer
+  add.l      #ig_cm_framebuffer_one+15000,d6
   move.l     other_mem_ptr(pc),a0
   add.l      #ig_om_datfile,a0
   move.l     chip_mem_ptr(pc),d7
-  add.l      #ig_cm_dmabuffer,d7                ; TODO: inside framebuffer
+  add.l      #ig_cm_framebuffer_one,d7
   move.l     chip_mem_ptr(pc),a1
   add.l      #ig_cm_datfile,a1
   bra        datafiles_load_and_unzip           ; implicit rts
