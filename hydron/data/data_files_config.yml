@@ -52,9 +52,13 @@ targetFiles:
     sources:
       - filename: ingame/level_0/vision.mod
         id: MP02
-      - filename: ingame/test_ehb_256x256.iff
+      - filename: ingame/test_ehb_256x256.iff # ingame/level_0/tiles.iff
         id: COLS
         colorsOnly: true
+        colorsLimit: 32
+      - filename: ingame/level_0/tiles.iff
+        id: TLS0
+        withMask: false
 #      - filename: _tiled/level_1.tmx
 #        id: LVLO
 #        reversedVertically: true
