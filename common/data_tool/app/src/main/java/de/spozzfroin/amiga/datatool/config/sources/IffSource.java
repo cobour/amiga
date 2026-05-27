@@ -28,6 +28,7 @@ class IffSource extends AbstractSource {
 	private int flattenedTileHeight;
 	private int flattenedReducedTileCount;
 	private boolean colorsOnly;
+	private int colorsLimit;
 
 	private int width;
 	private int height;
@@ -86,6 +87,12 @@ class IffSource extends AbstractSource {
 			this.colorsOnly = (boolean) parameter.get("colorsOnly");
 		} else {
 			this.colorsOnly = false;
+		}
+		//
+		if (parameter.containsKey("colorsLimit")) {
+			this.colorsLimit = (int) parameter.get("colorsLimit");
+		} else {
+			this.colorsLimit = -1;
 		}
 	}
 
@@ -334,6 +341,10 @@ class IffSource extends AbstractSource {
 				int blue = Byte.toUnsignedInt(colorBytes[i++]) >> 4;
 				String color = "0" + Integer.toHexString(red) + Integer.toHexString(green) + Integer.toHexString(blue);
 				uow.colors.add(Short.parseShort(color, 16));
+				// limit reached?
+				if (uow.colorsLimit > 0 && uow.colors.size() == uow.colorsLimit) {
+					break;
+				}
 			} while (i < chunkSize);
 		}
 	}
