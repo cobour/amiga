@@ -493,7 +493,7 @@ player_weapon_update:
   lea.l      ig_om_player_bullets_stack_2_list(a4),a0
   bsr.s      .bullet_still_visible_check_per_stack
 
-  nop                                                                             ; TODO: jsr to pointer when multiple weapons are available
+  nop                                                                             ; TODO: jsr to pointer when multiple weapons are available (maybe height or anything else must be updated, too)
 
   movem.l    (sp)+,d0-d1/d4-d5
   rts
