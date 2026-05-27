@@ -95,10 +95,10 @@ player_init:
   move.w     #PlayerFireDelay,ig_om_player_bullets_fire_delay_count(a4)           ; so bullet can be fired immediately
 
   ; set sprite pointers in copperlist
-  move.l     ig_om_buffer_front+ig_buffers_copperlist_pointer(a4),a0
+  move.l     ig_om_buffer_one+ig_buffers_copperlist_pointer(a4),a0
   lea.l      ig_cm_player_sprites_buffer_0(a5),a3
   bsr.s      .set_pointers_in_copperlist
-  move.l     ig_om_buffer_back+ig_buffers_copperlist_pointer(a4),a0
+  move.l     ig_om_buffer_two+ig_buffers_copperlist_pointer(a4),a0
   lea.l      ig_cm_player_sprites_buffer_1(a5),a3
   ; fall-through intended
 
@@ -268,7 +268,9 @@ player_update:
   ; *******************************
 
   ; init working pointers
-  move.l     ig_om_buffer_back+ig_buffers_sprites_pointer(a4),a1
+  bsr        buffers_get_backbuffer
+  move.l     ig_buffers_sprites_pointer(a0),a1
+
   lea.l      ig_om_player_sprite_0_work_pointer(a4),a3
   move.l     a1,(a3)+
   lea.l      ig_player_sprite1(a1),a2

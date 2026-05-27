@@ -84,8 +84,9 @@ ig_om_panel_cl_offset:                  rs.l       1                            
 ig_om_panel_redraw_lives:               rs.b       1                                                       ; boolean / must lives counter be drawn?
 ig_om_panel_redraw_score:               rs.b       1                                                       ; boolean / must score be drawn? (if new score is higher than old hiscore => update and redraw hiscore as well)
 ; ingame/buffers.asm
-ig_om_buffer_front:                     rs.b       ig_buffers_sizeof                                       ; buffers-struct of frame that is actually on-screen
-ig_om_buffer_back:                      rs.b       ig_buffers_sizeof                                       ; buffers-struct of frame that is currently composed in the background
+ig_om_buffers_framecount:               rs.l       1                                                       ; counts the displayed frames (means drawn and manually swapped frames, not real monitor frames; should be the same, but when gameplay gets busy, maybe it will take two monitor frames to draw one game frame)
+ig_om_buffer_one:                       rs.b       ig_buffers_sizeof                                       ; buffers-struct of buffer one (display swaps between one and two)
+ig_om_buffer_two:                       rs.b       ig_buffers_sizeof                                       ; buffers-struct of buffer two (display swaps between one and two)
 ; data files area
 ig_om_datfile:                          rs.b       0                                                       ; variable filesizes, therefore this MUST be the last entry in this struct
 ig_om_sizeof:                           rs.b       0
