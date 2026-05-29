@@ -22,14 +22,21 @@ ig_start:
   move.l     #$123456,c_om_hiscore(a4)
   ; REMOVE ME - test values
 
-  bsr        buffers_init                       ; MUST be called FIRST, because sets vars needed by other inits
+  bsr        buffers_init                                             ; MUST be called FIRST, because sets vars needed by other inits
   bsr        panel_init
   bsr        player_init
-  bsr        player_update                      ; update here once => init sprite data
+  bsr        player_update                                            ; update here once => init sprite data
+  bsr        background_init
   bsr        ctrl_take_system
   lea.l      lvl3_irq_handler(pc),a0
   bsr        ctrl_set_handler
   bsr        .init_music
+
+  ; TODO: proper fade-in
+  move.l     ig_om_buffer_one+ig_buffers_copperlist_pointer(a4),a2
+  bsr        buffers_set_colors_in_copperlist
+  move.l     ig_om_buffer_two+ig_buffers_copperlist_pointer(a4),a2
+  bsr        buffers_set_colors_in_copperlist
 
 .main_loop:
   clr.b      c_om_vbl(a4)
@@ -72,7 +79,7 @@ ig_start:
   add.l      #ig_cm_framebuffer_one,d7
   move.l     chip_mem_ptr(pc),a1
   add.l      #ig_cm_datfile,a1
-  bra        datafiles_load_and_unzip           ; implicit rts
+  bra        datafiles_load_and_unzip                                 ; implicit rts
 
 lvl3_irq_handler:
   movem.l    a4/a6,-(sp)
@@ -89,4 +96,4 @@ lvl3_irq_handler:
   rte
 
 
-  endif                                         ; ifnd INGAME_ASM
+  endif                                                               ; ifnd INGAME_ASM

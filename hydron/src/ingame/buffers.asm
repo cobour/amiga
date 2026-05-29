@@ -31,24 +31,34 @@ buffers_init:
   move.l     a0,ig_om_buffer_two+ig_buffers_sprites_pointer(a4)
 
   ; copperlists
-  bsr.s      .init_copper_list
   bsr.s      .copy_copperlist
-  bra        .set_copper_list                                                             ; implicit rts
-
-.init_copper_list:
-; get pointer to copperlist in chip mem
   move.l     ig_om_buffer_one+ig_buffers_copperlist_pointer(a4),a2
+  move.l     ig_om_buffer_one+ig_buffers_framebuffer_pointer(a4),d0
+  bsr.s      .init_bitplane_pointers
+  move.l     ig_om_buffer_two+ig_buffers_copperlist_pointer(a4),a2
+  move.l     ig_om_buffer_two+ig_buffers_framebuffer_pointer(a4),d0
+  bsr.s      .init_bitplane_pointers
+  bra.s      .set_copper_list                                                             ; implicit rts
 
-; set bitplane pointer - REFACTOR: let this be set by upcoming playfield.asm for both buffers
-  move.l     #"TSTB",d0
-  bsr        datafiles_get_pointer
-  move.l     df_idx_ptr_rawdata(a0),a0
-  move.l     a0,d0
+.copy_copperlist
+  movem.l    a0-a1/d7,-(sp)
+  move.l     ig_om_buffer_one+ig_buffers_copperlist_pointer(a4),a0
+  move.l     ig_om_buffer_two+ig_buffers_copperlist_pointer(a4),a1
+  move.w     #(ig_cm_cl_sizeof/4)-1,d7
+.ccl_loop:
+  move.l     (a0)+,(a1)+
+  dbf        d7,.ccl_loop
+  movem.l    (sp)+,a0-a1/d7
+  rts
 
+; in:
+;   a2 - pointer to copperlist
+;   d0 - pointer to framebuffer to be shown
+.init_bitplane_pointers:
+  add.l      #IgScreenWidthBytes*32*IgScreenBitPlanes,d0
   move.l     a2,a0
   lea.l      ig_cm_cl_bitplanes(a0),a0
-
-  moveq.l    #5,d7
+  moveq.l    #IgScreenBitPlanes-1,d7
 .icl1
   move.w     d0,6(a0)
   swap       d0
@@ -57,7 +67,19 @@ buffers_init:
   add.l      #IgScreenWidthBytes,d0
   addq.l     #8,a0
   dbf        d7,.icl1
+  rts
 
+.set_copper_list
+  movem.l    d0/a0,-(sp)
+  move.l     ig_om_buffer_one+ig_buffers_copperlist_pointer(a4),a0
+  move.l     a0,COP1LC(a6)
+  move.w     #$0000,COPJMP1(a6)
+  movem.l    (sp)+,d0/a0
+  rts
+
+; in:
+;   a2 - pointer to copperlist
+buffers_set_colors_in_copperlist:
 ; set colors
   move.l     #"COLS",d0
   bsr        datafiles_get_pointer
@@ -77,25 +99,6 @@ buffers_init:
   addq.l     #4,a1
   dbf        d7,.icl2
 
-  rts
-
-.copy_copperlist
-  movem.l    a0-a1/d7,-(sp)
-  move.l     ig_om_buffer_one+ig_buffers_copperlist_pointer(a4),a0
-  move.l     ig_om_buffer_two+ig_buffers_copperlist_pointer(a4),a1
-  move.w     #(ig_cm_cl_sizeof/4)-1,d7
-.ccl_loop:
-  move.l     (a0)+,(a1)+
-  dbf        d7,.ccl_loop
-  movem.l    (sp)+,a0-a1/d7
-  rts
-
-.set_copper_list
-  movem.l    d0/a0,-(sp)
-  move.l     ig_om_buffer_one+ig_buffers_copperlist_pointer(a4),a0
-  move.l     a0,COP1LC(a6)
-  move.w     #$0000,COPJMP1(a6)
-  movem.l    (sp)+,d0/a0
   rts
 
 buffers_swap:

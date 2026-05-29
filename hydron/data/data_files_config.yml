@@ -35,9 +35,6 @@ targetFiles:
         priority: 32
       - filename: ingame/common/ingame_copperlist.asm
         id: IGCL
-      - filename: ingame/test_ehb_256x256.iff
-        id: TSTB
-        withMask: false
 
   - filename: F001
     description: ingame_chip_level_0
@@ -47,34 +44,8 @@ targetFiles:
         id: MS02
 
   - filename: F100
-    description: ingame_other_level_0
-    memoryType: OTHER
-    sources:
-      - filename: ingame/level_0/vision.mod
-        id: MP02
-      - filename: ingame/test_ehb_256x256.iff # ingame/level_0/tiles.iff
-        id: COLS
-        colorsOnly: true
-        colorsLimit: 32
-      - filename: ingame/level_0/tiles.iff
-        id: TLS0
-        withMask: false
-#      - filename: _tiled/level_1.tmx
-#        id: LVLO
-#        reversedVertically: true
-#      - filename: ingame/background_tiles.iff
-#        id: LVLT
-#        withMask: false
-#        flattenedTileFormat: 16x16
-#        flattenedReducedTileCount: 64
-
-  - filename: F101
     description: ingame_other_common
     memoryType: OTHER
-    relatedFiles: # all related files must have been already defined! all om-files first, then all cm-files!
-      - F100
-      - F001
-      - F000
     sources:
       - filename: ingame/common/panel_score.iff
         id: PASC
@@ -96,6 +67,28 @@ targetFiles:
       - filename: ingame/common/player.iff
         id: PLYR
         withMask: false
+
+  - filename: F101
+    description: ingame_other_level_0
+    memoryType: OTHER
+    relatedFiles: # all related files must have been already defined! all om-files first, then all cm-files!
+      - F100
+      - F001
+      - F000
+    sources:
+      - filename: ingame/level_0/vision.mod
+        id: MP02
+      - filename: ingame/level_0/tiles.iff
+        id: COLS
+        colorsOnly: true
+        colorsLimit: 32
+      - filename: ingame/level_0/tiles.iff
+        id: TLS0
+        withMask: false
+        flattenedTileFormat: 16x16
+      - filename: ingame/level_0/MAP_001.tmx
+        id: MAPT
+        reversedVertically: true
 
 diskimageFiles:
   - filename: Hydron.adf

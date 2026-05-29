@@ -52,6 +52,7 @@ main_code_start:
   include    "../common/src/system/joystick.asm"
   include    "../common/src/system/bcd.asm"
   include    "src/ingame.asm"
+  include    "src/ingame/background.asm"
   include    "src/ingame/buffers.asm"
   include    "src/ingame/panel.asm"
   include    "src/ingame/player.asm"

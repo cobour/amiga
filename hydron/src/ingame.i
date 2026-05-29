@@ -1,6 +1,7 @@
                                         ifnd       INGAME_I
 INGAME_I           equ 1
                                         include    "src/globals.i"
+                                        include    "src/ingame/background.i"
                                         include    "src/ingame/buffers.i"
                                         include    "src/ingame/panel.i"
                                         include    "src/ingame/player.i"
@@ -88,6 +89,10 @@ ig_om_buffers_framecount:               rs.l       1                            
 ig_om_buffer_one:                       rs.b       ig_buffers_sizeof                                       ; buffers-struct of buffer one (display swaps between one and two)
 ig_om_buffer_two:                       rs.b       ig_buffers_sizeof                                       ; buffers-struct of buffer two (display swaps between one and two)
 ig_om_buffer_three:                     rs.l       1                                                       ; pointer to third buffer; used only for restoring background of bobs
+; ingame/background.asm
+ig_om_background_tiles_gfx_pointer:     rs.l       1                                                       ; pointer to gfx data of background tiles
+ig_om_background_tiles_width_in_bytes:  rs.l       1                                                       ; width of background tiles in bytes
+ig_om_background_level_data_pointer:    rs.l       1                                                       ; pointer to level data
 ; data files area
 ig_om_datfile:                          rs.b       0                                                       ; variable filesizes, therefore this MUST be the last entry in this struct
 ig_om_sizeof:                           rs.b       0
