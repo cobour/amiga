@@ -48,6 +48,8 @@ ig_cm_sizeof:                           rs.b       0
 ; Ingame other mem struct
                                         rsreset
 ig_om_common:                           rs.b       c_om_sizeof
+; ingame.asm
+ig_om_backbuffer:                       rs.l       1                                                       ; pointer to current backbuffer struct, set in game loop
 ; ingame/player.asm
 ig_om_player_gfx_ptr:                   rs.l       1                                                       ; pointer to the beginning of the gfx rawdata
 ig_om_player_anim_offset:               rs.l       1                                                       ; offset to the current anim step (to be added to ig_om_player_gfx_ptr)
@@ -93,6 +95,12 @@ ig_om_buffer_three:                     rs.l       1                            
 ig_om_background_tiles_gfx_pointer:     rs.l       1                                                       ; pointer to gfx data of background tiles
 ig_om_background_tiles_width_in_bytes:  rs.l       1                                                       ; width of background tiles in bytes
 ig_om_background_level_data_pointer:    rs.l       1                                                       ; pointer to level data
+ig_om_background_do_scroll:             rs.b       1                                                       ; boolean - must background scroll?
+ig_om_background_stop_scroll_count:     rs.b       1                                                       ; counter - when scrolling stops, countdown how often the bpl pointers must be set again
+ig_om_background_first_visible_line:    rs.w       1                                                       ; which line of the framebuffer is the first line that is visible onscreen? starts at 32
+ig_om_background_first_visible_offset:  rs.w       1                                                       ; offset in framebuffer of ig_om_background_first_visible_line
+ig_om_background_fill_row_offset:       rs.w       1                                                       ; offset in framebuffer of the row that is actually refilled
+ig_om_background_fill_column_offset:    rs.w       1                                                       ; offset in framebuffer of the column that is refilled next
 ; data files area
 ig_om_datfile:                          rs.b       0                                                       ; variable filesizes, therefore this MUST be the last entry in this struct
 ig_om_sizeof:                           rs.b       0

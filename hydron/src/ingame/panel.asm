@@ -83,7 +83,7 @@ panel_update:
 
   tst.b      ig_om_panel_redraw_lives(a4)
   beq.s      .check_score
-  bsr        buffers_get_backbuffer
+  move.l     ig_om_backbuffer(a4),a0
   move.l     ig_buffers_copperlist_pointer(a0),a1
   bsr.s      panel_draw_lives
   clr.b      ig_om_panel_redraw_lives(a4)

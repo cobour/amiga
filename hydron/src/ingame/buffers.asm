@@ -7,15 +7,18 @@ buffers_init:
   clr.l      ig_om_buffers_framecount(a4)
 
   ; framebuffer pointers
-  move.l     a5,d0
-  add.l      #ig_cm_framebuffer_one,d0
-  move.l     d0,ig_om_buffer_one+ig_buffers_framebuffer_pointer(a4)
-  move.l     a5,d0
-  add.l      #ig_cm_framebuffer_two,d0
-  move.l     d0,ig_om_buffer_two+ig_buffers_framebuffer_pointer(a4)
-  move.l     a5,d0
-  add.l      #ig_cm_framebuffer_three,d0
-  move.l     d0,ig_om_buffer_three(a4)                                                    ; just framebuffer pointer
+  move.l     a5,a0
+  add.l      #ig_cm_framebuffer_one,a0
+  move.l     a0,ig_om_buffer_one+ig_buffers_framebuffer_pointer(a4)
+  bsr.s      .clear_framebuffer
+  move.l     a5,a0
+  add.l      #ig_cm_framebuffer_two,a0
+  move.l     a0,ig_om_buffer_two+ig_buffers_framebuffer_pointer(a4)
+  bsr.s      .clear_framebuffer
+  move.l     a5,a0
+  add.l      #ig_cm_framebuffer_three,a0
+  move.l     a0,ig_om_buffer_three(a4)                                                    ; just framebuffer pointer
+  bsr.s      .clear_framebuffer
 
   ; copperlist vars
   move.l     #"IGCL",d0
@@ -49,6 +52,15 @@ buffers_init:
   move.l     (a0)+,(a1)+
   dbf        d7,.ccl_loop
   movem.l    (sp)+,a0-a1/d7
+  rts
+
+; in:
+;   a0 - pointer to framebuffer
+.clear_framebuffer:
+  move.w     #(IgFrameBufferSize/2)-1,d7
+.clear_framebuffer_loop:
+  clr.w      (a0)+
+  dbf        d7,.clear_framebuffer_loop
   rts
 
 ; in:
@@ -105,7 +117,7 @@ buffers_swap:
   movem.l    d0/a0,-(sp)
 
   ; set copperlist pointer
-  bsr.s      buffers_get_backbuffer
+  move.l     ig_om_backbuffer(a4),a0
   move.l     ig_buffers_copperlist_pointer(a0),a0
   move.l     a0,COP1LC(a6)
   ; no COPJMP1, because we do not know at which beam position this is executed

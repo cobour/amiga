@@ -30,10 +30,18 @@ player_init:
   clr.l      ig_cm_player_sprites_buffer_0+ig_player_sprite1(a5)
   clr.l      ig_cm_player_sprites_buffer_0+ig_player_sprite2(a5)
   clr.l      ig_cm_player_sprites_buffer_0+ig_player_sprite3(a5)
+  clr.l      ig_cm_player_sprites_buffer_0+ig_player_sprite4(a5)
+  clr.l      ig_cm_player_sprites_buffer_0+ig_player_sprite5(a5)
+  clr.l      ig_cm_player_sprites_buffer_0+ig_player_sprite6(a5)
+  clr.l      ig_cm_player_sprites_buffer_0+ig_player_sprite7(a5)
   clr.l      ig_cm_player_sprites_buffer_1+ig_player_sprite0(a5)
   clr.l      ig_cm_player_sprites_buffer_1+ig_player_sprite1(a5)
   clr.l      ig_cm_player_sprites_buffer_1+ig_player_sprite2(a5)
   clr.l      ig_cm_player_sprites_buffer_1+ig_player_sprite3(a5)
+  clr.l      ig_cm_player_sprites_buffer_1+ig_player_sprite4(a5)
+  clr.l      ig_cm_player_sprites_buffer_1+ig_player_sprite5(a5)
+  clr.l      ig_cm_player_sprites_buffer_1+ig_player_sprite6(a5)
+  clr.l      ig_cm_player_sprites_buffer_1+ig_player_sprite7(a5)
 
   ; init player fire sfx
   move.l     #"SBU0",d0
@@ -268,7 +276,7 @@ player_update:
   ; *******************************
 
   ; init working pointers
-  bsr        buffers_get_backbuffer
+  move.l     ig_om_backbuffer(a4),a0
   move.l     ig_buffers_sprites_pointer(a0),a1
 
   lea.l      ig_om_player_sprite_0_work_pointer(a4),a3

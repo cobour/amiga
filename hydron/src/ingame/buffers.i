@@ -1,8 +1,9 @@
                                  ifnd       INGAME_BUFFERS_I
-INGAME_BUFFERS_I  equ 1
+INGAME_BUFFERS_I    equ 1
 
 ; size of one framebuffer
-IgFrameBufferSize equ IgScreenWidthBytes*(IgScreenHeight+32)*IgScreenBitPlanes
+IgFrameBufferHeight equ IgScreenHeight+32                       ; height of framebuffer in pixels
+IgFrameBufferSize   equ IgScreenWidthBytes*IgFrameBufferHeight*IgScreenBitPlanes ; size of framebuffer in bytes
 
 ; struct that holds all pointers that represent one of the two buffers (double buffering)
                                  rsreset

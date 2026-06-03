@@ -25,14 +25,13 @@ ig_start:
   bsr        buffers_init                                             ; MUST be called FIRST, because sets vars needed by other inits
   bsr        panel_init
   bsr        player_init
-  bsr        player_update                                            ; update here once => init sprite data
   bsr        background_init
   bsr        ctrl_take_system
   lea.l      lvl3_irq_handler(pc),a0
   bsr        ctrl_set_handler
   bsr        .init_music
 
-  ; TODO: proper fade-in
+  ; TODO: proper fade-in (all 32 colors set, reset color17 below panel and panel copper effect)
   move.l     ig_om_buffer_one+ig_buffers_copperlist_pointer(a4),a2
   bsr        buffers_set_colors_in_copperlist
   move.l     ig_om_buffer_two+ig_buffers_copperlist_pointer(a4),a2
@@ -40,8 +39,27 @@ ig_start:
 
 .main_loop:
   clr.b      c_om_vbl(a4)
+  bsr        buffers_get_backbuffer
+  move.l     a0,ig_om_backbuffer(a4)
+
   bsr        player_update
   bsr        panel_update
+  bsr        background_update                                        ; MUST be called before any update-routines that modify the bitplanes
+
+  ; FOR TESTING - stop scrolling when top of buffer is reached
+  lea.l      .pause_executed(pc),a0
+  tst.w      (a0)
+  beq.s      .go_on
+  tst.w      ig_om_background_first_visible_line(a4)
+  bgt.s      .go_on
+  bsr        background_pause_scroll
+  clr.w      (a0)
+  bra.s      .go_on
+.pause_executed:
+  dc.w       1
+.go_on:
+  ; FOR TESTING - stop scrolling when top of buffer is reached
+
 .ml_wait_vbl:
   tst.b      c_om_vbl(a4)
   beq.s      .ml_wait_vbl
