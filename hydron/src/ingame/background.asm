@@ -20,6 +20,13 @@ background_init:
   move.l     #"MAPT",d0
   bsr        datafiles_get_pointer
   move.l     df_idx_ptr_rawdata(a0),ig_om_background_level_data_pointer(a4)
+  lea.l      df_idx_metadata(a0),a0
+  move.w     df_tld_plf_width(a0),d0
+  move.w     df_tld_plf_height(a0),d1
+  mulu       d1,d0
+  mulu       #2,d0
+  add.l      ig_om_background_level_data_pointer(a4),d0
+  move.l     d0,ig_om_background_level_data_end_pointer(a4)
 
   ; draw to third buffer
   move.l     ig_om_background_level_data_pointer(a4),a0
@@ -101,16 +108,26 @@ background_init:
   clr.b      ig_om_background_stop_scroll_count(a4)
   clr.w      ig_om_background_fill_row_offset(a4)
   clr.w      ig_om_background_fill_column_offset(a4)
+  clr.l      ig_om_background_copperwait_split(a4)
   rts
 
 background_pause_scroll:
+  tst.b      ig_om_background_do_scroll(a4)
+  beq.s      .exit
   clr.b      ig_om_background_do_scroll(a4)
   move.b     #2,ig_om_background_stop_scroll_count(a4)
+.exit:
   rts
 
 background_resume_scroll:
+  move.l     d0,-(sp)
+  move.l     ig_om_background_level_data_end_pointer(a4),d0
+  cmp.l      ig_om_background_level_data_pointer(a4),d0
+  beq.s      .exit
   move.b     #1,ig_om_background_do_scroll(a4)
   clr.b      ig_om_background_stop_scroll_count(a4)
+.exit:
+  move.l     (sp)+,d0
   rts
 
 background_update:
@@ -120,7 +137,7 @@ background_update:
   bra.s      .calc_and_set_bpl_pointers_in_copperlist
 .check_normal_scroll:
   tst.b      ig_om_background_do_scroll(a4)
-  beq.s      .exit
+  beq        .exit
   
   ; update first visible line/offset and set d0.w/d1.w
   moveq.l    #0,d0
@@ -139,12 +156,12 @@ background_update:
   ; draw one 16x16 tile to all 3 buffers and update ig_om_background_fill_row_offset+ig_om_background_fill_column_offset
   move.w     ig_om_background_fill_column_offset(a4),d0
   move.w     ig_om_background_fill_row_offset(a4),d1
-  bsr.s      .draw_tile
+  bsr        .draw_tile
   addq.w     #2,d0
   cmp.w      #IgScreenWidthBytes,d0
   blt.s      .end_of_draw_tile
   moveq.l    #0,d0
-  sub.w      #IgScreenWidthBytes*IgScreenBitPlanes*16,d1
+  sub.l      #IgScreenWidthBytes*IgScreenBitPlanes*16,d1                                           ; MUST be sub.L (not .w) so cc's are set correctly
   bge.s      .end_of_draw_tile
   move.w     #IgScreenWidthBytes*IgScreenBitPlanes*(IgScreenHeight+16),d1
 .end_of_draw_tile:
@@ -152,6 +169,8 @@ background_update:
   move.w     d1,ig_om_background_fill_row_offset(a4)
 
   ; set bitplane pointers in copperlist - MUST be last task before .exit (because must be executed even when there is no actual scroll, see ig_om_background_stop_scroll_count)
+  ; in this section (until .exit):
+  ;   a0 - ig_om_backbuffer(a4)
 .calc_and_set_bpl_pointers_in_copperlist:
   ; calc absolute pointer to be set in copperlist for first visible line
   moveq.l    #0,d0
@@ -159,21 +178,155 @@ background_update:
   move.l     ig_om_backbuffer(a4),a0
   add.l      ig_buffers_framebuffer_pointer(a0),d0
   ; set in copperlist
-  move.l     ig_buffers_copperlist_pointer(a0),a1
-  lea.l      ig_cm_cl_bitplanes(a1),a1
+  move.l     ig_buffers_copperlist_pointer(a0),a2
+  lea.l      ig_cm_cl_bitplanes(a2),a2
   moveq.l    #IgScreenBitPlanes-1,d7
 .update_first_bpl_pointers_in_copperlist_loop:
-  move.w     d0,6(a1)
+  move.w     d0,6(a2)
   swap       d0
-  move.w     d0,2(a1)
+  move.w     d0,2(a2)
   swap       d0
   add.l      #IgScreenWidthBytes,d0
-  addq.l     #8,a1
+  addq.l     #8,a2
   dbf        d7,.update_first_bpl_pointers_in_copperlist_loop
-  ; TODO: when framebuffer needs to be splitted, set second absolute pointer in copperlist
+
+  ; when framebuffer needs to be splitted, set second absolute pointer in copperlist
+  ; if ig_buffers_last_panel_split or ig_buffers_last_split is set, then reset that area and clear ig_buffers_last_panel_split or ig_buffers_last_split
+  tst.l      ig_buffers_last_panel_split(a0)
+  beq.s      .check_ig_buffers_last_split
+  move.l     ig_buffers_last_panel_split(a0),a1
+  move.l     #$01fe0000,d0
+  move.l     d0,(a1)+
+  move.l     d0,(a1)+
+  move.l     d0,(a1)+
+  move.l     d0,(a1)+
+  move.l     d0,(a1)+
+  move.l     d0,(a1)+
+  move.l     d0,(a1)+
+  move.l     d0,(a1)+
+  move.l     d0,(a1)+
+  move.l     d0,(a1)+
+  move.l     d0,(a1)+
+  move.l     d0,(a1)+
+  move.l     d0,(a1)
+  clr.l      ig_buffers_last_panel_split(a0)
+.check_ig_buffers_last_split:
+  tst.l      ig_buffers_last_split(a0)
+  beq.s      .end_reset
+  move.l     ig_buffers_last_split(a0),a1
+  move.l     #$01fe0000,d0
+  move.l     d0,(a1)+
+  move.l     d0,(a1)+
+  move.l     d0,(a1)+
+  move.l     d0,(a1)+
+  move.l     d0,(a1)+
+  move.l     d0,(a1)+
+  move.l     d0,(a1)+
+  move.l     d0,(a1)+
+  move.l     d0,(a1)+
+  move.l     d0,(a1)+
+  move.l     d0,(a1)+
+  move.l     d0,(a1)+
+  move.l     d0,(a1)+
+  move.l     #$ffdffffe,(a1)                                                                       ; first WAIT of ig_cm_cl_irq
+  clr.l      ig_buffers_last_split(a0)
+.end_reset:
+  ; check if split is necessary
+  moveq.l    #0,d0
+  move.w     ig_om_background_first_visible_line(a4),d0
+  cmp.w      #IgFrameBufferHeight-16,d0
+  blt.s      .check_split_below_panel
+  ; split inside panel
+  ; get copperlist position
+  sub.w      #$0110,d0
+  lsl.w      #1,d0
+  lea.l      .split_in_panel(pc),a1
+  move.w     (a1,d0.w),d0
+  move.l     ig_buffers_copperlist_pointer(a0),a2
+  add.l      d0,a2
+  move.l     a2,ig_buffers_last_panel_split(a0)
+  ; copper wait
+  move.w     52(a2),d0
+  move.b     #$d1,d0
+  sub.w      #$100,d0
+  move.w     d0,(a2)+
+  move.l     d0,ig_om_background_copperwait_split(a4)
+  move.w     #$fffe,(a2)+
+  ; set bitplane pointers
+  move.l     ig_buffers_framebuffer_pointer(a0),d0
+  bsr.s      .set_bitplane_pointer_in_copperlist
+  bra.s      .end_split
+.check_split_below_panel:
+  cmp.w      #32,d0
+  blt.s      .end_split
+  ; split below panel
+  move.l     ig_buffers_copperlist_pointer(a0),a2
+  lea.l      ig_cm_cl_wait_and_bitplane_pointers(a2),a2
+  move.l     a2,ig_buffers_last_split(a0)
+  ; copper wait(s)
+  move.l     ig_om_background_copperwait_split(a4),d0
+  tst.b      ig_om_background_do_scroll(a4)
+  beq.s      .split_below_panel_no_add
+  add.l      #$00000100,d0
+.split_below_panel_no_add:
+  move.l     d0,ig_om_background_copperwait_split(a4)
+  cmp.l      #$00010000,d0
+  blt.s      .split_below_panel_one_wait
+  move.l     #$ffdffffe,(a2)+
+.split_below_panel_one_wait:
+  move.w     d0,d1
+  move.w     d0,(a2)+
+  move.w     #$fffe,(a2)+
+  ; set bitplane pointers
+  move.l     ig_buffers_framebuffer_pointer(a0),d0
+  bsr.s      .set_bitplane_pointer_in_copperlist
+  ; in row $ff the first wait of ig_cm_cl_irq must be noop'd out, otherwise there would be two $ffxx-waits and because of this the copper irq will never be triggered again
+  and.w      #$ff00,d1
+  cmp.w      #$ff00,d1
+  bne.s      .end_split
+  move.l     #$01fe0000,(a2)
+.end_split:
 
 .exit:
   rts
+
+; in:
+;   a2   - pointer into copperlist where bitplane pointers are set
+;   d0.l - bitplane pointer
+.set_bitplane_pointer_in_copperlist:
+  moveq.l    #IgScreenBitPlanes-1,d7
+  move.w     #BPL1PTH,d6
+.set_bitplane_pointer_in_copperlist_loop:
+  move.w     d6,(a2)
+  addq.w     #2,d6
+  move.w     d6,4(a2)
+  addq.w     #2,d6
+  move.w     d0,6(a2)
+  swap       d0
+  move.w     d0,2(a2)
+  swap       d0
+  add.l      #IgScreenWidthBytes,d0
+  addq.l     #8,a2
+  dbf        d7,.set_bitplane_pointer_in_copperlist_loop
+  rts
+
+.split_in_panel:
+  dc.w       ig_cm_cl_panel+(panel_clrow_sizeof*16)-(panel_clrow_sizeof-panel_clrow_wait_3)
+  dc.w       ig_cm_cl_panel+(panel_clrow_sizeof*15)-(panel_clrow_sizeof-panel_clrow_wait_3)
+  dc.w       ig_cm_cl_panel+(panel_clrow_sizeof*14)-(panel_clrow_sizeof-panel_clrow_wait_3)
+  dc.w       ig_cm_cl_panel+(panel_clrow_sizeof*13)-(panel_clrow_sizeof-panel_clrow_wait_3)
+  dc.w       ig_cm_cl_panel+(panel_clrow_sizeof*12)-(panel_clrow_sizeof-panel_clrow_wait_3)
+  dc.w       ig_cm_cl_panel+(panel_clrow_sizeof*11)-(panel_clrow_sizeof-panel_clrow_wait_3)
+  dc.w       ig_cm_cl_panel+(panel_clrow_sizeof*10)-(panel_clrow_sizeof-panel_clrow_wait_3)
+  dc.w       ig_cm_cl_panel+(panel_clrow_sizeof*09)-(panel_clrow_sizeof-panel_clrow_wait_3)
+  dc.w       ig_cm_cl_panel+(panel_clrow_sizeof*08)-(panel_clrow_sizeof-panel_clrow_wait_3)
+  dc.w       ig_cm_cl_panel+(panel_clrow_sizeof*07)-(panel_clrow_sizeof-panel_clrow_wait_3)
+  dc.w       ig_cm_cl_panel+(panel_clrow_sizeof*06)-(panel_clrow_sizeof-panel_clrow_wait_3)
+  dc.w       ig_cm_cl_panel+(panel_clrow_sizeof*05)-(panel_clrow_sizeof-panel_clrow_wait_3)
+  dc.w       ig_cm_cl_panel+(panel_clrow_sizeof*04)-(panel_clrow_sizeof-panel_clrow_wait_3)
+  dc.w       ig_cm_cl_panel+(panel_clrow_sizeof*03)-(panel_clrow_sizeof-panel_clrow_wait_3)
+  dc.w       ig_cm_cl_panel+(panel_clrow_sizeof*02)-(panel_clrow_sizeof-panel_clrow_wait_3)
+  dc.w       ig_cm_cl_panel+(panel_clrow_sizeof*01)-(panel_clrow_sizeof-panel_clrow_wait_3)
 
   ; draw one row of one bitplane to all three buffers
   macro      TROW1
@@ -205,13 +358,17 @@ background_update:
 .draw_tile:
   move.l     a0,-(sp)
   
-  ; TODO stop scrolling when end of level data is reached
-
   ; get tile offset
   move.l     ig_om_background_level_data_pointer(a4),a0
   moveq.l    #0,d2
   move.w     (a0)+,d2
   move.l     a0,ig_om_background_level_data_pointer(a4)
+
+  ; stop scrolling when end of level data is reached
+  cmp.l      ig_om_background_level_data_end_pointer(a4),a0
+  bne.s      .no_stop
+  bsr        background_pause_scroll
+.no_stop:
 
   ; set source pointer (tile gfx)
   move.l     ig_om_background_tiles_gfx_pointer(a4),a0

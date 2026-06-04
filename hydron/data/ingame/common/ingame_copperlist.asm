@@ -688,8 +688,24 @@
   dc.w       SPR1POS,$0000
   dc.w       SPR1CTL,$0000
 
+  ; placeholder copper moves for re-setting the bitplane-pointers (will be one or two copper wait and 12 copper moves)
+  ; in case two waits are necessary, the first wait of "wait till raster beam is directly behind visible area" wil be overwritten bith bitplane pointer move
+  dc.w       $01fe,$0000
+  dc.w       $01fe,$0000
+  dc.w       $01fe,$0000
+  dc.w       $01fe,$0000
+  dc.w       $01fe,$0000
+  dc.w       $01fe,$0000
+  dc.w       $01fe,$0000
+  dc.w       $01fe,$0000
+  dc.w       $01fe,$0000
+  dc.w       $01fe,$0000
+  dc.w       $01fe,$0000
+  dc.w       $01fe,$0000
+  dc.w       $01fe,$0000
+
 ; wait till raster beam is directly behind visible area
-  dc.w       $ffdf,$fffe
+  dc.w       $ffdf,$fffe                                                            ; when above re-setting of bitplane pointers already has a $ffdffffe, then this wait is overwritten and needs to be replaced once it is no longer necessary above
   dc.w       $2bd1,$fffe
 
 ; trigger Copper-IRQ

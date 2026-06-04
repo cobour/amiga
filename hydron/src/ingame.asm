@@ -46,20 +46,6 @@ ig_start:
   bsr        panel_update
   bsr        background_update                                        ; MUST be called before any update-routines that modify the bitplanes
 
-  ; FOR TESTING - stop scrolling when top of buffer is reached
-  lea.l      .pause_executed(pc),a0
-  tst.w      (a0)
-  beq.s      .go_on
-  tst.w      ig_om_background_first_visible_line(a4)
-  bgt.s      .go_on
-  bsr        background_pause_scroll
-  clr.w      (a0)
-  bra.s      .go_on
-.pause_executed:
-  dc.w       1
-.go_on:
-  ; FOR TESTING - stop scrolling when top of buffer is reached
-
 .ml_wait_vbl:
   tst.b      c_om_vbl(a4)
   beq.s      .ml_wait_vbl

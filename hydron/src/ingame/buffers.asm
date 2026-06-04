@@ -10,7 +10,7 @@ buffers_init:
   move.l     a5,a0
   add.l      #ig_cm_framebuffer_one,a0
   move.l     a0,ig_om_buffer_one+ig_buffers_framebuffer_pointer(a4)
-  bsr.s      .clear_framebuffer
+  bsr        .clear_framebuffer
   move.l     a5,a0
   add.l      #ig_cm_framebuffer_two,a0
   move.l     a0,ig_om_buffer_two+ig_buffers_framebuffer_pointer(a4)
@@ -38,9 +38,13 @@ buffers_init:
   move.l     ig_om_buffer_one+ig_buffers_copperlist_pointer(a4),a2
   move.l     ig_om_buffer_one+ig_buffers_framebuffer_pointer(a4),d0
   bsr.s      .init_bitplane_pointers
+  clr.l      ig_om_buffer_one+ig_buffers_last_panel_split(a4)
+  clr.l      ig_om_buffer_one+ig_buffers_last_split(a4)
   move.l     ig_om_buffer_two+ig_buffers_copperlist_pointer(a4),a2
   move.l     ig_om_buffer_two+ig_buffers_framebuffer_pointer(a4),d0
   bsr.s      .init_bitplane_pointers
+  clr.l      ig_om_buffer_two+ig_buffers_last_panel_split(a4)
+  clr.l      ig_om_buffer_two+ig_buffers_last_split(a4)
   bra.s      .set_copper_list                                                             ; implicit rts
 
 .copy_copperlist
