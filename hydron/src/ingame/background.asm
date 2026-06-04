@@ -109,6 +109,7 @@ background_init:
   clr.w      ig_om_background_fill_row_offset(a4)
   clr.w      ig_om_background_fill_column_offset(a4)
   clr.l      ig_om_background_copperwait_split(a4)
+  clr.b      ig_om_background_last_row_countdown(a4)
   rts
 
 background_pause_scroll:
@@ -154,6 +155,14 @@ background_update:
   move.w     d1,ig_om_background_first_visible_offset(a4)
 
   ; draw one 16x16 tile to all 3 buffers and update ig_om_background_fill_row_offset+ig_om_background_fill_column_offset
+  tst.b      ig_om_background_last_row_countdown(a4)
+  beq.s      .must_draw
+  sub.b      #1,ig_om_background_last_row_countdown(a4)
+  tst.b      ig_om_background_last_row_countdown(a4)
+  bne.s      .no_draw
+  bsr        background_pause_scroll
+  bra.s      .no_draw
+.must_draw:
   move.w     ig_om_background_fill_column_offset(a4),d0
   move.w     ig_om_background_fill_row_offset(a4),d1
   bsr        .draw_tile
@@ -167,6 +176,7 @@ background_update:
 .end_of_draw_tile:
   move.w     d0,ig_om_background_fill_column_offset(a4)
   move.w     d1,ig_om_background_fill_row_offset(a4)
+.no_draw:
 
   ; set bitplane pointers in copperlist - MUST be last task before .exit (because must be executed even when there is no actual scroll, see ig_om_background_stop_scroll_count)
   ; in this section (until .exit):
@@ -367,7 +377,7 @@ background_update:
   ; stop scrolling when end of level data is reached
   cmp.l      ig_om_background_level_data_end_pointer(a4),a0
   bne.s      .no_stop
-  bsr        background_pause_scroll
+  move.b     #16,ig_om_background_last_row_countdown(a4)
 .no_stop:
 
   ; set source pointer (tile gfx)

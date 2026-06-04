@@ -100,6 +100,8 @@ ig_om_background_level_data_pointer:      rs.l       1                          
 ig_om_background_level_data_end_pointer:  rs.l       1                                                       ; pointer to end of level data
 ig_om_background_do_scroll:               rs.b       1                                                       ; boolean - must background scroll?
 ig_om_background_stop_scroll_count:       rs.b       1                                                       ; counter - when scrolling stops, countdown how often the bpl pointers must be set again
+ig_om_background_last_row_countdown:      rs.b       1                                                       ; last row of level data is drawn but needs to be scrolled in - when this countdown gets zero, scrolling must be stopped
+ig_om_background_dummy:                   rs.b       1                                                       ; padding byte
 ig_om_background_first_visible_line:      rs.w       1                                                       ; which line of the framebuffer is the first line that is visible onscreen? starts at 32
 ig_om_background_first_visible_offset:    rs.w       1                                                       ; offset in framebuffer of ig_om_background_first_visible_line
 ig_om_background_fill_row_offset:         rs.w       1                                                       ; offset in framebuffer of the row that is actually refilled
