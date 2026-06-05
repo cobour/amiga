@@ -44,5 +44,6 @@ df_tld_plf_width:        rs.w       1              ; number of tiles
 df_tld_plf_height:       rs.w       1              ; number of tiles
 df_tld_plf_tile_width:   rs.w       1              ; pixels of tile
 df_tld_plf_tile_height:  rs.w       1              ; pixels of tile
+df_tld_plf_rawsize:      rs.l       1              ; size of level data in bytes
 
                          endif                     ; ifnd DATAFILES_I

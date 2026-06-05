@@ -21,10 +21,7 @@ background_init:
   bsr        datafiles_get_pointer
   move.l     df_idx_ptr_rawdata(a0),ig_om_background_level_data_pointer(a4)
   lea.l      df_idx_metadata(a0),a0
-  move.w     df_tld_plf_width(a0),d0
-  move.w     df_tld_plf_height(a0),d1
-  mulu       d1,d0
-  mulu       #2,d0
+  move.l     df_tld_plf_rawsize(a0),d0
   add.l      ig_om_background_level_data_pointer(a4),d0
   move.l     d0,ig_om_background_level_data_end_pointer(a4)
 
