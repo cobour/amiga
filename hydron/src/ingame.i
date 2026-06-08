@@ -50,8 +50,6 @@ ig_cm_sizeof:                             rs.b       0
 ; Ingame other mem struct
                                           rsreset
 ig_om_common:                             rs.b       c_om_sizeof
-; ingame.asm
-ig_om_backbuffer:                         rs.l       1                                                       ; pointer to current backbuffer struct, set in game loop
 ; ingame/player.asm
 ig_om_player_gfx_ptr:                     rs.l       1                                                       ; pointer to the beginning of the gfx rawdata
 ig_om_player_anim_offset:                 rs.l       1                                                       ; offset to the current anim step (to be added to ig_om_player_gfx_ptr)
@@ -89,6 +87,8 @@ ig_om_panel_cl_offset:                    rs.l       1                          
 ig_om_panel_redraw_lives:                 rs.b       1                                                       ; boolean / must lives counter be drawn?
 ig_om_panel_redraw_score:                 rs.b       1                                                       ; boolean / must score be drawn? (if new score is higher than old hiscore => update and redraw hiscore as well)
 ; ingame/buffers.asm
+ig_om_buffers_frontbuffer:                rs.l       1                                                       ; pointer to current frontbuffer struct, set in game loop by call to buffers_set_pointers
+ig_om_buffers_backbuffer:                 rs.l       1                                                       ; pointer to current backbuffer struct, set in game loop by call to buffers_set_pointers
 ig_om_buffers_framecount:                 rs.l       1                                                       ; counts the displayed frames (means drawn and manually swapped frames, not real monitor frames; should be the same, but when gameplay gets busy, maybe it will take two monitor frames to draw one game frame)
 ig_om_buffer_one:                         rs.b       ig_buffers_sizeof                                       ; buffers-struct of buffer one (display swaps between one and two)
 ig_om_buffer_two:                         rs.b       ig_buffers_sizeof                                       ; buffers-struct of buffer two (display swaps between one and two)
@@ -107,6 +107,10 @@ ig_om_background_first_visible_offset:    rs.w       1                          
 ig_om_background_fill_row_offset:         rs.w       1                                                       ; offset in framebuffer of the row that is actually refilled
 ig_om_background_fill_column_offset:      rs.w       1                                                       ; offset in framebuffer of the column that is refilled next
 ig_om_background_copperwait_split:        rs.l       1                                                       ; first word of copperwait command
+; ingame/fade.asm
+ig_om_fade_step:                          rs.b       1                                                       ; steps 16-1 = fade steps to backbuffer copperlist, step 0 = copy colors from frontbuffer-copperlist to backbuffer-copperlist, step -1 = do nothing
+ig_om_fade_dummy:                         rs.b       1                                                       ; padding byte 
+ig_om_fade_color_tab:                     rs.b       32*2*16                                                 ; color-tab for common/src/system/fade.asm
 ; data files area
 ig_om_datfile:                            rs.b       0                                                       ; variable filesizes, therefore this MUST be the last entry in this struct
 ig_om_sizeof:                             rs.b       0

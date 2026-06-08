@@ -22,37 +22,30 @@ ig_start:
   move.l     #$123456,c_om_hiscore(a4)
   ; REMOVE ME - test values
 
-  bsr        buffers_init                                             ; MUST be called FIRST, because sets vars needed by other inits
+  bsr        buffers_init                       ; MUST be called FIRST, because sets vars needed by other inits
   bsr        panel_init
   bsr        player_init
   bsr        background_init
+  bsr        fade_ingame_init
   bsr        ctrl_take_system
   lea.l      lvl3_irq_handler(pc),a0
   bsr        ctrl_set_handler
   bsr        .init_music
 
-  ; TODO: proper fade-in (all 32 colors set, reset color17 below panel and panel copper effect)
-  move.l     ig_om_buffer_one+ig_buffers_copperlist_pointer(a4),a2
-  bsr        buffers_set_colors_in_copperlist
-  move.l     ig_om_buffer_two+ig_buffers_copperlist_pointer(a4),a2
-  bsr        buffers_set_colors_in_copperlist
-
 .main_loop:
   clr.b      c_om_vbl(a4)
-  bsr        buffers_get_backbuffer
-  move.l     a0,ig_om_backbuffer(a4)
+  bsr        buffers_set_pointers
 
+  bsr        fade_ingame_update
   bsr        player_update
   bsr        panel_update
-  bsr        background_update                                        ; MUST be called before any update-routines that modify the bitplanes
+  bsr        background_update                  ; MUST be called before any update-routines that modify the bitplanes
 
 .ml_wait_vbl:
   tst.b      c_om_vbl(a4)
   beq.s      .ml_wait_vbl
   bsr        buffers_swap
-  ; for now: quit on mouse click
-  btst       #6,$bfe001
-  bne.s      .main_loop
+  bra.s      .main_loop
 
   bsr        _mt_end
   bsr        ctrl_set_black_screen
@@ -83,7 +76,7 @@ ig_start:
   add.l      #ig_cm_framebuffer_one,d7
   move.l     chip_mem_ptr(pc),a1
   add.l      #ig_cm_datfile,a1
-  bra        datafiles_load_and_unzip                                 ; implicit rts
+  bra        datafiles_load_and_unzip           ; implicit rts
 
 lvl3_irq_handler:
   movem.l    a4/a6,-(sp)
@@ -100,4 +93,4 @@ lvl3_irq_handler:
   rte
 
 
-  endif                                                               ; ifnd INGAME_ASM
+  endif                                         ; ifnd INGAME_ASM

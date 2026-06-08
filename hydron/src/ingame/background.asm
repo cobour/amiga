@@ -177,12 +177,12 @@ background_update:
 
   ; set bitplane pointers in copperlist - MUST be last task before .exit (because must be executed even when there is no actual scroll, see ig_om_background_stop_scroll_count)
   ; in this section (until .exit):
-  ;   a0 - ig_om_backbuffer(a4)
+  ;   a0 - ig_om_buffers_backbuffer(a4)
 .calc_and_set_bpl_pointers_in_copperlist:
   ; calc absolute pointer to be set in copperlist for first visible line
   moveq.l    #0,d0
   move.w     ig_om_background_first_visible_offset(a4),d0
-  move.l     ig_om_backbuffer(a4),a0
+  move.l     ig_om_buffers_backbuffer(a4),a0
   add.l      ig_buffers_framebuffer_pointer(a0),d0
   ; set in copperlist
   move.l     ig_buffers_copperlist_pointer(a0),a2

@@ -121,7 +121,7 @@ buffers_swap:
   movem.l    d0/a0,-(sp)
 
   ; set copperlist pointer
-  move.l     ig_om_backbuffer(a4),a0
+  move.l     ig_om_buffers_backbuffer(a4),a0
   move.l     ig_buffers_copperlist_pointer(a0),a0
   move.l     a0,COP1LC(a6)
   ; no COPJMP1, because we do not know at which beam position this is executed
@@ -133,17 +133,21 @@ buffers_swap:
   movem.l    (sp)+,d0/a0
   rts
 
-buffers_get_backbuffer:
-  move.l     d0,-(sp)
+buffers_set_pointers:
   move.b     ig_om_buffers_framecount+3(a4),d0
   btst       #0,d0
-  beq.s      .buffer_two
+  beq.s      .buffer_two_is_backbuffer
   lea.l      ig_om_buffer_one(a4),a0
-  bra.s      .exit
-.buffer_two:
+  move.l     a0,ig_om_buffers_backbuffer(a4)
   lea.l      ig_om_buffer_two(a4),a0
+  move.l     a0,ig_om_buffers_frontbuffer(a4)
+  bra.s      .exit
+.buffer_two_is_backbuffer:
+  lea.l      ig_om_buffer_two(a4),a0
+  move.l     a0,ig_om_buffers_backbuffer(a4)
+  lea.l      ig_om_buffer_one(a4),a0
+  move.l     a0,ig_om_buffers_frontbuffer(a4)
 .exit:
-  move.l     (sp)+,d0
   rts
 
   endif                                                                                   ; ifnd INGAME_BUFFERS_ASM

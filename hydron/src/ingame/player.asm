@@ -276,7 +276,7 @@ player_update:
   ; *******************************
 
   ; init working pointers
-  move.l     ig_om_backbuffer(a4),a0
+  move.l     ig_om_buffers_backbuffer(a4),a0
   move.l     ig_buffers_sprites_pointer(a0),a1
 
   lea.l      ig_om_player_sprite_0_work_pointer(a4),a3
