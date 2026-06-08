@@ -91,7 +91,7 @@ class TiledSource extends AbstractSource {
 		BINARY_VALUE_CONVERTER.writeWord(this.height, metadata);
 		BINARY_VALUE_CONVERTER.writeWord(this.tileWidth, metadata);
 		BINARY_VALUE_CONVERTER.writeWord(this.tileHeight, metadata);
-		BINARY_VALUE_CONVERTER.writeLong(this.offsets.size() * 2, metadata);
+		BINARY_VALUE_CONVERTER.writeLong(this.length(), metadata);
 		return Arrays.asList(IndexEntry.create(this.getId(), metadata.toByteArray(), this));
 	}
 
