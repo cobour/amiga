@@ -626,8 +626,8 @@ player_bullet_add_to_stack:
 player_bullettype_simple_for_stack_0:
   dc.w       0,0                                                                  ; xpos in screen coordinates as fixed-point 16/16 value relative to player position
   dc.w       -10,0                                                                ; ypos in screen coordinates as fixed-point 16/16 value relative to player position
-  dc.w       -2,0                                                                 ; xpos-add in screen coordinates as fixed-point 16/16 value
-  dc.w       -8,0                                                                 ; ypos-add in screen coordinates as fixed-point 16/16 value
+  dc.w       -4,0                                                                 ; xpos-add in screen coordinates as fixed-point 16/16 value
+  dc.w       -16,0                                                                ; ypos-add in screen coordinates as fixed-point 16/16 value
   dc.w       -15                                                                  ; minimum valid xpos of bullet as int value (no fraction), delete bullet when current xpos is lower than this value
   dc.w       IgScreenWidth+1                                                      ; maximum valid xpos of bullet as int value (no fraction), delete bullet when current xpos is greater than this value
   dc.w       -15                                                                  ; minimum valid ypos of bullet as int value (no fraction), delete bullet when current ypos is lower than this value
@@ -642,7 +642,7 @@ player_bullettype_simple_for_stack_1:
   dc.w       8,0                                                                  ; xpos in screen coordinates as fixed-point 16/16 value relative to player position
   dc.w       -10,0                                                                ; ypos in screen coordinates as fixed-point 16/16 value relative to player position
   dc.w       0,0                                                                  ; xpos-add in screen coordinates as fixed-point 16/16 value
-  dc.w       -8,0                                                                 ; ypos-add in screen coordinates as fixed-point 16/16 value
+  dc.w       -16,0                                                                ; ypos-add in screen coordinates as fixed-point 16/16 value
   dc.w       -15                                                                  ; minimum valid xpos of bullet as int value (no fraction), delete bullet when current xpos is lower than this value
   dc.w       IgScreenWidth+1                                                      ; maximum valid xpos of bullet as int value (no fraction), delete bullet when current xpos is greater than this value
   dc.w       -15                                                                  ; minimum valid ypos of bullet as int value (no fraction), delete bullet when current ypos is lower than this value
@@ -656,8 +656,8 @@ player_bullettype_simple_for_stack_1:
 player_bullettype_simple_for_stack_2:
   dc.w       16,0                                                                 ; xpos in screen coordinates as fixed-point 16/16 value relative to player position
   dc.w       -10,0                                                                ; ypos in screen coordinates as fixed-point 16/16 value relative to player position
-  dc.w       2,0                                                                  ; xpos-add in screen coordinates as fixed-point 16/16 value
-  dc.w       -8,0                                                                 ; ypos-add in screen coordinates as fixed-point 16/16 value
+  dc.w       4,0                                                                  ; xpos-add in screen coordinates as fixed-point 16/16 value
+  dc.w       -16,0                                                                ; ypos-add in screen coordinates as fixed-point 16/16 value
   dc.w       -15                                                                  ; minimum valid xpos of bullet as int value (no fraction), delete bullet when current xpos is lower than this value
   dc.w       IgScreenWidth+1                                                      ; maximum valid xpos of bullet as int value (no fraction), delete bullet when current xpos is greater than this value
   dc.w       -15                                                                  ; minimum valid ypos of bullet as int value (no fraction), delete bullet when current ypos is lower than this value
