@@ -24,6 +24,7 @@ ig_start:
 
   clr.b      c_om_next_frame_ready(a4)
   clr.b      c_om_vbl(a4)
+  clr.b      ig_om_end_mainloop(a4)
 
   bsr        buffers_init                       ; MUST be called FIRST, because sets vars needed by other inits
   bsr        panel_init
@@ -37,6 +38,10 @@ ig_start:
 
 .main_loop:
   clr.b      c_om_next_frame_ready(a4)
+
+  tst.b      ig_om_end_mainloop(a4)
+  bne.s      .exit
+
   bsr        buffers_set_pointers
 
   bsr        fade_ingame_update
@@ -46,13 +51,34 @@ ig_start:
 
   move.b     #1,c_om_next_frame_ready(a4)
   clr.b      c_om_vbl(a4)
+  ifd        RED_TIMING
+  move.w     #$0f00,COLOR00(a6)                 ; end of preparation of next frame
+  endif                                         ; ifd RED_TIMING
 .ml_wait_vbl:
   tst.b      c_om_vbl(a4)
   beq.s      .ml_wait_vbl
+
+  ; TEST CODE - fade out on mouse click
+  lea.l      .is_fade_out(pc),a0
+  tst.w      (a0)
+  bne.s      .end_fade_out
+  btst       #6,$bfe001
+  bne.s      .end_fade_out
+  bsr        fade_ingame_start_fade_out
+  lea.l      .is_fade_out(pc),a0
+  move.w     #1,(a0)
+  bra.s      .end_fade_out
+.is_fade_out:
+  dc.w       0
+.end_fade_out:
+  ; TEST CODE - fade out on mouse click
+
   bra.s      .main_loop
 
+.exit:
+  clr.b      c_om_next_frame_ready(a4)
+  bsr        buffers_clear
   bsr        _mt_end
-  bsr        ctrl_set_black_screen
 
 .error:
   rts
@@ -84,21 +110,25 @@ ig_start:
 
 lvl3_irq_handler:
   movem.l    a4/a6,-(sp)
+  lea.l      CUSTOM,a6
+  move.l     other_mem_ptr(pc),a4
 
   ; clear Copper-IRQ-Bit
-  lea.l      CUSTOM,a6
   move.w     #%0000000000010000,INTREQ(a6)
 
+  ; set vbl flag in common om struct
+  move.b     #1,c_om_vbl(a4)
+
+  ; is end-of-mainloog trigger set?
+  tst.b      ig_om_end_mainloop(a4)
+  bne.s      .exit
+
   ; is frame rendered completely into backbuffer?
-  move.l     other_mem_ptr(pc),a4
   tst.b      c_om_next_frame_ready(a4)
   beq.s      .exit
 
   ; swap buffers
   bsr        buffers_swap
-
-  ; set vbl flag in common om struct
-  move.b     #1,c_om_vbl(a4)
 
 .exit:
   movem.l    (sp)+,a4/a6

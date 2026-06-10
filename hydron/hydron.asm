@@ -2,6 +2,8 @@
   include    "src/globals.i"
   include    "../common/src/system/screen.i"
 
+;RED_TIMING equ 1                                       ; show end of frrame preparation as red COLOR00
+
 main_code_start:
 
   bsr        common_init
@@ -18,9 +20,10 @@ main_code_start:
 
   bsr        ig_start
 
+  ifnd       USE_DISK_DMA
   bsr        ctrl_free_system
-  bsr        disk_cleanup
   bsr        ctrl_restore_screen
+  endif                                                ; ifnd USE_DISK_DMA
 
 .end:
   bsr        disk_cleanup

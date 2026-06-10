@@ -5,6 +5,7 @@ INGAME_I           equ 1
                                           include    "src/ingame/buffers.i"
                                           include    "src/ingame/panel.i"
                                           include    "src/ingame/player.i"
+                                          include    "../common/src/system/fade.i"
 
 ; Ingame screen definitions
 IgScreenBitPlanes  equ 6
@@ -50,6 +51,8 @@ ig_cm_sizeof:                             rs.b       0
 ; Ingame other mem struct
                                           rsreset
 ig_om_common:                             rs.b       c_om_sizeof
+ig_om_end_mainloop:                       rs.b       1                                                       ; boolean (continue looping or not)
+ig_om_dummy:                              rs.b       1                                                       ; padding byte
 ; ingame/player.asm
 ig_om_player_gfx_ptr:                     rs.l       1                                                       ; pointer to the beginning of the gfx rawdata
 ig_om_player_anim_offset:                 rs.l       1                                                       ; offset to the current anim step (to be added to ig_om_player_gfx_ptr)
@@ -108,9 +111,12 @@ ig_om_background_fill_row_offset:         rs.w       1                          
 ig_om_background_fill_column_offset:      rs.w       1                                                       ; offset in framebuffer of the column that is refilled next
 ig_om_background_copperwait_split:        rs.l       1                                                       ; first word of copperwait command
 ; ingame/fade.asm
-ig_om_fade_step:                          rs.b       1                                                       ; steps 16-1 = fade steps to backbuffer copperlist, step 0 = copy colors from frontbuffer-copperlist to backbuffer-copperlist, step -1 = do nothing
-ig_om_fade_dummy:                         rs.b       1                                                       ; padding byte 
-ig_om_fade_color_tab:                     rs.b       32*2*16                                                 ; color-tab for common/src/system/fade.asm
+ig_om_fade_in_step:                       rs.b       1                                                       ; steps 16-1 = fade steps to backbuffer copperlist, step 0 = copy colors from frontbuffer-copperlist to backbuffer-copperlist, step -1 = do nothing
+ig_om_fade_out_step:                      rs.b       1                                                       ; steps 16-1 = fade steps to backbuffer copperlist, step 0 = copy colors from frontbuffer-copperlist to backbuffer-copperlist, step -1 = do nothing
+ig_om_fade_color_tab_fade_in:             rs.b       32*2*16                                                 ; color-tab for common/src/system/fade.asm for fade in
+ig_om_fade_color_tab_fade_out:            rs.b       32*2*16                                                 ; color-tab for common/src/system/fade.asm for fade out
+ig_om_fade_in_struct:                     rs.b       fade_sizeof                                             ; fade struct for fade in
+ig_om_fade_out_struct:                    rs.b       fade_sizeof                                             ; fade struct for fade out
 ; data files area
 ig_om_datfile:                            rs.b       0                                                       ; variable filesizes, therefore this MUST be the last entry in this struct
 ig_om_sizeof:                             rs.b       0

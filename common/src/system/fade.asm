@@ -1,17 +1,20 @@
   ifnd       FADE_ASM
 FADE_ASM equ 1
 
+  include    "../common/src/system/fade.i"
+
 ; inits the color tab and vars
 ; in:
 ;   a0   - pointer to color tab area; must have size = colors * 2 * 16
 ;   a1   - pointer to color values (words)
+;   a3   - pointer to fade struct
 ;   d0.w - number of colors
 ;   d1.b - fade-in = 0 ; fade_out <> 0
 fade_init:
-  movem.l    d2-d7/a2-a3,-(sp)
+  movem.l    d0-d7/a0-a4,-(sp)
 
   ; set pointers
-  lea.l      fade_color_tab(pc),a2
+  move.l     a3,a2
   move.l     a0,(a2)+
   move.l     a0,(a2)+
 
@@ -34,7 +37,7 @@ fade_init:
   tst.b      d1
   beq.s      .fi_do_loop
   ; when fade-out: copy orig colors as first step
-  move.w     fade_number_of_colors(pc),d7
+  move.w     fade_number_of_colors(a3),d7
   move.l     a1,a2
 .fo_copy_loop:
   move.w     (a2)+,(a0)+
@@ -46,11 +49,11 @@ fade_init:
   moveq.l    #14,d7
 .fade_outer_loop:
 
-  move.w     fade_number_of_colors(pc),d6
-  move.l     a1,a3
+  move.w     fade_number_of_colors(a3),d6
+  move.l     a1,a4
 .fade_inner_loop:
 
-  move.w     (a3)+,d2                           ; target color
+  move.w     (a4)+,d2                           ; target color
   
   ; red
   move.w     d2,d3
@@ -93,27 +96,27 @@ fade_init:
   ; when fade-in: copy orig colors as last step
   tst.b      d1
   bne.s      .exit
-  move.w     fade_number_of_colors(pc),d7
+  move.w     fade_number_of_colors(a3),d7
   move.l     a1,a2
 .fi_copy_loop:
   move.w     (a2)+,(a0)+
   dbf        d7,.fi_copy_loop
 
 .exit:
-  movem.l    (sp)+,d2-d7/a2-a3
+  movem.l    (sp)+,d0-d7/a0-a4
   rts
 
 ; executes next fading step
 ; in:
 ;   a0 - pointer to copperlist-moves to color regs (MODIFIED by this code)
+;   a3   - pointer to fade struct
 fade_next_step:
   movem.l    d7/a1-a2,-(sp)
-  lea.l      fade_step_countdown(pc),a1
-  tst.w      (a1)
+  tst.w      fade_step_countdown(a3)
   beq.s      .exit
 
-  move.l     fade_color_tab_next_step(pc),a1
-  move.w     fade_number_of_colors(pc),d7
+  move.l     fade_color_tab_next_step(a3),a1
+  move.w     fade_number_of_colors(a3),d7
   addq.l     #2,a0
 .loop:
   move.w     (a1)+,(a0)
@@ -122,32 +125,16 @@ fade_next_step:
 
 .next:
   ; countdown
-  lea.l      fade_step_countdown(pc),a1
-  sub.w      #1,(a1)
+  sub.w      #1,fade_step_countdown(a3)
   ; pointer to next step
-  lea.l      fade_color_tab_next_step(pc),a1
+  lea.l      fade_color_tab_next_step(a3),a1
   move.l     (a1),a2
-  add.l      fade_color_tab_step_size(pc),a2
+  add.l      fade_color_tab_step_size(a3),a2
   move.l     a2,(a1)
 
 .exit:
   movem.l    (sp)+,d7/a1-a2
   rts
-
-;
-; vars (all initialized by fade_init)
-;
-
-fade_color_tab:
-  dc.l       0
-fade_color_tab_next_step:
-  dc.l       0
-fade_color_tab_step_size:
-  dc.l       0
-fade_step_countdown:
-  dc.w       0
-fade_number_of_colors:
-  dc.w       0                                  ; num of colors minus 1 = for dbf-loops
 
   endif                                         ; ifnd FADE_ASM
  

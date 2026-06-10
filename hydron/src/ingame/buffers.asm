@@ -150,4 +150,23 @@ buffers_set_pointers:
 .exit:
   rts
 
+; sets all color moves (except panel) in both copperlists to black
+buffers_clear:
+  lea.l      ig_om_buffer_one(a4),a0
+  bsr        .clear
+  lea.l      ig_om_buffer_two(a4),a0
+  ; intentional fall-through
+
+.clear:
+  move.l     ig_buffers_copperlist_pointer(a0),a1
+  lea.l      ig_cm_cl_colors+2(a1),a2
+  moveq.l    #31,d7
+.clear_colors_loop:
+  clr.w      (a2)
+  addq.l     #4,a2
+  dbf        d7,.clear_colors_loop
+  lea.l      ig_cm_cl_reset_color17+2(a1),a2
+  clr.w      (a2)
+  rts
+
   endif                                                                                   ; ifnd INGAME_BUFFERS_ASM
