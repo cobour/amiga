@@ -31,28 +31,62 @@ fade_ingame_start_fade_out:
   rts
 
 fade_ingame_update:
-
   tst.b      ig_om_fade_out_step(a4)
-  blt.s      .check_fade_in
+  blt        .check_fade_in
 
   ; fade out
+  move.b     ig_om_buffers_framecount+3(a4),d0
+  btst       #0,d0
+  beq.s      .fade_out_normal_step
+
   sub.b      #1,ig_om_fade_out_step(a4)
   bne.s      .fade_out_normal_step
   
   ; last fade out step
-  move.b     #1,ig_om_end_mainloop(a4)               ; trigger end of mainloop
+  move.b     #1,ig_om_end_mainloop(a4)                                  ; trigger end of mainloop
 
   move.l     ig_om_buffers_frontbuffer(a4),a0
   bsr        .clear_colors
+  bsr        .clear_panel_data
   move.l     ig_om_buffers_backbuffer(a4),a0
   bsr        .clear_colors
+  bsr        .clear_panel_data
 
-  bra.s      .exit
+  bra        .exit
 
 .fade_out_normal_step:
-  ; TODO: panel (remove data from cl, clear panel-update-trigger)
-
   ; step 16-1
+
+  ; panel (flood out)
+  moveq.l    #16,d7
+  moveq.l    #0,d6
+  move.b     ig_om_fade_out_step(a4),d6
+  sub.b      d6,d7
+  lsl.w      #2,d7
+  lea.l      .flood_out_copperlist_offset_tab(pc),a0
+  move.l     (a0,d7.w),d7
+
+  move.l     ig_om_buffers_backbuffer(a4),a0
+  move.l     ig_buffers_copperlist_pointer(a0),a0
+  lea.l      ig_cm_cl_panel(a0),a0
+  move.l     a0,a2
+  add.l      d7,a0
+  move.l     a0,a1
+.fo_flood_loop:
+  ; copy a0 to a1
+  move.w     panel_clrow_lives_0+6(a0),panel_clrow_lives_0+6(a1)
+  move.w     panel_clrow_lives_1+6(a0),panel_clrow_lives_1+6(a1)
+  move.w     panel_clrow_score_0+6(a0),panel_clrow_score_0+6(a1)
+  move.w     panel_clrow_score_1+6(a0),panel_clrow_score_1+6(a1)
+  move.w     panel_clrow_score_2+6(a0),panel_clrow_score_2+6(a1)
+  move.w     panel_clrow_hiscore_0+6(a0),panel_clrow_hiscore_0+6(a1)
+  move.w     panel_clrow_hiscore_1+6(a0),panel_clrow_hiscore_1+6(a1)
+  move.w     panel_clrow_hiscore_2+6(a0),panel_clrow_hiscore_2+6(a1)
+  lea.l      -panel_clrow_sizeof(a1),a1
+  cmp.l      a2,a1
+  bge.s      .fo_flood_loop
+
+  ; colors
   move.l     ig_om_buffers_backbuffer(a4),a2
   move.l     ig_buffers_copperlist_pointer(a2),a1
   lea.l      ig_cm_cl_colors(a1),a0
@@ -63,14 +97,20 @@ fade_ingame_update:
   lea.l      ig_cm_cl_reset_color17+2(a1),a0
   lea.l      ig_cm_cl_colors+70(a1),a1
   move.w     (a1),(a0)
-  bra.s      .exit
+  bra        .exit
 
 .check_fade_in:
   tst.b      ig_om_fade_in_step(a4)
-  blt.s      .exit
-  sub.b      #1,ig_om_fade_in_step(a4)
-  beq.s      .set_final_colors_in_both_buffers
+  blt        .exit
 
+  move.b     ig_om_buffers_framecount+3(a4),d0
+  btst       #0,d0
+  beq.s      .fi_no_sub
+
+  sub.b      #1,ig_om_fade_in_step(a4)
+  beq        .fade_in_final_step
+
+.fi_no_sub:
   ; step 16-1
   move.l     ig_om_buffers_backbuffer(a4),a2
   move.l     ig_buffers_copperlist_pointer(a2),a1
@@ -83,12 +123,55 @@ fade_ingame_update:
   lea.l      ig_cm_cl_colors+70(a1),a1
   move.w     (a1),(a0)
 
-  ; TODO panel (bump in, adjust all copper waits between beginning of ig_cm_cl_panel and end of ig_cm_cl_sprite01_off)
+  ; panel (flood in)
+  moveq.l    #0,d7
+  move.b     ig_om_fade_in_step(a4),d7                                  ; loop counter for lines to flood-copy
+
+  moveq.l    #14,d6
+  sub.w      d7,d6                                                      ; loop counter for lines to copy target data into (if negative no copy needed)
+
+  lea.l      ig_om_panel_backup_for_fade(a4),a0
+  add.l      #16*15,a0                                                  ; source pointer - offset to last row of backup copy of data
+  move.l     ig_om_buffers_backbuffer(a4),a1
+  move.l     ig_buffers_copperlist_pointer(a1),a1
+  lea.l      ig_cm_cl_panel(a1),a1                   
+  add.l      #panel_clrow_sizeof*15,a1                                  ; target pointer - offset to last panel row in copperlist
+
+  tst.w      d6
+  blt.s      .fi_panel_loop_flood_data
+
+.fi_panel_loop_target_data:
+  move.l     a0,a2
+  move.w     (a2)+,panel_clrow_lives_0+6(a1)
+  move.w     (a2)+,panel_clrow_lives_1+6(a1)
+  move.w     (a2)+,panel_clrow_score_0+6(a1)
+  move.w     (a2)+,panel_clrow_score_1+6(a1)
+  move.w     (a2)+,panel_clrow_score_2+6(a1)
+  move.w     (a2)+,panel_clrow_hiscore_0+6(a1)
+  move.w     (a2)+,panel_clrow_hiscore_1+6(a1)
+  move.w     (a2),panel_clrow_hiscore_2+6(a1)
+  lea.l      -16(a0),a0
+  lea.l      -panel_clrow_sizeof(a1),a1
+  dbf        d6,.fi_panel_loop_target_data
+
+.fi_panel_loop_flood_data:
+  move.l     a0,a2
+  move.w     (a2)+,panel_clrow_lives_0+6(a1)
+  move.w     (a2)+,panel_clrow_lives_1+6(a1)
+  move.w     (a2)+,panel_clrow_score_0+6(a1)
+  move.w     (a2)+,panel_clrow_score_1+6(a1)
+  move.w     (a2)+,panel_clrow_score_2+6(a1)
+  move.w     (a2)+,panel_clrow_hiscore_0+6(a1)
+  move.w     (a2)+,panel_clrow_hiscore_1+6(a1)
+  move.w     (a2),panel_clrow_hiscore_2+6(a1)
+  ; a0 stays the same
+  lea.l      -panel_clrow_sizeof(a1),a1
+  dbf        d7,.fi_panel_loop_flood_data
 
   bra.s      .exit
 
-  ; step 0
-.set_final_colors_in_both_buffers:
+.fade_in_final_step:
+  ; colors
   move.l     ig_om_buffers_frontbuffer(a4),a2
   move.l     ig_buffers_copperlist_pointer(a2),a2
   bsr        buffers_set_colors_in_copperlist
@@ -96,9 +179,53 @@ fade_ingame_update:
   move.l     ig_buffers_copperlist_pointer(a2),a2
   bsr        buffers_set_colors_in_copperlist
 
-  ; TODO panel
-  
+  ; panel
+  move.l     ig_om_buffers_frontbuffer(a4),a1
+  move.l     ig_buffers_copperlist_pointer(a1),a1
+  lea.l      ig_cm_cl_panel(a1),a1
+  bsr.s      .set_complete_panel_data
+  move.l     ig_om_buffers_backbuffer(a4),a1
+  move.l     ig_buffers_copperlist_pointer(a1),a1
+  lea.l      ig_cm_cl_panel(a1),a1
+  bsr.s      .set_complete_panel_data
+
+  ; end fade in (both copperlists are in final state)
+  move.b     #-1,ig_om_fade_in_step(a4)
+
 .exit:
+  rts
+
+.set_complete_panel_data:
+  lea.l      ig_om_panel_backup_for_fade(a4),a0
+  moveq.l    #15,d7
+.set_complete_panel_data_loop:
+  move.w     (a0)+,panel_clrow_lives_0+6(a1)
+  move.w     (a0)+,panel_clrow_lives_1+6(a1)
+  move.w     (a0)+,panel_clrow_score_0+6(a1)
+  move.w     (a0)+,panel_clrow_score_1+6(a1)
+  move.w     (a0)+,panel_clrow_score_2+6(a1)
+  move.w     (a0)+,panel_clrow_hiscore_0+6(a1)
+  move.w     (a0)+,panel_clrow_hiscore_1+6(a1)
+  move.w     (a0)+,panel_clrow_hiscore_2+6(a1)
+  lea.l      panel_clrow_sizeof(a1),a1
+  dbf        d7,.set_complete_panel_data_loop
+  rts
+
+.clear_panel_data:
+  move.l     ig_buffers_copperlist_pointer(a0),a1
+  lea.l      ig_cm_cl_panel(a1),a1
+  moveq.l    #15,d7
+.clear_panel_data_loop:
+  clr.w      panel_clrow_lives_0+6(a1)
+  clr.w      panel_clrow_lives_1+6(a1)
+  clr.w      panel_clrow_score_0+6(a1)
+  clr.w      panel_clrow_score_1+6(a1)
+  clr.w      panel_clrow_score_2+6(a1)
+  clr.w      panel_clrow_hiscore_0+6(a1)
+  clr.w      panel_clrow_hiscore_1+6(a1)
+  clr.w      panel_clrow_hiscore_2+6(a1)
+  lea.l      panel_clrow_sizeof(a1),a1
+  dbf        d7,.clear_panel_data_loop
   rts
 
 .clear_colors:
@@ -113,4 +240,22 @@ fade_ingame_update:
   clr.w      (a2)
   rts
 
-  endif                                              ; ifnd INGAME_FADE_ASM
+.flood_out_copperlist_offset_tab: ; to avoid mulu
+  dc.l       panel_clrow_sizeof*0
+  dc.l       panel_clrow_sizeof*1
+  dc.l       panel_clrow_sizeof*2
+  dc.l       panel_clrow_sizeof*3
+  dc.l       panel_clrow_sizeof*4
+  dc.l       panel_clrow_sizeof*5
+  dc.l       panel_clrow_sizeof*6
+  dc.l       panel_clrow_sizeof*7
+  dc.l       panel_clrow_sizeof*8
+  dc.l       panel_clrow_sizeof*9
+  dc.l       panel_clrow_sizeof*10
+  dc.l       panel_clrow_sizeof*11
+  dc.l       panel_clrow_sizeof*12
+  dc.l       panel_clrow_sizeof*13
+  dc.l       panel_clrow_sizeof*14
+  dc.l       panel_clrow_sizeof*15
+
+  endif                                                                 ; ifnd INGAME_FADE_ASM

@@ -7,9 +7,9 @@
   dc.w    $0678
   dc.w    $0789
   dc.w    $09df
-  ; nothing
-  dc.w    $0000
-  dc.w    $0000
+  ; nothing (only when flooded in or out)
+  dc.w    $09df
+  dc.w    $0dea
   ; numbers
   dc.w    $0dea
   dc.w    $0fed

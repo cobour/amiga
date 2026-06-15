@@ -89,6 +89,7 @@ ig_om_panel_font_pointer:                 rs.l       1                          
 ig_om_panel_cl_offset:                    rs.l       1                                                       ; offset to the area of the copperlist where the panel values must be drawn
 ig_om_panel_redraw_lives:                 rs.b       1                                                       ; boolean / must lives counter be drawn?
 ig_om_panel_redraw_score:                 rs.b       1                                                       ; boolean / must score be drawn? (if new score is higher than old hiscore => update and redraw hiscore as well)
+ig_om_panel_backup_for_fade:              rs.b       256                                                     ; backup of all SPRxDATA content after panel is initialised (as reference for flood-effect while fade ind or out)
 ; ingame/buffers.asm
 ig_om_buffers_frontbuffer:                rs.l       1                                                       ; pointer to current frontbuffer struct, set in game loop by call to buffers_set_pointers
 ig_om_buffers_backbuffer:                 rs.l       1                                                       ; pointer to current backbuffer struct, set in game loop by call to buffers_set_pointers

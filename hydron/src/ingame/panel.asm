@@ -5,10 +5,49 @@ INGAME_PANEL_ASM equ 1
 
 ; inits panel (should be called once before game loop)
 panel_init:
+  ; init both copperlists
   move.l     ig_om_buffer_one+ig_buffers_copperlist_pointer(a4),a1
-  bsr.s      .init_sub
+  bsr        .init_sub
   move.l     ig_om_buffer_two+ig_buffers_copperlist_pointer(a4),a1
-  ; intended fall-through
+  bsr        .init_sub
+  
+  ; init ig_om_panel_backup_for_fade and clear data in both copperlists
+  move.l     ig_om_buffer_one+ig_buffers_copperlist_pointer(a4),a1
+  lea.l      ig_cm_cl_panel(a1),a1
+  move.l     ig_om_buffer_two+ig_buffers_copperlist_pointer(a4),a3
+  lea.l      ig_cm_cl_panel(a3),a3
+  lea.l      ig_om_panel_backup_for_fade(a4),a2
+  moveq.l    #15,d7
+.pi_backup_loop:
+  move.w     panel_clrow_lives_0+6(a1),(a2)+
+  move.w     panel_clrow_lives_1+6(a1),(a2)+
+  move.w     panel_clrow_score_0+6(a1),(a2)+
+  move.w     panel_clrow_score_1+6(a1),(a2)+
+  move.w     panel_clrow_score_2+6(a1),(a2)+
+  move.w     panel_clrow_hiscore_0+6(a1),(a2)+
+  move.w     panel_clrow_hiscore_1+6(a1),(a2)+
+  move.w     panel_clrow_hiscore_2+6(a1),(a2)+
+  clr.w      panel_clrow_lives_0+6(a1)
+  clr.w      panel_clrow_lives_1+6(a1)
+  clr.w      panel_clrow_score_0+6(a1)
+  clr.w      panel_clrow_score_1+6(a1)
+  clr.w      panel_clrow_score_2+6(a1)
+  clr.w      panel_clrow_hiscore_0+6(a1)
+  clr.w      panel_clrow_hiscore_1+6(a1)
+  clr.w      panel_clrow_hiscore_2+6(a1)
+  clr.w      panel_clrow_lives_0+6(a3)
+  clr.w      panel_clrow_lives_1+6(a3)
+  clr.w      panel_clrow_score_0+6(a3)
+  clr.w      panel_clrow_score_1+6(a3)
+  clr.w      panel_clrow_score_2+6(a3)
+  clr.w      panel_clrow_hiscore_0+6(a3)
+  clr.w      panel_clrow_hiscore_1+6(a3)
+  clr.w      panel_clrow_hiscore_2+6(a3)
+  lea.l      panel_clrow_sizeof(a1),a1
+  lea.l      panel_clrow_sizeof(a3),a3
+  dbf        d7,.pi_backup_loop
+
+  rts
 
 .init_sub:
   move.l     a1,a3
@@ -79,6 +118,12 @@ panel_init:
 
 ; updates panel values if necessary (should be called each frame)
 panel_update:
+  ; no update while fading
+  tst.b      ig_om_fade_in_step(a4)
+  bge.s      .exit_no_update
+  tst.b      ig_om_fade_out_step(a4)
+  bge.s      .exit_no_update
+
   movem.l    d0-d2/a0-a3,-(sp)
 
   tst.b      ig_om_panel_redraw_lives(a4)
@@ -104,6 +149,7 @@ panel_update:
 
 .exit:
   movem.l    (sp)+,d0-d2/a0-a3
+.exit_no_update:
   rts
 
 ; INTERNAL USE ONLY
