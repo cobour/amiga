@@ -114,6 +114,8 @@ ig_om_background_copperwait_split:        rs.l       1                          
 ; ingame/fade.asm
 ig_om_fade_in_step:                       rs.b       1                                                       ; steps 16-1 = fade steps to backbuffer copperlist, step 0 = copy colors from frontbuffer-copperlist to backbuffer-copperlist, step -1 = do nothing
 ig_om_fade_out_step:                      rs.b       1                                                       ; steps 16-1 = fade steps to backbuffer copperlist, step 0 = copy colors from frontbuffer-copperlist to backbuffer-copperlist, step -1 = do nothing
+ig_om_fade_step_delay:                    rs.b       1                                                       ; 0 = next step, >0 delay countdown
+ig_om_fade_dummy:                         rs.b       1                                                       ; padding byte
 ig_om_fade_color_tab_fade_in:             rs.b       32*2*16                                                 ; color-tab for common/src/system/fade.asm for fade in
 ig_om_fade_color_tab_fade_out:            rs.b       32*2*16                                                 ; color-tab for common/src/system/fade.asm for fade out
 ig_om_fade_in_struct:                     rs.b       fade_sizeof                                             ; fade struct for fade in

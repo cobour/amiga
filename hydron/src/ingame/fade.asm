@@ -3,6 +3,8 @@ INGAME_FADE_ASM equ 1
 
   include    "src/ingame.i"
 
+FadeStepDelay   equ 1
+
 fade_ingame_init:
   ; get color tab
   move.l     #"COLS",d0
@@ -23,11 +25,13 @@ fade_ingame_init:
   ; set default values
   move.b     #16,ig_om_fade_in_step(a4)
   move.b     #-1,ig_om_fade_out_step(a4)
+  clr.b      ig_om_fade_step_delay(a4)
   
   rts
 
 fade_ingame_start_fade_out:
   move.b     #16,ig_om_fade_out_step(a4)
+  clr.b      ig_om_fade_step_delay(a4)
   rts
 
 fade_ingame_update:
@@ -35,10 +39,15 @@ fade_ingame_update:
   blt        .check_fade_in
 
   ; fade out
-  move.b     ig_om_buffers_framecount+3(a4),d0
-  btst       #0,d0
-  beq.s      .fade_out_normal_step
+  cmp.b      #FadeStepDelay,ig_om_fade_step_delay(a4)
+  beq        .copy_front_to_back
+  tst.b      ig_om_fade_step_delay(a4)
+  beq.s      .fade_out_next_step
+  sub.b      #1,ig_om_fade_step_delay(a4)
+  bra        .exit
 
+.fade_out_next_step:
+  move.b     #FadeStepDelay,ig_om_fade_step_delay(a4)
   sub.b      #1,ig_om_fade_out_step(a4)
   bne.s      .fade_out_normal_step
   
@@ -103,10 +112,16 @@ fade_ingame_update:
   tst.b      ig_om_fade_in_step(a4)
   blt        .exit
 
-  move.b     ig_om_buffers_framecount+3(a4),d0
-  btst       #0,d0
-  beq.s      .fi_no_sub
+  ; fade in
+  cmp.b      #FadeStepDelay,ig_om_fade_step_delay(a4)
+  beq        .copy_front_to_back
+  tst.b      ig_om_fade_step_delay(a4)
+  beq.s      .fade_in_next_step
+  sub.b      #1,ig_om_fade_step_delay(a4)
+  bra        .exit
 
+.fade_in_next_step:
+  move.b     #FadeStepDelay,ig_om_fade_step_delay(a4)
   sub.b      #1,ig_om_fade_in_step(a4)
   beq        .fade_in_final_step
 
@@ -239,6 +254,48 @@ fade_ingame_update:
   lea.l      ig_cm_cl_reset_color17+2(a1),a2
   clr.w      (a2)
   rts
+
+.copy_front_to_back:
+  ; panel
+  move.l     ig_om_buffers_frontbuffer(a4),a0
+  move.l     ig_buffers_copperlist_pointer(a0),a0
+  lea.l      ig_cm_cl_panel(a0),a0
+  move.l     ig_om_buffers_backbuffer(a4),a1
+  move.l     ig_buffers_copperlist_pointer(a1),a1
+  lea.l      ig_cm_cl_panel(a1),a1
+  moveq.l    #15,d7
+.copy_front_to_back_panel_loop:
+  move.w     panel_clrow_lives_0+6(a0),panel_clrow_lives_0+6(a1)
+  move.w     panel_clrow_lives_1+6(a0),panel_clrow_lives_1+6(a1)
+  move.w     panel_clrow_score_0+6(a0),panel_clrow_score_0+6(a1)
+  move.w     panel_clrow_score_1+6(a0),panel_clrow_score_1+6(a1)
+  move.w     panel_clrow_score_2+6(a0),panel_clrow_score_2+6(a1)
+  move.w     panel_clrow_hiscore_0+6(a0),panel_clrow_hiscore_0+6(a1)
+  move.w     panel_clrow_hiscore_1+6(a0),panel_clrow_hiscore_1+6(a1)
+  move.w     panel_clrow_hiscore_2+6(a0),panel_clrow_hiscore_2+6(a1)
+  lea.l      panel_clrow_sizeof(a0),a0
+  lea.l      panel_clrow_sizeof(a1),a1
+  dbf        d7,.copy_front_to_back_panel_loop
+
+  ; colors
+  move.l     ig_om_buffers_frontbuffer(a4),a0
+  move.l     ig_buffers_copperlist_pointer(a0),a0
+  lea.l      ig_cm_cl_reset_color17+2(a0),a2
+  lea.l      ig_cm_cl_colors+2(a0),a0
+  move.l     ig_om_buffers_backbuffer(a4),a1
+  move.l     ig_buffers_copperlist_pointer(a1),a1
+  lea.l      ig_cm_cl_reset_color17+2(a1),a3
+  lea.l      ig_cm_cl_colors+2(a1),a1
+  move.w     (a2),(a3)                                                  ; color 17
+  moveq.l    #31,d7
+.copy_front_to_back_colors_loop:
+  move.w     (a0),(a1)
+  addq.l     #4,a0
+  addq.l     #4,a1
+  dbf        d7,.copy_front_to_back_colors_loop
+
+  sub.b      #1,ig_om_fade_step_delay(a4)
+  rts                                                                   ; bra.s .exit when .exit does more than rts
 
 .flood_out_copperlist_offset_tab: ; to avoid mulu
   dc.l       panel_clrow_sizeof*0
