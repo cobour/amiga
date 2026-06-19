@@ -8,6 +8,7 @@ df_st_pt_module       equ "MOD "
 df_st_sfx             equ "WAV "
 df_st_tiled_playfield equ "TLDP"
 df_st_iff_palette     equ "COLS"
+df_st_svg_path        equ "SVGP"
 
 ; IndexEntry
                          rsreset
@@ -45,5 +46,9 @@ df_tld_plf_height:       rs.w       1              ; number of tiles
 df_tld_plf_tile_width:   rs.w       1              ; pixels of tile
 df_tld_plf_tile_height:  rs.w       1              ; pixels of tile
 df_tld_plf_rawsize:      rs.l       1              ; size of level data in bytes
+
+; SvgPathSource metadata
+                         rsreset
+df_svgp_steps:           rs.w       1              ; number of steps
 
                          endif                     ; ifnd DATAFILES_I

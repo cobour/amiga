@@ -7,7 +7,6 @@ import de.spozzfroin.amiga.datatool.config.TargetFile;
 public class SourceFactory {
 
 	public Source create(TargetFile targetFile, LinkedHashMap<String, Object> parameter) {
-		// TODO: filename OR name
 		var filename = (String) parameter.get("filename");
 		var extension = filename.substring(filename.lastIndexOf(".") + 1).toLowerCase();
 		var source = this.createInstance(targetFile, extension);
@@ -27,6 +26,8 @@ public class SourceFactory {
 			return new WavSource(targetFile);
 		case "tmx":
 			return new TiledSource(targetFile);
+		case "svg":
+			return new SvgPathSource(targetFile);
 		default:
 			throw new RuntimeException("unknown extension: " + extension);
 		}

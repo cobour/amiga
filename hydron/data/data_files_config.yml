@@ -89,6 +89,10 @@ targetFiles:
       - filename: ingame/level_0/MAP_001.tmx
         id: MAPT
         reversedVertically: true
+      - filename: ingame/level_0/simple_topleft_to_downright.svg
+        id: EM01
+        numberOfSteps: 250
+        numberOfDirections: 16
 
 diskimageFiles:
   - filename: Hydron.adf

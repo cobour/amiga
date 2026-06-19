@@ -131,10 +131,6 @@ public class BinaryValueConverter {
 		long b3 = ((long) bytes[offset + 2] << 8) & 0x0000ff00L;
 		long b4 = ((long) bytes[offset + 3] << 0) & 0x000000ffL;
 		return b1 | b2 | b3 | b4;
-		// return (bytes[offset] << 24) & 0xff000000L | (bytes[offset + 1] << 16) &
-		// 0x00ff0000L
-		// | (bytes[offset + 2] << 8) & 0x0000ff00L | (bytes[offset + 3] << 0) &
-		// 0x000000ffL;
 	}
 
 	public void setLong(byte[] bytes, int offset, long value) {
@@ -142,5 +138,22 @@ public class BinaryValueConverter {
 		bytes[offset + 1] = (byte) ((value & 0x00ff0000L) >> 16);
 		bytes[offset + 2] = (byte) ((value & 0x0000ff00L) >> 8);
 		bytes[offset + 3] = (byte) ((value & 0x000000ffL) >> 0);
+	}
+
+	public void writeFixedPointDecimal(float value, OutputStream data) {
+		var negative = value < 0.0f ? true : false;
+		//
+		var left = (int) value;
+		var rightFloat = (value - left) * 10000.0f;
+		var right = (int) rightFloat;
+		right = (int) (right * (65536.0f / 10000.0f));
+		//
+		if (negative) {
+			left -= 1.0f;
+			right = 65536 + right;
+		}
+		//
+		this.writeWord(left, data);
+		this.writeWord(right, data);
 	}
 }

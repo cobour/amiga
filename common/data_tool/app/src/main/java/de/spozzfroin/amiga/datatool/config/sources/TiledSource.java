@@ -80,6 +80,7 @@ class TiledSource extends AbstractSource {
 
 	@Override
 	public void writeRawData(Config config, OutputStream data) throws Exception {
+		LOG.print(String.format("writing rawdata of \"%s\"", this.getFilename()));
 		this.offsets.stream().forEach(o -> BINARY_VALUE_CONVERTER.writeWord(o, data));
 	}
 
