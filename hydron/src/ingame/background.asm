@@ -4,6 +4,14 @@ INGAME_BACKGROUND_ASM equ 1
   include    "src/ingame.i"
 
 background_init:
+  ; init ranges
+  clr.w      ig_om_background_range_1_row_start(a4)
+  move.w     #IgScreenHeight-1,ig_om_background_range_1_row_end(a4)
+  move.l     #32*IgScreenWidthBytes*IgScreenBitPlanes,ig_om_background_range_1_row_offset(a4)
+  move.w     #-1,ig_om_background_range_2_row_start(a4)
+  move.w     #IgScreenHeight-1,ig_om_background_range_2_row_end(a4)
+  clr.l      ig_om_background_range_2_row_offset(a4)
+
   ; tiles gfx pointer
   move.l     #"TLS0",d0
   bsr        datafiles_get_pointer
@@ -151,6 +159,9 @@ background_update:
   move.w     d0,ig_om_background_first_visible_line(a4)
   move.w     d1,ig_om_background_first_visible_offset(a4)
 
+  ; set offset for first range
+  move.l     d1,ig_om_background_range_1_row_offset(a4)
+
   ; draw one 16x16 tile to all 3 buffers and update ig_om_background_fill_row_offset+ig_om_background_fill_column_offset
   tst.b      ig_om_background_last_row_countdown(a4)
   beq.s      .must_draw
@@ -265,7 +276,7 @@ background_update:
   bra.s      .end_split
 .check_split_below_panel:
   cmp.w      #32,d0
-  blt.s      .end_split
+  ble.s      .no_split
   ; split below panel
   move.l     ig_buffers_copperlist_pointer(a0),a2
   lea.l      ig_cm_cl_wait_and_bitplane_pointers(a2),a2
@@ -293,6 +304,21 @@ background_update:
   bne.s      .end_split
   move.l     #$01fe0000,(a2)
 .end_split:
+  ; set correct end/start rows for both ranges
+  tst.w      ig_om_background_range_2_row_start(a4)
+  bge.s      .no_switch_to_split
+  clr.w      ig_om_background_range_2_row_start(a4)
+.no_switch_to_split:
+  move.w     ig_om_background_range_2_row_start(a4),d0
+  addq.w     #1,d0
+  move.w     d0,ig_om_background_range_2_row_start(a4)
+  subq.w     #1,d0
+  move.w     d0,ig_om_background_range_1_row_end(a4)
+  bra.s      .exit
+
+.no_split:
+  move.w     #-1,ig_om_background_range_2_row_start(a4)
+  move.w     #IgScreenHeight-1,ig_om_background_range_1_row_end(a4)
 
 .exit:
   rts

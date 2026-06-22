@@ -98,6 +98,12 @@ ig_om_buffer_one:                         rs.b       ig_buffers_sizeof          
 ig_om_buffer_two:                         rs.b       ig_buffers_sizeof                                       ; buffers-struct of buffer two (display swaps between one and two)
 ig_om_buffer_three:                       rs.l       1                                                       ; pointer to third buffer; used only for restoring background of bobs
 ; ingame/background.asm
+ig_om_background_range_1_row_start:       rs.w       1                                                       ; number of first row (in screen-coordinates) of first bitmap range (should be zero all times)
+ig_om_background_range_1_row_end:         rs.w       1                                                       ; number of last row (in screen-coordinates) of first bitmap range
+ig_om_background_range_1_row_offset:      rs.l       1                                                       ; offset in bitmap buffer of first bitmap range
+ig_om_background_range_2_row_start:       rs.w       1                                                       ; number of first row (in screen-coordinates) of second bitmap range (or -1 if there is no split and only first range is needed)
+ig_om_background_range_2_row_end:         rs.w       1                                                       ; number of last row (in screen-coordinates) of second bitmap range (should be 255)
+ig_om_background_range_2_row_offset:      rs.l       1                                                       ; offset in bitmap buffer of second bitmap range (should always be zero?!?)
 ig_om_background_tiles_gfx_pointer:       rs.l       1                                                       ; pointer to gfx data of background tiles
 ig_om_background_tiles_width_in_bytes:    rs.l       1                                                       ; width of background tiles in bytes
 ig_om_background_level_data_pointer:      rs.l       1                                                       ; pointer to level data
