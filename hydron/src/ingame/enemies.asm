@@ -14,14 +14,15 @@ enemies_init:
   clr.l      enemy_ypos(a0)
   clr.w      enemy_width(a0)
   clr.w      enemy_height(a0)
-  clr.w      enemy_width_bytes(a0)
   clr.w      enemy_width_words(a0)
   clr.w      enemy_height_blt(a0)
   clr.l      enemy_data_pointer(a0)
   clr.l      enemy_mask_pointer(a0)
   clr.l      enemy_anim_offset(a0)
-  clr.w      enemy_modulo_no_shift(a0)
-  clr.w      enemy_modulo_shift(a0)
+  clr.w      enemy_src_mod_no_shift(a0)
+  clr.w      enemy_src_mod_shift(a0)
+  clr.w      enemy_trg_mod_no_shift(a0)
+  clr.w      enemy_trg_mod_shift(a0)
   clr.w      enemy_restore_1a+enemy_restore_offset(a0)
   clr.w      enemy_restore_1a+enemy_restore_bltsize(a0)
   clr.w      enemy_restore_1a+enemy_restore_modulo(a0)
@@ -59,13 +60,14 @@ enemies_init:
   move.l     d0,enemy_mask_pointer(a1)
   move.w     df_iff_width(a0),enemy_width(a1)
   move.w     df_iff_height(a0),enemy_height(a1)
-  move.w     #4,enemy_width_bytes(a1)
   move.w     #2,enemy_width_words(a1)
   move.w     #32*6,enemy_height_blt(a1)
   move.l     #$00700000,enemy_xpos(a1)
   move.l     #$00700000,enemy_ypos(a1)
-  move.w     #$0000,enemy_modulo_no_shift(a1)
-  move.w     #-2,enemy_modulo_shift(a1)
+  move.w     #$0000,enemy_src_mod_no_shift(a1)
+  move.w     #-2,enemy_src_mod_shift(a1)
+  move.w     #28,enemy_trg_mod_no_shift(a1)
+  move.w     #26,enemy_trg_mod_shift(a1)
 
   rts
 
@@ -212,10 +214,10 @@ enemies_draw:
 .do_blit:
   move.w     d5,enemy_restore_offset(a1)
 
+  WAITBLT
+
   tst.b      d4
   bne.s      .do_blit_with_shift
-
-  WAITBLT
 
   ; no pixel shift - full masked copy
   move.w     #$ffff,d6
@@ -224,11 +226,10 @@ enemies_draw:
   move.w     #%0000111111001010,BLTCON0(a6)
   clr.w      BLTCON1(a6)
   ; modulos
-  move.w     enemy_modulo_no_shift(a0),d7
+  move.w     enemy_src_mod_no_shift(a0),d7
   move.w     d7,BLTAMOD(a6)
   move.w     d7,BLTBMOD(a6)
-  move.w     #IgScreenWidthBytes,d7
-  sub.w      enemy_width_bytes(a0),d7
+  move.w     enemy_trg_mod_no_shift(a0),d7
   move.w     d7,BLTCMOD(a6)
   move.w     d7,BLTDMOD(a6)
   move.w     d7,enemy_restore_modulo(a1)
@@ -253,8 +254,40 @@ enemies_draw:
   bra        .end_draw_bob
 
 .do_blit_with_shift:
-  nop
-  ; TODO
+  ; pixel shift - full masked copy
+  move.w     #$ffff,BLTAFWM(a6)
+  clr.w      BLTALWM(a6)
+  ror.w      #4,d4
+  move.w     d4,BLTCON1(a6)
+  or.w       #%0000111111001010,d4
+  move.w     d4,BLTCON0(a6)
+  ; modulos
+  move.w     enemy_src_mod_shift(a0),d7
+  move.w     d7,BLTAMOD(a6)
+  move.w     d7,BLTBMOD(a6)
+  move.w     enemy_trg_mod_shift(a0),d7
+  move.w     d7,BLTCMOD(a6)
+  move.w     d7,BLTDMOD(a6)
+  move.w     d7,enemy_restore_modulo(a1)
+  ; pointers
+  move.l     enemy_anim_offset(a0),d7
+  move.l     enemy_data_pointer(a0),d6
+  add.l      d7,d6
+  move.l     d6,BLTBPT(a6)
+  move.l     enemy_mask_pointer(a0),d6
+  add.l      d7,d6
+  move.l     d6,BLTAPT(a6)
+  add.l      ig_om_enemies_targetbuffer(a4),d5
+  move.l     d5,BLTCPT(a6)
+  move.l     d5,BLTDPT(a6)
+  ; bltsize
+  move.w     enemy_height_blt(a0),d7
+  lsl.w      #6,d7
+  add.w      enemy_width_words(a0),d7
+  addq.w     #1,d7
+  move.w     d7,BLTSIZE(a6)
+  move.w     d7,enemy_restore_bltsize(a1)
+  ; end
   bra        .end_draw_bob
 
   endif                                                    ; ifnd ENEMIES_ASM
