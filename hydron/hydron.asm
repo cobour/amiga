@@ -2,7 +2,7 @@
   include    "src/globals.i"
   include    "../common/src/system/screen.i"
 
-;RED_TIMING equ 1                                       ; show end of frrame preparation as red COLOR00
+;RED_TIMING equ 1                                       ; show end of frame preparation as red COLOR00
 
 main_code_start:
 
@@ -61,5 +61,6 @@ main_code_start:
   include    "src/ingame/panel.asm"
   include    "src/ingame/player.asm"
   include    "src/ingame/fade.asm"
+  include    "src/ingame/enemies.asm"
   include    "../common/src/3rdparty/inflate.asm"
   include    "../common/src/3rdparty/ptplayer.asm"

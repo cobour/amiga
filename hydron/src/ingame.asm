@@ -35,6 +35,7 @@ ig_start:
   bsr        player_init
   bsr        background_init
   bsr        fade_ingame_init
+  bsr        enemies_init
   bsr        ctrl_take_system
   lea.l      lvl3_irq_handler(pc),a0
   bsr        ctrl_set_handler
@@ -49,9 +50,13 @@ ig_start:
   bsr        buffers_set_pointers
 
   bsr        fade_ingame_update
-  bsr        player_update
+  bsr        player_update                      ; TODO: only update of position and fire new bullets
   bsr        panel_update
+  bsr        enemies_update
   bsr        background_update                  ; MUST be called before any update-routines that modify the bitplanes
+
+  bsr        enemies_restore
+  bsr        enemies_draw
 
   move.b     #1,c_om_next_frame_ready(a4)
   clr.b      c_om_vbl(a4)

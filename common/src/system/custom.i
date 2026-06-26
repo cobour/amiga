@@ -23,12 +23,16 @@ BLTCON0       equ $40
 BLTCON1       equ $42
 BLTAFWM       equ $44
 BLTALWM       equ $46
+BLTCPT        equ $48
 BLTCPTH       equ $48
 BLTCPTL       equ $4a
+BLTBPT        equ $4c
 BLTBPTH       equ $4c
 BLTBPTL       equ $4e
+BLTAPT        equ $50
 BLTAPTH       equ $50
 BLTAPTL       equ $52
+BLTDPT        equ $54
 BLTDPTH       equ $54
 BLTDPTL       equ $56
 BLTSIZE       equ $58

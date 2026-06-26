@@ -5,6 +5,7 @@ INGAME_I           equ 1
                                           include    "src/ingame/buffers.i"
                                           include    "src/ingame/panel.i"
                                           include    "src/ingame/player.i"
+                                          include    "src/ingame/enemies.i"
                                           include    "../common/src/system/fade.i"
 
 ; Ingame screen definitions
@@ -126,6 +127,10 @@ ig_om_fade_color_tab_fade_in:             rs.b       32*2*16                    
 ig_om_fade_color_tab_fade_out:            rs.b       32*2*16                                                 ; color-tab for common/src/system/fade.asm for fade out
 ig_om_fade_in_struct:                     rs.b       fade_sizeof                                             ; fade struct for fade in
 ig_om_fade_out_struct:                    rs.b       fade_sizeof                                             ; fade struct for fade out
+; ingame/enemies.asm
+ig_om_enemies_targetbuffer:               rs.l       1                                                       ; pointer to framebuffer for restore/draw
+ig_om_enemies:                            rs.b       enemy_sizeof*EnemiesCount                               ; enemy-structs
+ig_om_enemies_framebuffer_offsets:        rs.l       IgScreenHeight                                          ; offsets for all rows in framebuffer (table to avoid mulu)
 ; data files area
 ig_om_datfile:                            rs.b       0                                                       ; variable filesizes, therefore this MUST be the last entry in this struct
 ig_om_sizeof:                             rs.b       0

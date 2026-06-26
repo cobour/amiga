@@ -2,7 +2,7 @@
 BLITTER_I equ 1
 
 ; Waits for the blitter to be ready
-  macro    WAIT_BLT 
+  macro    WAITBLT 
 ; tst for compatibility with A1000 with first Agnus revision
   tst.w    DMACONR(a6)
 .1\@:

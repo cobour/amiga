@@ -18,7 +18,7 @@ player_init:
   move.w     d0,ig_om_player_gfx_width_bytes(a4)
   move.l     #$00010000,ig_om_player_speed(a4)                                    ; alternatively move 1 and a half pixel per frame with #$00018000
   move.l     #$00700000,ig_om_player_xpos(a4)
-  move.l     #$00700000,ig_om_player_ypos(a4)
+  move.l     #$00d00000,ig_om_player_ypos(a4)
   clr.l      ig_om_player_min_xpos(a4)
   move.l     #$00100000,ig_om_player_min_ypos(a4)
   move.l     #$00e00000,ig_om_player_max_xpos(a4)
