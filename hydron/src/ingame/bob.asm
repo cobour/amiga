@@ -139,15 +139,15 @@ bob_restore:
 ;   a0 - pointer to bob-struct
 bob_draw:
   move.w     d7,-(sp)
-  move.l     bob_bobtype_pointer(a0),a3
+  move.l     bob_bobtype_pointer(a0),a2
 
   ; get bob dimensions
   move.w     bob_ypos(a0),d0                                                  ; min y
   move.w     d0,d1
-  add.w      bobtype_height(a3),d1                                            ; max y
+  add.w      bobtype_height(a2),d1                                            ; max y
   move.w     bob_xpos(a0),d2                                                  ; min x
   move.w     d2,d3
-  add.w      bobtype_width(a3),d3                                             ; max x
+  add.w      bobtype_width(a2),d3                                             ; max x
 .check_split:
   lea.l      ig_om_background_range_1_row_start(a4),a1
   move.w     (a1)+,d4
@@ -180,10 +180,14 @@ bob_draw:
   move.w     (sp)+,d7
   rts
 
+.draw_splitted_in_range:
+  ; called twice
+  ; sets d4 and d5 accordingly
+
 ; in:
 ;   a0   - pointer to bob-struct
 ;   a1   - pointer to bob_restore-struct
-;   a3   - pointer to bobtype-struct
+;   a2   - pointer to bobtype-struct
 ;   d0.w - ypos          (min y)
 ;   d1.w - ypos+height   (max y)
 ;   d2.w - xpos          (min x)
@@ -194,25 +198,30 @@ bob_draw:
   move.w     d0,d6
   sub.w      d4,d6
   lsl.w      #2,d6
-  lea.l      ig_om_enemies_framebuffer_offsets(a4),a2
-  add.l      (a2,d6.w),d5                                                     ; offset in framebuffer of first row of bob
+  lea.l      ig_om_enemies_framebuffer_offsets(a4),a3
+  add.l      (a3,d6.w),d5                                                     ; offset in framebuffer of first row of bob
   moveq.l    #0,d6
   move.w     d2,d6
   lsr.w      #4,d6
   lsl.w      #1,d6
   add.l      d6,d5                                                            ; offset in framebuffer to bob position
+  move.w     bobtype_height_blt(a2),d0
+  move.w     bobtype_width_words(a2),d1
   move.w     d2,d4
+  move.l     bob_anim_offset(a0),d2
   and.w      #$000f,d4                                                        ; 0 = no shift, >0 = shift by pixels
+  beq.s      .draw_in_range_no_shift
+  addq.w     #1,d1
+.draw_in_range_no_shift:
   ; intended fall-through
 
 ; in:
 ;   a0   - pointer to enemy-struct
 ;   a1   - pointer to enemy_restore-struct
-;   a3   - pointer to bobtype-struct
-;   d0.w - ypos          (min y)
-;   d1.w - ypos+height   (max y)
-;   d2.w - xpos          (min x)
-;   d3.w - xpos+width    (max x)
+;   a2   - pointer to bobtype-struct
+;   d0.w - blitter height (lines*bitplanes)
+;   d1.w - blitter width in words
+;   d2.l - anim offset plus additional offset for gfx and mask pointer (multiplies of lines*bitplanes to skip upper lines of bob)
 ;   d4.w - 0 = no shift, >0 = shift by pixels
 ;   d5.l - offset in framebuffer
 .do_blit:
@@ -230,30 +239,28 @@ bob_draw:
   move.w     #%0000111111001010,BLTCON0(a6)
   clr.w      BLTCON1(a6)
   ; modulos
-  move.w     bobtype_src_mod_no_shift(a3),d7
+  move.w     bobtype_src_mod_no_shift(a2),d7
   move.w     d7,BLTAMOD(a6)
   move.w     d7,BLTBMOD(a6)
-  move.w     bobtype_trg_mod_no_shift(a3),d7
+  move.w     bobtype_trg_mod_no_shift(a2),d7
   move.w     d7,BLTCMOD(a6)
   move.w     d7,BLTDMOD(a6)
   move.w     d7,bob_restore_modulo(a1)
   ; pointers
-  move.l     bob_anim_offset(a0),d7
-  move.l     bobtype_data_pointer(a3),d6
-  add.l      d7,d6
+  move.l     bobtype_data_pointer(a2),d6
+  add.l      d2,d6
   move.l     d6,BLTBPT(a6)
-  move.l     bobtype_mask_pointer(a3),d6
-  add.l      d7,d6
+  move.l     bobtype_mask_pointer(a2),d6
+  add.l      d2,d6
   move.l     d6,BLTAPT(a6)
   add.l      ig_om_bob_targetbuffer(a4),d5
   move.l     d5,BLTCPT(a6)
   move.l     d5,BLTDPT(a6)
   ; bltsize
-  move.w     bobtype_height_blt(a3),d7
-  lsl.w      #6,d7
-  add.w      bobtype_width_words(a3),d7
-  move.w     d7,BLTSIZE(a6)
-  move.w     d7,bob_restore_bltsize(a1)
+  lsl.w      #6,d0
+  add.w      d1,d0
+  move.w     d0,BLTSIZE(a6)
+  move.w     d0,bob_restore_bltsize(a1)
   ; end
   bra        .end_draw_bob
 
@@ -266,31 +273,28 @@ bob_draw:
   or.w       #%0000111111001010,d4
   move.w     d4,BLTCON0(a6)
   ; modulos
-  move.w     bobtype_src_mod_shift(a3),d7
+  move.w     bobtype_src_mod_shift(a2),d7
   move.w     d7,BLTAMOD(a6)
   move.w     d7,BLTBMOD(a6)
-  move.w     bobtype_trg_mod_shift(a3),d7
+  move.w     bobtype_trg_mod_shift(a2),d7
   move.w     d7,BLTCMOD(a6)
   move.w     d7,BLTDMOD(a6)
   move.w     d7,bob_restore_modulo(a1)
   ; pointers
-  move.l     bob_anim_offset(a0),d7
-  move.l     bobtype_data_pointer(a3),d6
-  add.l      d7,d6
+  move.l     bobtype_data_pointer(a2),d6
+  add.l      d2,d6
   move.l     d6,BLTBPT(a6)
-  move.l     bobtype_mask_pointer(a3),d6
-  add.l      d7,d6
+  move.l     bobtype_mask_pointer(a2),d6
+  add.l      d2,d6
   move.l     d6,BLTAPT(a6)
   add.l      ig_om_bob_targetbuffer(a4),d5
   move.l     d5,BLTCPT(a6)
   move.l     d5,BLTDPT(a6)
   ; bltsize
-  move.w     bobtype_height_blt(a3),d7
-  lsl.w      #6,d7
-  add.w      bobtype_width_words(a3),d7
-  addq.w     #1,d7
-  move.w     d7,BLTSIZE(a6)
-  move.w     d7,bob_restore_bltsize(a1)
+  lsl.w      #6,d0
+  add.w      d1,d0
+  move.w     d0,BLTSIZE(a6)
+  move.w     d0,bob_restore_bltsize(a1)
   ; end
   bra        .end_draw_bob
 
