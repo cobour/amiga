@@ -91,19 +91,39 @@ bob_update:
 bob_restore:
   tst.w      bob_status(a0)
   blt.s      .do_not_restore
-  ; TODO bob_restore_2b
+  ; bob_restore_2a
   lea.l      bob_restore_2a(a0),a3
   move.w     bob_restore_bltsize(a3),d3
   beq.s      .restore_done
-  ; restore
+  bsr.s      .do_restore
+  ; bob_restore_2b
+  lea.l      bob_restore_2b(a0),a3
+  move.w     bob_restore_bltsize(a3),d3
+  beq.s      .restore_done
+  bsr.s      .do_restore
+.restore_done:
+  ; copy restore 1 to restore 2
+  lea.l      bob_restore_1a(a0),a1
+  lea.l      bob_restore_2a(a0),a2
+  move.l     (a1)+,(a2)+
+  move.l     (a1)+,(a2)+
+  move.l     (a1),(a2)
+.do_not_restore:
+  rts
+
+; in:
+;   a1 - base pointer of target buffer
+;   a2 - base pointer of source buffer
+;   a3 - pointer to bob_restore-struct
+.do_restore:
   move.w     bob_restore_offset(a3),d4
   move.l     a2,d0
   add.l      d4,d0                                                            ; source pointer
   move.l     a1,d1
   add.l      d4,d1                                                            ; target pointer
   move.w     bob_restore_modulo(a3),d2
-  WAITBLT
   move.w     #$ffff,d6
+  WAITBLT
   move.w     d6,BLTAFWM(a6)
   move.w     d6,BLTALWM(a6)
   move.w     #%0000100111110000,BLTCON0(a6)
@@ -113,14 +133,6 @@ bob_restore:
   move.l     d0,BLTAPT(a6)
   move.l     d1,BLTDPT(a6)
   move.w     d3,BLTSIZE(a6)
-.restore_done:
-  ; copy restore 1 to restore 2
-  lea.l      bob_restore_1a(a0),a1
-  lea.l      bob_restore_2a(a0),a2
-  move.l     (a1)+,(a2)+
-  move.l     (a1)+,(a2)+
-  move.l     (a1),(a2)
-.do_not_restore:
   rts
 
 ; in:
