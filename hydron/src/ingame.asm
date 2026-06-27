@@ -55,6 +55,7 @@ ig_start:
   bsr        enemies_update
   bsr        background_update                  ; MUST be called before any update-routines that modify the bitplanes
 
+  bsr        bob_update
   bsr        enemies_restore
   bsr        enemies_draw
 

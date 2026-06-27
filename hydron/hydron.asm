@@ -61,6 +61,7 @@ main_code_start:
   include    "src/ingame/panel.asm"
   include    "src/ingame/player.asm"
   include    "src/ingame/fade.asm"
+  include    "src/ingame/bob.asm"
   include    "src/ingame/enemies.asm"
   include    "../common/src/3rdparty/inflate.asm"
   include    "../common/src/3rdparty/ptplayer.asm"
