@@ -4,23 +4,56 @@ INGAME_BBOB_ASM equ 1
   include    "src/ingame.i"
   include    "../common/src/system/blitter.i"
 
+bob_init:
+  ; clear bobtype-structs
+  lea.l      ig_om_bob_types(a4),a0
+  moveq.l    #BobTypeCount-1,d7
+.bobtype_lear_loop:
+  bsr.s      .bobtype_clear
+  lea.l      bobtype_sizeof(a0),a0
+  dbf        d7,.bobtype_lear_loop
+
+  ; TESTCODE - test bobtype
+  lea.l      ig_om_bob_types(a4),a1
+  move.l     #"TEST",d0
+  bsr        datafiles_get_pointer
+  move.l     df_idx_ptr_rawdata(a0),d0
+  move.l     d0,bobtype_data_pointer(a1)
+  lea.l      df_idx_metadata(a0),a0
+  add.l      df_iff_rawsize(a0),d0
+  move.l     d0,bobtype_mask_pointer(a1)
+  move.w     df_iff_width(a0),bobtype_width(a1)
+  move.w     df_iff_height(a0),bobtype_height(a1)
+  move.w     #2,bobtype_width_words(a1)
+  move.w     #32*6,bobtype_height_blt(a1)
+  move.w     #$0000,bobtype_src_mod_no_shift(a1)
+  move.w     #-2,bobtype_src_mod_shift(a1)
+  move.w     #28,bobtype_trg_mod_no_shift(a1)
+  move.w     #26,bobtype_trg_mod_shift(a1)
+  ; TESTCODE - test bobtype
+
+  rts
+
+.bobtype_clear:
+  clr.w      bobtype_width(a0)
+  clr.w      bobtype_height(a0)
+  clr.w      bobtype_width_words(a0)
+  clr.w      bobtype_height_blt(a0)
+  clr.l      bobtype_data_pointer(a0)
+  clr.l      bobtype_mask_pointer(a0)
+  clr.w      bobtype_src_mod_no_shift(a0)
+  clr.w      bobtype_src_mod_shift(a0)
+  clr.w      bobtype_trg_mod_no_shift(a0)
+  clr.w      bobtype_trg_mod_shift(a0)
+  rts
+
 ; in:
 ;   a0 - pointer to bob-struct
 bob_clear:
   move.w     #-1,bob_status(a0)
   clr.l      bob_xpos(a0)
   clr.l      bob_ypos(a0)
-  clr.w      bob_width(a0)
-  clr.w      bob_height(a0)
-  clr.w      bob_width_words(a0)
-  clr.w      bob_height_blt(a0)
-  clr.l      bob_data_pointer(a0)
-  clr.l      bob_mask_pointer(a0)
   clr.l      bob_anim_offset(a0)
-  clr.w      bob_src_mod_no_shift(a0)
-  clr.w      bob_src_mod_shift(a0)
-  clr.w      bob_trg_mod_no_shift(a0)
-  clr.w      bob_trg_mod_shift(a0)
   clr.w      bob_restore_1a+bob_restore_offset(a0)
   clr.w      bob_restore_1a+bob_restore_bltsize(a0)
   clr.w      bob_restore_1a+bob_restore_modulo(a0)
@@ -33,6 +66,17 @@ bob_clear:
   clr.w      bob_restore_2b+bob_restore_offset(a0)
   clr.w      bob_restore_2b+bob_restore_bltsize(a0)
   clr.w      bob_restore_2b+bob_restore_modulo(a0)
+  rts
+
+; for reuse of bob inside game-loop
+; in:
+;   a0 - pointer to bob-struct
+bob_clear_quick:
+  move.w     #-1,bob_status(a0)
+  clr.w      bob_restore_1a+bob_restore_bltsize(a0)
+  clr.w      bob_restore_2a+bob_restore_bltsize(a0)
+  clr.w      bob_restore_1b+bob_restore_bltsize(a0)
+  clr.w      bob_restore_2b+bob_restore_bltsize(a0)
   rts
 
 bob_update:
@@ -83,14 +127,15 @@ bob_restore:
 ;   a0 - pointer to bob-struct
 bob_draw:
   move.w     d7,-(sp)
+  move.l     bob_bobtype_pointer(a0),a3
 
   ; get bob dimensions
   move.w     bob_ypos(a0),d0                                                  ; min y
   move.w     d0,d1
-  add.w      bob_height(a0),d1                                                ; max y
+  add.w      bobtype_height(a3),d1                                            ; max y
   move.w     bob_xpos(a0),d2                                                  ; min x
   move.w     d2,d3
-  add.w      bob_width(a0),d3                                                 ; max x
+  add.w      bobtype_width(a3),d3                                             ; max x
 .check_split:
   lea.l      ig_om_background_range_1_row_start(a4),a1
   move.w     (a1)+,d4
@@ -126,6 +171,7 @@ bob_draw:
 ; in:
 ;   a0   - pointer to bob-struct
 ;   a1   - pointer to bob_restore-struct
+;   a3   - pointer to bobtype-struct
 ;   d0.w - ypos          (min y)
 ;   d1.w - ypos+height   (max y)
 ;   d2.w - xpos          (min x)
@@ -150,6 +196,7 @@ bob_draw:
 ; in:
 ;   a0   - pointer to enemy-struct
 ;   a1   - pointer to enemy_restore-struct
+;   a3   - pointer to bobtype-struct
 ;   d0.w - ypos          (min y)
 ;   d1.w - ypos+height   (max y)
 ;   d2.w - xpos          (min x)
@@ -171,28 +218,28 @@ bob_draw:
   move.w     #%0000111111001010,BLTCON0(a6)
   clr.w      BLTCON1(a6)
   ; modulos
-  move.w     bob_src_mod_no_shift(a0),d7
+  move.w     bobtype_src_mod_no_shift(a3),d7
   move.w     d7,BLTAMOD(a6)
   move.w     d7,BLTBMOD(a6)
-  move.w     bob_trg_mod_no_shift(a0),d7
+  move.w     bobtype_trg_mod_no_shift(a3),d7
   move.w     d7,BLTCMOD(a6)
   move.w     d7,BLTDMOD(a6)
   move.w     d7,bob_restore_modulo(a1)
   ; pointers
   move.l     bob_anim_offset(a0),d7
-  move.l     bob_data_pointer(a0),d6
+  move.l     bobtype_data_pointer(a3),d6
   add.l      d7,d6
   move.l     d6,BLTBPT(a6)
-  move.l     bob_mask_pointer(a0),d6
+  move.l     bobtype_mask_pointer(a3),d6
   add.l      d7,d6
   move.l     d6,BLTAPT(a6)
   add.l      ig_om_bob_targetbuffer(a4),d5
   move.l     d5,BLTCPT(a6)
   move.l     d5,BLTDPT(a6)
   ; bltsize
-  move.w     bob_height_blt(a0),d7
+  move.w     bobtype_height_blt(a3),d7
   lsl.w      #6,d7
-  add.w      bob_width_words(a0),d7
+  add.w      bobtype_width_words(a3),d7
   move.w     d7,BLTSIZE(a6)
   move.w     d7,bob_restore_bltsize(a1)
   ; end
@@ -207,28 +254,28 @@ bob_draw:
   or.w       #%0000111111001010,d4
   move.w     d4,BLTCON0(a6)
   ; modulos
-  move.w     bob_src_mod_shift(a0),d7
+  move.w     bobtype_src_mod_shift(a3),d7
   move.w     d7,BLTAMOD(a6)
   move.w     d7,BLTBMOD(a6)
-  move.w     bob_trg_mod_shift(a0),d7
+  move.w     bobtype_trg_mod_shift(a3),d7
   move.w     d7,BLTCMOD(a6)
   move.w     d7,BLTDMOD(a6)
   move.w     d7,bob_restore_modulo(a1)
   ; pointers
   move.l     bob_anim_offset(a0),d7
-  move.l     bob_data_pointer(a0),d6
+  move.l     bobtype_data_pointer(a3),d6
   add.l      d7,d6
   move.l     d6,BLTBPT(a6)
-  move.l     bob_mask_pointer(a0),d6
+  move.l     bobtype_mask_pointer(a3),d6
   add.l      d7,d6
   move.l     d6,BLTAPT(a6)
   add.l      ig_om_bob_targetbuffer(a4),d5
   move.l     d5,BLTCPT(a6)
   move.l     d5,BLTDPT(a6)
   ; bltsize
-  move.w     bob_height_blt(a0),d7
+  move.w     bobtype_height_blt(a3),d7
   lsl.w      #6,d7
-  add.w      bob_width_words(a0),d7
+  add.w      bobtype_width_words(a3),d7
   addq.w     #1,d7
   move.w     d7,BLTSIZE(a6)
   move.w     d7,bob_restore_bltsize(a1)

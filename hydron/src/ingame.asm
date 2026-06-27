@@ -35,6 +35,7 @@ ig_start:
   bsr        player_init
   bsr        background_init
   bsr        fade_ingame_init
+  bsr        bob_init
   bsr        enemies_init
   bsr        ctrl_take_system
   lea.l      lvl3_irq_handler(pc),a0

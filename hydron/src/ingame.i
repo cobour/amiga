@@ -130,6 +130,7 @@ ig_om_fade_in_struct:                     rs.b       fade_sizeof                
 ig_om_fade_out_struct:                    rs.b       fade_sizeof                                             ; fade struct for fade out
 ; ingame/bob.asm
 ig_om_bob_targetbuffer:                   rs.l       1                                                       ; pointer to framebuffer for restore/draw
+ig_om_bob_types:                          rs.b       bobtype_sizeof*BobTypeCount                             ; bobtype-structs
 ; ingame/enemies.asm
 ig_om_enemies:                            rs.b       bob_sizeof*EnemiesCount                                 ; enemy-structs
 ig_om_enemies_framebuffer_offsets:        rs.l       IgScreenHeight                                          ; offsets for all rows in framebuffer (table to avoid mulu)

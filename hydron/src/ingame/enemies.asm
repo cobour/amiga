@@ -22,26 +22,14 @@ enemies_init:
   add.l      d1,d0
   dbf        d7,.init_offsets_table_loop
 
-  ; init TEST bob
+  ; TESTCODE - test bob
   lea.l      ig_om_enemies(a4),a1
+  lea.l      ig_om_bob_types(a4),a2
+  move.l     a2,bob_bobtype_pointer(a1)
   move.w     #1,bob_status(a1)
-  move.l     #"TEST",d0
-  bsr        datafiles_get_pointer
-  move.l     df_idx_ptr_rawdata(a0),d0
-  move.l     d0,bob_data_pointer(a1)
-  lea.l      df_idx_metadata(a0),a0
-  add.l      df_iff_rawsize(a0),d0
-  move.l     d0,bob_mask_pointer(a1)
-  move.w     df_iff_width(a0),bob_width(a1)
-  move.w     df_iff_height(a0),bob_height(a1)
-  move.w     #2,bob_width_words(a1)
-  move.w     #32*6,bob_height_blt(a1)
   move.l     #$00700000,bob_xpos(a1)
   move.l     #$00700000,bob_ypos(a1)
-  move.w     #$0000,bob_src_mod_no_shift(a1)
-  move.w     #-2,bob_src_mod_shift(a1)
-  move.w     #28,bob_trg_mod_no_shift(a1)
-  move.w     #26,bob_trg_mod_shift(a1)
+  ; TESTCODE - test bob
 
   rts
 
