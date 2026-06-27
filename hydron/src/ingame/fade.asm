@@ -26,6 +26,7 @@ fade_ingame_init:
   move.b     #16,ig_om_fade_in_step(a4)
   move.b     #-1,ig_om_fade_out_step(a4)
   clr.b      ig_om_fade_step_delay(a4)
+  move.b     #1,ig_om_fade_first_step_fade_in(a4)
   
   rts
 
@@ -111,6 +112,13 @@ fade_ingame_update:
 .check_fade_in:
   tst.b      ig_om_fade_in_step(a4)
   blt        .exit
+
+  ; first step of fade in?
+  tst.b      ig_om_fade_first_step_fade_in(a4)
+  beq.s      .do_not_init_panel_colors
+  clr.b      ig_om_fade_first_step_fade_in(a4)
+  bsr        panel_set_colors
+.do_not_init_panel_colors:
 
   ; fade in
   cmp.b      #FadeStepDelay,ig_om_fade_step_delay(a4)

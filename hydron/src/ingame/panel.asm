@@ -53,14 +53,11 @@ panel_init:
   move.l     a1,a3
   move.l     a1,-(sp)
 
-  ; init copper colors
-  move.l     #"PACO",d0
-  bsr        datafiles_get_pointer
-  move.l     df_idx_ptr_rawdata(a0),a0
+  ; clear copper colors
   lea.l      ig_cm_cl_panel+6(a1),a1
   moveq.l    #15,d7
 .pi_cols_loop:
-  move.w     (a0)+,(a1)
+  clr.w      (a1)
   lea.l      panel_clrow_sizeof(a1),a1
   dbf        d7,.pi_cols_loop
 
@@ -114,6 +111,24 @@ panel_init:
   move.l     (sp)+,a1
   bsr        panel_draw_hiscore
 
+  rts
+
+panel_set_colors:
+  move.l     #"PACO",d0
+  bsr        datafiles_get_pointer
+  move.l     df_idx_ptr_rawdata(a0),a0
+  move.l     ig_om_buffer_one+ig_buffers_copperlist_pointer(a4),a1
+  lea.l      ig_cm_cl_panel+6(a1),a1
+  move.l     ig_om_buffer_two+ig_buffers_copperlist_pointer(a4),a2
+  lea.l      ig_cm_cl_panel+6(a2),a2
+  moveq.l    #15,d7
+.pi_cols_loop:
+  move.w     (a0),(a1)
+  move.w     (a0),(a2)
+  addq.l     #2,a0
+  lea.l      panel_clrow_sizeof(a1),a1
+  lea.l      panel_clrow_sizeof(a2),a2
+  dbf        d7,.pi_cols_loop
   rts
 
 ; updates panel values if necessary (should be called each frame)
