@@ -83,7 +83,8 @@ bob_restore:
 ;   a0 - pointer to bob-struct
 bob_draw:
   move.w     d7,-(sp)
-  ; get enemy dimensions
+
+  ; get bob dimensions
   move.w     bob_ypos(a0),d0                                                  ; min y
   move.w     d0,d1
   add.w      bob_height(a0),d1                                                ; max y
@@ -101,7 +102,7 @@ bob_draw:
   ; completely inside range 1
   move.l     (a1),d5                                                          ; offset in framebuffer
   lea.l      bob_restore_1a(a0),a1
-  bra.s      .draw_unsplitted
+  bra.s      .draw_in_range
 .check_range_2:
   addq.l     #4,a1
   move.w     (a1)+,d4
@@ -113,7 +114,7 @@ bob_draw:
   ; completely inside range 2
   move.l     (a1),d5                                                          ; offset in framebuffer
   lea.l      bob_restore_1a(a0),a1
-  bra.s      .draw_unsplitted
+  bra.s      .draw_in_range
 .split_necessary:
   ; TODO
   nop
@@ -123,15 +124,15 @@ bob_draw:
   rts
 
 ; in:
-;   a0   - pointer to enemy-struct
-;   a1   - pointer to enemy_restore-struct
+;   a0   - pointer to bob-struct
+;   a1   - pointer to bob_restore-struct
 ;   d0.w - ypos          (min y)
 ;   d1.w - ypos+height   (max y)
 ;   d2.w - xpos          (min x)
 ;   d3.w - xpos+width    (max x)
 ;   d4.w - first row of range
 ;   d5.l - offset of first row of range in framebuffer
-.draw_unsplitted:
+.draw_in_range:
   move.w     d0,d6
   sub.w      d4,d6
   lsl.w      #2,d6
