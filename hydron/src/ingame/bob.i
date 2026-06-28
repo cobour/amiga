@@ -1,7 +1,11 @@
                            ifnd       INGAME_BOB_I
 INGAME_BOB_I         equ 1
 
+; max number of different bobtypes that are possible per level
 BobTypeCount         equ 32
+
+; max height in pixels for bobs - when increased various tables must be enlarged, too (search for BobMaxHeight)
+BobMaxHeight         equ 64
 
 ; see bob_status
 BobStatusInactive    equ -1
@@ -25,6 +29,7 @@ bobtype_src_mod_no_shift:  rs.w       1                     ; source-modulo with
 bobtype_src_mod_shift:     rs.w       1                     ; source-modulo with pixel shift (xpos is NOT at word-border) if full width of bob is visible
 bobtype_trg_mod_no_shift:  rs.w       1                     ; target-modulo without pixel shift (xpos is at word-border) if full width of bob is visible
 bobtype_trg_mod_shift:     rs.w       1                     ; target-modulo with pixel shift (xpos is NOT at word-border) if full width of bob is visible
+bobtype_row_offsets:       rs.l       BobMaxHeight          ; offsets for any row up to bobtype_height in source data (data aka gfx and mask)
 bobtype_sizeof:            rs.b       0
 
 

@@ -13,6 +13,16 @@ bob_init:
   lea.l      bobtype_sizeof(a0),a0
   dbf        d7,.bobtype_lear_loop
 
+  ; init ig_om_bob_blt_height
+  lea.l      ig_om_bob_blt_height(a4),a0
+  moveq.l    #0,d0
+  moveq.l    #IgScreenBitPlanes,d1
+  moveq.l    #BobMaxHeight-1,d7
+.blt_height_loop:
+  move.w     d0,(a0)+
+  add.w      d1,d0
+  dbf        d7,.blt_height_loop
+
   ; TESTCODE - test bobtype
   lea.l      ig_om_bob_types(a4),a1
   move.l     #"TEST",d0
@@ -30,6 +40,14 @@ bob_init:
   move.w     #-2,bobtype_src_mod_shift(a1)
   move.w     #28,bobtype_trg_mod_no_shift(a1)
   move.w     #26,bobtype_trg_mod_shift(a1)
+  lea.l      bobtype_row_offsets(a1),a1
+  moveq.l    #0,d0
+  moveq.l    #6*4,d1                                                          ; 6 bitplanes, 4 bytes width
+  moveq.l    #BobMaxHeight-1,d7
+.bobtype_row_offsets_loop:
+  move.l     d0,(a1)+
+  add.l      d1,d0
+  dbf        d7,.bobtype_row_offsets_loop
   ; TESTCODE - test bobtype
 
   rts
@@ -144,10 +162,12 @@ bob_draw:
   ; get bob dimensions
   move.w     bob_ypos(a0),d0                                                  ; min y
   move.w     d0,d1
-  add.w      bobtype_height(a2),d1                                            ; max y
+  add.w      bobtype_height(a2),d1
+  subq.w     #1,d1                                                            ; max y (-1 so it's the last row inside the bob, not the first line below the bob)
   move.w     bob_xpos(a0),d2                                                  ; min x
   move.w     d2,d3
-  add.w      bobtype_width(a2),d3                                             ; max x
+  add.w      bobtype_width(a2),d3
+  subq.w     #1,d3                                                            ; max x (-1 so it's the last column inside the bob, bot the first column right to the bob)
 .check_split:
   lea.l      ig_om_background_range_1_row_start(a4),a1
   move.w     (a1)+,d4
@@ -159,7 +179,10 @@ bob_draw:
   ; completely inside range 1
   move.l     (a1),d5                                                          ; offset in framebuffer
   lea.l      bob_restore_1a(a0),a1
-  bra.s      .draw_in_range
+  moveq.l    #0,d1
+  moveq.l    #0,d3
+  bsr.s      .draw_in_range
+  bra.s      .end_draw_bob
 .check_range_2:
   addq.l     #4,a1
   move.w     (a1)+,d4
@@ -171,27 +194,53 @@ bob_draw:
   ; completely inside range 2
   move.l     (a1),d5                                                          ; offset in framebuffer
   lea.l      bob_restore_1a(a0),a1
-  bra.s      .draw_in_range
+  moveq.l    #0,d1
+  moveq.l    #0,d3
+  bsr.s      .draw_in_range
+  bra.s      .end_draw_bob
 .split_necessary:
-  ; TODO
-  nop
+  move.w     d4,d7
+  sub.w      d0,d7                                                            ; d7 = lines to cut from top of bob in range 2
+  ; first draw part in range 2
+  move.l     (a1),d5                                                          ; offset in framebuffer
+  lea.l      bob_restore_1a(a0),a1
+  move.w     d7,d1
+  add.w      d1,d1
+  lea.l      ig_om_bob_blt_height(a4),a3
+  move.w     (a3,d1.w),d1
+  move.w     d7,d3
+  add.w      d3,d3
+  add.w      d3,d3
+  lea.l      bobtype_row_offsets(a2),a3
+  move.l     (a3,d3.w),d3
+  movem.w    d0/d2/d7,-(sp)
+  move.w     d4,d0
+  bsr.s      .draw_in_range
+  movem.w    (sp)+,d0/d2/d7
+  ; then draw part in range 1
+  lea.l      bob_restore_1b(a0),a1
+  move.w     bobtype_height(a2),d1
+  sub.w      d7,d1
+  add.w      d1,d1
+  lea.l      ig_om_bob_blt_height(a4),a3
+  move.w     (a3,d1.w),d1
+  moveq.l    #0,d3
+  move.w     ig_om_background_range_1_row_start(a4),d4
+  move.l     ig_om_background_range_1_row_offset(a4),d5
+  bsr.s      .draw_in_range
 
 .end_draw_bob:
   move.w     (sp)+,d7
   rts
 
-.draw_splitted_in_range:
-  ; called twice
-  ; sets d4 and d5 accordingly
-
 ; in:
 ;   a0   - pointer to bob-struct
 ;   a1   - pointer to bob_restore-struct
 ;   a2   - pointer to bobtype-struct
-;   d0.w - ypos          (min y)
-;   d1.w - ypos+height   (max y)
-;   d2.w - xpos          (min x)
-;   d3.w - xpos+width    (max x)
+;   d0.w - ypos
+;   d1.w - reduce blitter height by this value
+;   d2.w - xpos
+;   d3.l - add this value to source offset
 ;   d4.w - first row of range
 ;   d5.l - offset of first row of range in framebuffer
 .draw_in_range:
@@ -206,9 +255,11 @@ bob_draw:
   lsl.w      #1,d6
   add.l      d6,d5                                                            ; offset in framebuffer to bob position
   move.w     bobtype_height_blt(a2),d0
+  sub.w      d1,d0
   move.w     bobtype_width_words(a2),d1
   move.w     d2,d4
   move.l     bob_anim_offset(a0),d2
+  add.l      d3,d2
   and.w      #$000f,d4                                                        ; 0 = no shift, >0 = shift by pixels
   beq.s      .draw_in_range_no_shift
   addq.w     #1,d1
@@ -262,7 +313,7 @@ bob_draw:
   move.w     d0,BLTSIZE(a6)
   move.w     d0,bob_restore_bltsize(a1)
   ; end
-  bra        .end_draw_bob
+  rts
 
 .do_blit_with_shift:
   ; pixel shift - full masked copy
@@ -296,6 +347,6 @@ bob_draw:
   move.w     d0,BLTSIZE(a6)
   move.w     d0,bob_restore_bltsize(a1)
   ; end
-  bra        .end_draw_bob
+  rts
 
   endif                                                                       ; ifnd INGAME_BOB_ASM
