@@ -34,7 +34,13 @@ public interface Source {
 		public String toString() {
 			return this.id;
 		}
+
+		public boolean isEqualTo(String otherId) {
+			return this.id.equals(otherId);
+		}
 	}
+
+	ID getId();
 
 	SourceType getType();
 

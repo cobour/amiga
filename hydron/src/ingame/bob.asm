@@ -5,14 +5,6 @@ INGAME_BBOB_ASM equ 1
   include    "../common/src/system/blitter.i"
 
 bob_init:
-  ; clear bobtype-structs
-  lea.l      ig_om_bob_types(a4),a0
-  moveq.l    #BobTypeCount-1,d7
-.bobtype_lear_loop:
-  bsr.s      .bobtype_clear
-  lea.l      bobtype_sizeof(a0),a0
-  dbf        d7,.bobtype_lear_loop
-
   ; init ig_om_bob_blt_height
   lea.l      ig_om_bob_blt_height(a4),a0
   moveq.l    #0,d0
@@ -23,46 +15,6 @@ bob_init:
   add.w      d1,d0
   dbf        d7,.blt_height_loop
 
-  ; TESTCODE - test bobtype
-  lea.l      ig_om_bob_types(a4),a1
-  move.l     #"TEST",d0
-  bsr        datafiles_get_pointer
-  move.l     df_idx_ptr_rawdata(a0),d0
-  move.l     d0,bobtype_data_pointer(a1)
-  lea.l      df_idx_metadata(a0),a0
-  add.l      df_iff_rawsize(a0),d0
-  move.l     d0,bobtype_mask_pointer(a1)
-  move.w     df_iff_width(a0),bobtype_width(a1)
-  move.w     df_iff_height(a0),bobtype_height(a1)
-  move.w     #2,bobtype_width_words(a1)
-  move.w     #32*6,bobtype_height_blt(a1)
-  move.w     #$0000,bobtype_src_mod_no_shift(a1)
-  move.w     #-2,bobtype_src_mod_shift(a1)
-  move.w     #28,bobtype_trg_mod_no_shift(a1)
-  move.w     #26,bobtype_trg_mod_shift(a1)
-  lea.l      bobtype_row_offsets(a1),a1
-  moveq.l    #0,d0
-  moveq.l    #6*4,d1                                                          ; 6 bitplanes, 4 bytes width
-  moveq.l    #BobMaxHeight-1,d7
-.bobtype_row_offsets_loop:
-  move.l     d0,(a1)+
-  add.l      d1,d0
-  dbf        d7,.bobtype_row_offsets_loop
-  ; TESTCODE - test bobtype
-
-  rts
-
-.bobtype_clear:
-  clr.w      bobtype_width(a0)
-  clr.w      bobtype_height(a0)
-  clr.w      bobtype_width_words(a0)
-  clr.w      bobtype_height_blt(a0)
-  clr.l      bobtype_data_pointer(a0)
-  clr.l      bobtype_mask_pointer(a0)
-  clr.w      bobtype_src_mod_no_shift(a0)
-  clr.w      bobtype_src_mod_shift(a0)
-  clr.w      bobtype_trg_mod_no_shift(a0)
-  clr.w      bobtype_trg_mod_shift(a0)
   rts
 
 ; in:
@@ -87,6 +39,7 @@ bob_clear:
   rts
 
 ; for reuse of bob inside game-loop
+; should be called when bob is removed
 ; in:
 ;   a0 - pointer to bob-struct
 bob_clear_quick:

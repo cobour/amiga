@@ -6,7 +6,7 @@ import java.nio.charset.StandardCharsets;
 public enum SourceType {
 
 	ASSEMBLER("ASM "), IFF("IFF "), MOD("MOD "), WAV("WAV "), TILED_PLAYFIELD("TLDP"), PALETTE("COLS"),
-	SVG_PATH("SVGP");
+	SVG_PATH("SVGP"), BOB_TYPE("BOBT"), ENEMY_TYPE("ENMT");
 
 	// see datafiles.i
 	private final String type;

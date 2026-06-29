@@ -95,6 +95,14 @@ targetFiles:
         id: EM01
         numberOfSteps: 250
         numberOfDirections: 16
+      - filename: .bobtype
+        id: BT00
+        gfxId: TEST
+        width: 32
+        height: 32
+      - filename: .enemytype
+        id: ET00
+        bobtypeId: BT00
 
 diskimageFiles:
   - filename: Hydron.adf

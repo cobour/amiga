@@ -29,7 +29,7 @@ abstract class AbstractSource implements Source {
 		this.filename = theFilename;
 	}
 
-	protected ID getId() {
+	public ID getId() {
 		return this.id;
 	}
 

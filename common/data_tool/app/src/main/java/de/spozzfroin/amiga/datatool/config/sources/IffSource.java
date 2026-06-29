@@ -182,6 +182,18 @@ class IffSource extends AbstractSource {
 		throw new IllegalStateException(String.format("No ChunkProcessor found for ID: %s", chunkID));
 	}
 
+	int getWidth() {
+		return this.width;
+	}
+
+	int getHeight() {
+		return this.height;
+	}
+
+	int getBitplanes() {
+		return this.bitplanes;
+	}
+
 	//
 	// processors for IFF/ILBM file chunks
 	//

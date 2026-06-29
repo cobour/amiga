@@ -43,6 +43,7 @@ class TargetFileFactory {
 					fn -> config.getTargetFiles().stream().filter(tf -> tf.getFilename().equals(fn)).findFirst().get())
 					.collect(Collectors.toList());
 			targetFile.setRelatedFiles(relatedFiles);
+			relatedFiles.stream().forEach(f -> f.setRelatedParent(targetFile));
 			if (targetFile.getMemoryType().isChip()) {
 				throw new RuntimeException("index in other-mem files only");
 			}

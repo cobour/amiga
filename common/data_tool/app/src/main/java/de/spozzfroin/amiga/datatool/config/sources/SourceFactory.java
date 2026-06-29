@@ -28,6 +28,10 @@ public class SourceFactory {
 			return new TiledSource(targetFile);
 		case "svg":
 			return new SvgPathSource(targetFile);
+		case "bobtype":
+			return new BobTypeSource(targetFile);
+		case "enemytype":
+			return new EnemyTypeSource(targetFile);
 		default:
 			throw new RuntimeException("unknown extension: " + extension);
 		}

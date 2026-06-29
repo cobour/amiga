@@ -9,6 +9,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 import java.util.zip.GZIPOutputStream;
@@ -27,6 +28,7 @@ public class TargetFile {
 	private boolean codeFile;
 	private List<TargetFile> relatedFiles;
 	private List<Source> sources;
+	private TargetFile relatedParent;
 
 	private long sizeRawDataFile = -1;
 	private long sizeGzippedDataFile = -1;
@@ -144,6 +146,21 @@ public class TargetFile {
 		writer.flush();
 	}
 
+	public Optional<Source> getSource(String id) {
+		Optional<Source> src = this.sources.stream().filter(s -> s.getId().isEqualTo(id)).findFirst();
+		if (src.isPresent()) {
+			return src;
+		} else if (this.relatedFiles != null) {
+			for (var relatedFile : this.relatedFiles) {
+				src = relatedFile.getSource(id);
+				if (src.isPresent()) {
+					return src;
+				}
+			}
+		}
+		return Optional.empty();
+	}
+
 	public String getIdentifier() {
 		return this.filename.toLowerCase();
 	}
@@ -194,5 +211,9 @@ public class TargetFile {
 
 	void setSources(List<Source> sources) {
 		this.sources = sources;
+	}
+
+	void setRelatedParent(TargetFile theRelatedParent) {
+		this.relatedParent = theRelatedParent;
 	}
 }

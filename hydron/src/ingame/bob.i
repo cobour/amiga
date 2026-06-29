@@ -19,6 +19,7 @@ bob_restore_modulo:        rs.w       1                     ; modulo for restore
 bob_restore_sizeof:        rs.b       0
 
                            rsreset
+bobtype_gfx_id:            rs.l       1                     ; ID of gfx file that is associated to this bobtype
 bobtype_width:             rs.w       1                     ; width of bob in pixels
 bobtype_height:            rs.w       1                     ; height of bob in pixels
 bobtype_width_words:       rs.w       1                     ; width of bob in words
