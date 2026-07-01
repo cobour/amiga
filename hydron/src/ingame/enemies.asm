@@ -22,62 +22,91 @@ enemies_init:
   add.l      d1,d0
   dbf        d7,.init_offsets_table_loop
 
-  ; TESTCODE - test enemy
-  ; TODO: when enemy-spawn info is read from tiled-file, ALL enemytype's and thus ALL bobtype's 
-  ;       will be initialised here to avoid time-consuming pointer look-ups via datafiles_get_pointer
-  ; init bobtype
-  move.l     #"BT00",d0
+  ; enemy spawn info
+  move.l     #"MAPT",d0
   bsr        datafiles_get_pointer
   move.l     df_idx_ptr_rawdata(a0),a1
-  move.l     bobtype_gfx_id(a1),d0
+  lea.l      df_idx_metadata(a0),a0
+  move.l     df_tld_plf_rawsize(a0),d0
+  move.l     df_tld_enm_rawsize(a0),d1
+  add.l      d0,a1
+  move.l     a1,ig_om_enemies_spawn_data_pointer(a4)
+  add.l      d1,a1
+  move.l     a1,ig_om_enemies_spawn_data_end_pointer(a4)
+
+  ; init enemytypes and bobtypes
+  move.l     ig_om_enemies_spawn_data_pointer(a4),a1
+  move.l     ig_om_enemies_spawn_data_end_pointer(a4),d7
+.init_types_loop:
+  move.l     df_tld_enm_enemytype(a1),d0
   bsr        datafiles_get_pointer
+  move.l     df_idx_ptr_rawdata(a0),a2                                ; pointer to enemytype-struct
+  move.l     a2,df_tld_enm_enemytype(a1)
+  move.l     enemytype_bobtype_id(a2),d0
+  bsr        datafiles_get_pointer
+  move.l     df_idx_ptr_rawdata(a0),a3                                ; pointer to bobtype-struct
+  move.l     a3,enemytype_bobtype_pointer(a2)
+  move.l     bobtype_gfx_id(a3),d0
+  bsr        datafiles_get_pointer                                    ; pointer to gfx-struct
   move.l     df_idx_ptr_rawdata(a0),d0
-  move.l     d0,bobtype_data_pointer(a1)
+  move.l     d0,bobtype_data_pointer(a3)
   lea.l      df_idx_metadata(a0),a0
   add.l      df_iff_rawsize(a0),d0
-  move.l     d0,bobtype_mask_pointer(a1)
-  ; init enemytype
-  move.l     #"ET00",d0
-  bsr        datafiles_get_pointer
-  move.l     df_idx_ptr_rawdata(a0),a0
-  move.l     a1,enemytype_bobtype_pointer(a0)
-  ; spawn enemy
-  move.l     #$00700000,d0
-  move.l     #$00700000,d1
-  bsr.s      enemies_spawn_new_enemy
-  ; TESTCODE - test enemy
+  move.l     d0,bobtype_mask_pointer(a3)
+  ; next
+  lea.l      df_tld_enm_sizeof(a1),a1
+  cmp.l      a1,d7
+  bne.s      .init_types_loop
 
+  ; first spawn check, maybe enemies are there at the very beginning
+  bsr.s      enemies_spawn
+
+  ; init finished
   rts
 
-; in:
-;   a0   - pointer to enemytype-struct
-;   d0.l - xpos (fixed-point-value)
-;   d1.l - ypos (fixed-point-value)
-enemies_spawn_new_enemy:
+enemies_spawn:
+  move.l     ig_om_enemies_spawn_data_pointer(a4),a2
+  move.l     ig_om_enemies_spawn_data_end_pointer(a4),d6
+  cmp.l      d6,a2
+  beq.s      .no_more_spawns
+
+.spawn_loop:
+  ; check for spawns to process
+  move.l     df_tld_enm_level_ypos(a2),d0
+  cmp.l      ig_om_background_level_ypos(a4),d0
+  blt.s      .no_more_spawns
+
   ; find empty spot
   lea.l      ig_om_enemies(a4),a1
   moveq.l    #EnemiesCount-1,d7
-  moveq.l    #-1,d5
-  moveq.l    #enemy_sizeof,d6
+  moveq.l    #-1,d0
 .find_empty_spot_loop:
-  cmp.w      bob_status(a1),d5
+  cmp.w      bob_status(a1),d0
   beq.s      .add_enemy
-  add.l      d6,a1
+  lea.l      enemy_sizeof(a1),a1
   dbf        d7,.find_empty_spot_loop
   ; no empty spot found
-  bra.s      .exit
+  bra.s      .no_empty_spot
 
 .add_enemy:
   move.w     #1,bob_status(a1)
-  move.l     d0,bob_xpos(a1)
-  move.l     d1,bob_ypos(a1)
+  move.l     df_tld_enm_xpos(a2),bob_xpos(a1)
+  move.l     df_tld_enm_ypos(a2),bob_ypos(a1)
+  move.l     df_tld_enm_enemytype(a2),a0
   move.l     a0,enemy_enemytype_pointer(a1)
   move.l     enemytype_bobtype_pointer(a0),bob_bobtype_pointer(a1)
 
-.exit:
+.no_empty_spot:
+  lea.l      df_tld_enm_sizeof(a2),a2
+  cmp.l      a2,d6
+  bne.s      .spawn_loop
+
+.no_more_spawns:
+  move.l     a2,ig_om_enemies_spawn_data_pointer(a4)
   rts
 
 enemies_update:
+  bsr.s      enemies_spawn
   ; do not move right now
   rts
 

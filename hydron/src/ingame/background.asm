@@ -24,11 +24,14 @@ background_init:
   lsr.w      #3,d0
   move.l     d0,ig_om_background_tiles_width_in_bytes(a4)
 
-  ; level data pointer
+  ; level data pointer and current level ypos
   move.l     #"MAPT",d0
   bsr        datafiles_get_pointer
   move.l     df_idx_ptr_rawdata(a0),ig_om_background_level_data_pointer(a4)
   lea.l      df_idx_metadata(a0),a0
+  move.w     df_tld_plf_height(a0),d0
+  mulu       df_tld_plf_tile_height(a0),d0
+  move.l     d0,ig_om_background_level_ypos(a4)
   move.l     df_tld_plf_rawsize(a0),d0
   add.l      ig_om_background_level_data_pointer(a4),d0
   move.l     d0,ig_om_background_level_data_end_pointer(a4)
@@ -145,6 +148,11 @@ background_update:
   tst.b      ig_om_background_do_scroll(a4)
   beq        .exit
   
+  ; update level position
+  move.l     ig_om_background_level_ypos(a4),d0
+  subq.l     #1,d0
+  move.l     d0,ig_om_background_level_ypos(a4)
+
   ; update first visible line/offset and set d0.w/d1.w
   moveq.l    #0,d0
   moveq.l    #0,d1

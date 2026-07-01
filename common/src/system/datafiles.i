@@ -39,13 +39,22 @@ df_cols_sizeof:          rs.b       0
 ; WavSource metadata
 ; using this: ptplayer.asm sfx_*
 
-; TiledSource playfield metadata
+; TiledSource enemy spawn info metadata
+                         rsreset
+df_tld_enm_enemytype:    rs.l       1              ; enemytype to spawn (should be overwritten with pointer to enemytype-struct during init)
+df_tld_enm_xpos:         rs.l       1              ; spawn xpos in screen-coordinates as fixed-point value
+df_tld_enm_ypos:         rs.l       1              ; spawn ypos in screen-coordinates as fixed-point value
+df_tld_enm_level_ypos:   rs.l       1              ; ypos of level in level-coordinates that triggers the spawn
+df_tld_enm_sizeof:       rs.b       0
+
+; TiledSource metadata
                          rsreset
 df_tld_plf_width:        rs.w       1              ; number of tiles
 df_tld_plf_height:       rs.w       1              ; number of tiles
 df_tld_plf_tile_width:   rs.w       1              ; pixels of tile
 df_tld_plf_tile_height:  rs.w       1              ; pixels of tile
-df_tld_plf_rawsize:      rs.l       1              ; size of level data in bytes
+df_tld_plf_rawsize:      rs.l       1              ; size of playfield data in bytes
+df_tld_enm_rawsize:      rs.l       1              ; size of enemy spawn info (= number of enemy spawn entries * df_tld_enm_sizeof) in bytes
 
 ; SvgPathSource metadata
                          rsreset

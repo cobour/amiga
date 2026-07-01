@@ -8,6 +8,7 @@ INGAME_I           equ 1
                                           include    "src/ingame/bob.i"
                                           include    "src/ingame/enemies.i"
                                           include    "../common/src/system/fade.i"
+                                          include    "../common/src/system/datafiles.i"
 
 ; Ingame screen definitions
 IgScreenBitPlanes  equ 6
@@ -110,6 +111,7 @@ ig_om_background_tiles_gfx_pointer:       rs.l       1                          
 ig_om_background_tiles_width_in_bytes:    rs.l       1                                                       ; width of background tiles in bytes
 ig_om_background_level_data_pointer:      rs.l       1                                                       ; pointer to level data
 ig_om_background_level_data_end_pointer:  rs.l       1                                                       ; pointer to end of level data
+ig_om_background_level_ypos:              rs.l       1                                                       ; current ypos of level (starts with level height and is counted down to zero when scrolled)
 ig_om_background_do_scroll:               rs.b       1                                                       ; boolean - must background scroll?
 ig_om_background_stop_scroll_count:       rs.b       1                                                       ; counter - when scrolling stops, countdown how often the bpl pointers must be set again
 ig_om_background_last_row_countdown:      rs.b       1                                                       ; last row of level data is drawn but needs to be scrolled in - when this countdown gets zero, scrolling must be stopped
@@ -134,6 +136,8 @@ ig_om_bob_blt_height:                     rs.w       BobMaxHeight               
 ; ingame/enemies.asm
 ig_om_enemies:                            rs.b       enemy_sizeof*EnemiesCount                               ; enemy-structs
 ig_om_enemies_framebuffer_offsets:        rs.l       IgScreenHeight                                          ; offsets for all rows in framebuffer (table to avoid mulu)
+ig_om_enemies_spawn_data_pointer:         rs.l       1                                                       ; pointer to enemies spawn data
+ig_om_enemies_spawn_data_end_pointer:     rs.l       1                                                       ; pointer to end of enemies spawn data
 ; data files area
 ig_om_datfile:                            rs.b       0                                                       ; variable filesizes, therefore this MUST be the last entry in this struct
 ig_om_sizeof:                             rs.b       0
