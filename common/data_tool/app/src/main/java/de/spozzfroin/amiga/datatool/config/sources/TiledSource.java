@@ -209,19 +209,14 @@ class TiledSource extends AbstractSource {
 		IntStream.range(0, nodeList.getLength()).forEach(i -> {
 			var item = (Element) nodeList.item(i);
 			var attributes = item.getAttributes();
-			var enemyHeight = Integer.parseInt(attributes.getNamedItem("height").getNodeValue());
 			var enemyType = attributes.getNamedItem("type").getNodeValue();
 			var xpos = (int) Float.parseFloat(attributes.getNamedItem("x").getNodeValue());
 			var levelYpos = (int) Float.parseFloat(attributes.getNamedItem("y").getNodeValue());
 			var properties = this.getProperties(item);
-			var spawn_add_ypos = Integer.parseInt(properties.get("spawn_add_ypos"));
-			levelYpos += spawn_add_ypos;
-			var ypos = (int) Float.parseFloat(attributes.getNamedItem("y").getNodeValue());
-			if (spawn_add_ypos > 0) {
-				ypos = spawn_add_ypos - enemyHeight;
-			} else {
-				ypos = -enemyHeight; // spawned on top just outside visible area when line of level is reached
-			}
+			var spawnAddToLevelYpos = Integer.parseInt(properties.get("spawn_add_to_level_ypos") != null ? //
+					properties.get("spawn_add_to_level_ypos") : "0"); // property is optional
+			levelYpos += spawnAddToLevelYpos;
+			var ypos = Integer.parseInt(properties.get("spawn_screen_ypos")); // property is obligatory
 			spawnInfo.add(new EnemySpawnInfo(enemyType, xpos, ypos, levelYpos));
 		});
 		//

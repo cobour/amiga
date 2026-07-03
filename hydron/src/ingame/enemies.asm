@@ -9,7 +9,8 @@ enemies_init:
   moveq.l    #EnemiesCount-1,d7
 .init_structs_loop:
   bsr        bob_clear
-  lea.l      bob_sizeof(a0),a0
+  clr.l      enemy_enemytype_pointer(a0)
+  lea.l      enemy_sizeof(a0),a0
   dbf        d7,.init_structs_loop
 
   ; init ig_om_enemies_framebuffer_offsets
@@ -86,7 +87,7 @@ enemies_spawn:
   lea.l      enemy_sizeof(a1),a1
   dbf        d7,.find_empty_spot_loop
   ; no empty spot found
-  bra.s      .no_empty_spot
+  bra.s      .no_more_spawns
 
 .add_enemy:
   move.w     #1,bob_status(a1)
@@ -96,7 +97,7 @@ enemies_spawn:
   move.l     a0,enemy_enemytype_pointer(a1)
   move.l     enemytype_bobtype_pointer(a0),bob_bobtype_pointer(a1)
 
-.no_empty_spot:
+  ; next spawn info
   lea.l      df_tld_enm_sizeof(a2),a2
   cmp.l      a2,d6
   bne.s      .spawn_loop
@@ -117,10 +118,9 @@ enemies_restore:
   ; restore
   lea.l      ig_om_enemies(a4),a0
   moveq.l    #EnemiesCount-1,d7
-  moveq.l    #0,d4
 .restore_loop:
   bsr        bob_restore
-  lea.l      bob_sizeof(a0),a0
+  lea.l      enemy_sizeof(a0),a0
   dbf        d7,.restore_loop
   rts
 
@@ -136,7 +136,7 @@ enemies_draw:
   ble.s      .do_not_draw
   bsr        bob_draw
 .do_not_draw:
-  lea.l      bob_sizeof(a0),a0
+  lea.l      enemy_sizeof(a0),a0
   dbf        d7,.draw_loop
   rts
 

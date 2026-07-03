@@ -74,19 +74,23 @@ bob_restore:
   bsr.s      .do_restore
 .restore_done:
   ; copy restore 1 to restore 2
-  lea.l      bob_restore_1a(a0),a1
-  lea.l      bob_restore_2a(a0),a2
-  move.l     (a1)+,(a2)+
-  move.l     (a1)+,(a2)+
-  move.l     (a1),(a2)
+  move.l     a4,d4
+  lea.l      bob_restore_1a(a0),a3
+  lea.l      bob_restore_2a(a0),a4
+  move.l     (a3)+,(a4)+
+  move.l     (a3)+,(a4)+
+  move.l     (a3),(a4)
+  move.l     d4,a4
 .do_not_restore:
   rts
 
 ; in:
-;   a1 - base pointer of target buffer
-;   a2 - base pointer of source buffer
-;   a3 - pointer to bob_restore-struct
+;   a1   - base pointer of target buffer
+;   a2   - base pointer of source buffer
+;   a3   - pointer to bob_restore-struct
+;   d3.w - BLTSIZE
 .do_restore:
+  moveq.l    #0,d4
   move.w     bob_restore_offset(a3),d4
   move.l     a2,d0
   add.l      d4,d0                                                            ; source pointer
