@@ -116,15 +116,86 @@ bob_draw:
   move.w     d7,-(sp)
   move.l     bob_bobtype_pointer(a0),a2
 
+  ; must clear BLTSIZE in both restore-structs to prevent phantom-restores
+  clr.w      bob_restore_1a+bob_restore_bltsize(a0)
+  clr.w      bob_restore_1b+bob_restore_bltsize(a0)
+
   ; get bob dimensions
   move.w     bob_ypos(a0),d0                                                  ; min y
+  swap       d0
+  move.w     bobtype_height_blt(a2),d0
+  swap       d0                                                               ; highword d0 = bob height for blit (lines*bitplanes)
   move.w     d0,d1
-  add.w      bobtype_height(a2),d1
+  move.w     bobtype_height(a2),d3
+  add.w      d3,d1
   subq.w     #1,d1                                                            ; max y (-1 so it's the last row inside the bob, not the first line below the bob)
+  swap       d1
+  move.w     d3,d1
+  swap       d1                                                               ; highword d1 = bob height
   move.w     bob_xpos(a0),d2                                                  ; min x
   move.w     d2,d3
   add.w      bobtype_width(a2),d3
   subq.w     #1,d3                                                            ; max x (-1 so it's the last column inside the bob, bot the first column right to the bob)
+
+  ; check if bob is completely outside screen
+ 
+  ; upper border
+  tst.w      d1
+  blt        .end_draw_bob
+  ; lower border
+  cmp.w      #IgScreenHeight-1,d0
+  bgt        .end_draw_bob
+  ; left border
+  tst.w      d3
+  blt        .end_draw_bob
+  ; right border
+  cmp.w      #IgScreenWidth-1,d2
+  bgt        .end_draw_bob
+
+  ; check border intersection
+  moveq.l    #0,d6
+
+  ; check bob against upper screen border
+  tst.w      d0
+  bge.s      .check_lower_border
+  ; TODO
+  ; bob can't intersect upper AND lower border
+  bra.s      .check_left_border
+
+  ; check bob against lower screen border
+.check_lower_border:
+  cmp.w      #IgScreenHeight-1,d1
+  ble.s      .check_left_border
+  move.w     d1,d6
+  sub.w      #IgScreenHeight-1,d6
+  swap       d1
+  sub.w      d6,d1
+  swap       d1
+  add.w      d6,d6
+  lea.l      ig_om_bob_blt_height(a4),a3
+  move.w     (a3,d6.w),d6
+  swap       d0
+  sub.w      d6,d0
+  swap       d0                                                               ; d0 highword = reduced bob height for blit (lines*bitplanes)
+  move.w     #IgScreenHeight-1,d1                                             ; d1 = adjusted max y
+
+  ; check bob against left screen border
+.check_left_border:
+  tst.w      d2
+  bge.s      .check_right_border
+  ; TODO HYD-33
+  ; bob can't intersect left AND right border
+  bra.s      .check_borders_end
+
+  ; check bob against right screen border
+.check_right_border:
+  cmp.w      #IgScreenWidth-1,d3
+  ble.s      .check_borders_end
+  ; TODO HYD-33
+  nop
+
+.check_borders_end:
+
 .check_split:
   lea.l      ig_om_background_range_1_row_start(a4),a1
   move.w     (a1)+,d4
@@ -136,7 +207,7 @@ bob_draw:
   ; completely inside range 1
   move.l     (a1),d5                                                          ; offset in framebuffer
   lea.l      bob_restore_1a(a0),a1
-  moveq.l    #0,d1
+  clr.w      d1                                                               ; clr.w = do not touch highword
   moveq.l    #0,d3
   bsr.s      .draw_in_range
   bra.s      .end_draw_bob
@@ -151,7 +222,7 @@ bob_draw:
   ; completely inside range 2
   move.l     (a1),d5                                                          ; offset in framebuffer
   lea.l      bob_restore_1a(a0),a1
-  moveq.l    #0,d1
+  clr.w      d1                                                               ; clr.w = do not touch highword
   moveq.l    #0,d3
   bsr.s      .draw_in_range
   bra.s      .end_draw_bob
@@ -170,13 +241,13 @@ bob_draw:
   add.w      d3,d3
   lea.l      bobtype_row_offsets(a2),a3
   move.l     (a3,d3.w),d3
-  movem.w    d0/d2/d7,-(sp)
+  movem.l    d0-d2/d7,-(sp)
   move.w     d4,d0
   bsr.s      .draw_in_range
-  movem.w    (sp)+,d0/d2/d7
+  movem.l    (sp)+,d0-d2/d7
   ; then draw part in range 1
   lea.l      bob_restore_1b(a0),a1
-  move.w     bobtype_height(a2),d1
+  swap       d1
   sub.w      d7,d1
   add.w      d1,d1
   lea.l      ig_om_bob_blt_height(a4),a3
@@ -211,7 +282,7 @@ bob_draw:
   lsr.w      #4,d6
   lsl.w      #1,d6
   add.l      d6,d5                                                            ; offset in framebuffer to bob position
-  move.w     bobtype_height_blt(a2),d0
+  swap       d0                                                               ; bob height for blit (lines*bitplanes)
   sub.w      d1,d0
   move.w     bobtype_width_words(a2),d1
   move.w     d2,d4
