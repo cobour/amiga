@@ -327,19 +327,19 @@
 </data>
  </layer>
  <objectgroup id="2" name="enemies layer">
-  <object id="1" type="ET00" gid="449" x="112" y="4976" width="32" height="32">
+  <object id="1" type="ET00" gid="449" x="113" y="4976" width="32" height="32">
    <properties>
     <property name="spawn_add_to_level_ypos" type="int" value="144"/>
     <property name="spawn_screen_ypos" type="int" value="112"/>
    </properties>
   </object>
-  <object id="8" type="ET00" gid="449" x="176" y="4896" width="32" height="32">
+  <object id="8" type="ET00" gid="449" x="177" y="4896" width="32" height="32">
    <properties>
     <property name="spawn_add_to_level_ypos" type="int" value="224"/>
     <property name="spawn_screen_ypos" type="int" value="0"/>
    </properties>
   </object>
-  <object id="9" type="ET00" gid="449" x="192" y="5120" width="32" height="32">
+  <object id="9" type="ET00" gid="449" x="193" y="5120" width="32" height="32">
    <properties>
     <property name="spawn_add_to_level_ypos" type="int" value="0"/>
     <property name="spawn_screen_ypos" type="int" value="224"/>
@@ -357,13 +357,13 @@
     <property name="spawn_screen_ypos" type="int" value="112"/>
    </properties>
   </object>
-  <object id="12" type="ET00" gid="449" x="112.333" y="4863" width="32" height="32">
+  <object id="12" type="ET00" gid="449" x="65" y="4875" width="32" height="32">
    <properties>
-    <property name="spawn_add_to_level_ypos" type="int" value="257"/>
-    <property name="spawn_screen_ypos" type="int" value="-33"/>
+    <property name="spawn_add_to_level_ypos" type="int" value="245"/>
+    <property name="spawn_screen_ypos" type="int" value="-20"/>
    </properties>
   </object>
-  <object id="13" type="ET00" gid="449" x="112" y="5144" width="32" height="32">
+  <object id="13" type="ET00" gid="449" x="113" y="5144" width="32" height="32">
    <properties>
     <property name="spawn_add_to_level_ypos" type="int" value="0"/>
     <property name="spawn_screen_ypos" type="int" value="248"/>

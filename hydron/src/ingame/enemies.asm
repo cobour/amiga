@@ -125,6 +125,7 @@ enemies_restore:
   rts
 
 enemies_draw:
+  move.l     a5,-(sp)
   move.l     ig_om_bob_targetbuffer(a4),a1                            ; base pointer of target buffer
   move.l     ig_om_buffer_three(a4),a2                                ; base pointer of source buffer
 
@@ -138,6 +139,8 @@ enemies_draw:
 .do_not_draw:
   lea.l      enemy_sizeof(a0),a0
   dbf        d7,.draw_loop
+
+  move.l     (sp)+,a5
   rts
 
   endif                                                               ; ifnd ENEMIES_ASM

@@ -112,6 +112,7 @@ bob_restore:
 
 ; in:
 ;   a0 - pointer to bob-struct
+; DIRTIES A5 !!
 bob_draw:
   move.w     d7,-(sp)
   move.l     bob_bobtype_pointer(a0),a2
@@ -121,23 +122,25 @@ bob_draw:
   clr.w      bob_restore_1b+bob_restore_bltsize(a0)
 
   ; get bob dimensions
-  move.w     bob_ypos(a0),d0                                                  ; min y
+  move.w     bob_ypos(a0),d0                                                  ; d0 = min y
   swap       d0
   move.w     bobtype_height_blt(a2),d0
   swap       d0                                                               ; highword d0 = bob height for blit (lines*bitplanes)
   move.w     d0,d1
   move.w     bobtype_height(a2),d3
   add.w      d3,d1
-  subq.w     #1,d1                                                            ; max y (-1 so it's the last row inside the bob, not the first line below the bob)
+  subq.w     #1,d1                                                            ; d1 = max y (-1 so it's the last row inside the bob, not the first line below the bob)
   swap       d1
   move.w     d3,d1
   swap       d1                                                               ; highword d1 = bob height
-  move.w     bob_xpos(a0),d2                                                  ; min x
+  move.w     bob_xpos(a0),d2                                                  ; d2 = min x
   move.w     d2,d3
   add.w      bobtype_width(a2),d3
-  subq.w     #1,d3                                                            ; max x (-1 so it's the last column inside the bob, bot the first column right to the bob)
+  subq.w     #1,d3                                                            ; d3 = max x (-1 so it's the last column inside the bob, bot the first column right to the bob)
 
+  ;
   ; check if bob is completely outside screen
+  ;
  
   ; upper border
   tst.w      d1
@@ -152,13 +155,32 @@ bob_draw:
   cmp.w      #IgScreenWidth-1,d2
   bgt        .end_draw_bob
 
+  ;
   ; check border intersection
+  ;
+
   moveq.l    #0,d6
+  sub.l      a5,a5
 
   ; check bob against upper screen border
   tst.w      d0
   bge.s      .check_lower_border
-  ; TODO
+  move.w     d0,d6
+  swap       d1
+  add.w      d6,d1
+  swap       d1                                                               ; highword d1 = reduced bob height
+  neg.w      d6
+  add.w      d6,d6
+  lea.l      ig_om_bob_blt_height(a4),a3
+  move.w     (a3,d6.w),d7
+  swap       d0
+  sub.w      d7,d0
+  swap       d0                                                               ; highword d0 = reduced bob height for blit (lines*bitplanes)
+  clr.w      d0                                                               ; d0 = adjusted min y
+  add.w      d6,d6
+  lea.l      bobtype_row_offsets(a2),a3
+  move.l     (a3,d6.w),a5                                                     ; a5 = offset for gfx and mask
+
   ; bob can't intersect upper AND lower border
   bra.s      .check_left_border
 
@@ -170,14 +192,14 @@ bob_draw:
   sub.w      #IgScreenHeight-1,d6
   swap       d1
   sub.w      d6,d1
-  swap       d1
+  swap       d1                                                               ; highword d1 = reduced bob height
   add.w      d6,d6
   lea.l      ig_om_bob_blt_height(a4),a3
   move.w     (a3,d6.w),d6
   swap       d0
   sub.w      d6,d0
-  swap       d0                                                               ; d0 highword = reduced bob height for blit (lines*bitplanes)
-  move.w     #IgScreenHeight-1,d1                                             ; d1 = adjusted max y
+  swap       d0                                                               ; highword d0 = reduced bob height for blit (lines*bitplanes)
+  move.w     #IgScreenHeight-1,d1                                             ; d1 = reduced max y
 
   ; check bob against left screen border
 .check_left_border:
@@ -265,6 +287,7 @@ bob_draw:
 ;   a0   - pointer to bob-struct
 ;   a1   - pointer to bob_restore-struct
 ;   a2   - pointer to bobtype-struct
+;   a5.l - offset for gfx and mask (because of screen border clipping)
 ;   d0.w - ypos
 ;   d1.w - reduce blitter height by this value
 ;   d2.w - xpos
@@ -288,6 +311,7 @@ bob_draw:
   move.w     d2,d4
   move.l     bob_anim_offset(a0),d2
   add.l      d3,d2
+  add.l      a5,d2
   and.w      #$000f,d4                                                        ; 0 = no shift, >0 = shift by pixels
   beq.s      .draw_in_range_no_shift
   addq.w     #1,d1
