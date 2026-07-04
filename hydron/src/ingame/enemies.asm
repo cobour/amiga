@@ -119,7 +119,10 @@ enemies_restore:
   lea.l      ig_om_enemies(a4),a0
   moveq.l    #EnemiesCount-1,d7
 .restore_loop:
+  tst.w      bob_status(a0)
+  blt.s      .do_not_restore
   bsr        bob_restore
+.do_not_restore:
   lea.l      enemy_sizeof(a0),a0
   dbf        d7,.restore_loop
   rts

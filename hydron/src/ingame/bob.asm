@@ -60,8 +60,6 @@ bob_update:
 ;   a1 - base pointer of target buffer
 ;   a2 - base pointer of source buffer
 bob_restore:
-  tst.w      bob_status(a0)
-  blt.s      .do_not_restore
   ; bob_restore_2a
   lea.l      bob_restore_2a(a0),a3
   move.w     bob_restore_bltsize(a3),d3
@@ -81,7 +79,6 @@ bob_restore:
   move.l     (a3)+,(a4)+
   move.l     (a3),(a4)
   move.l     d4,a4
-.do_not_restore:
   rts
 
 ; in:
