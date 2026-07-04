@@ -280,7 +280,7 @@ background_update:
   move.w     #$fffe,(a2)+
   ; set bitplane pointers
   move.l     ig_buffers_framebuffer_pointer(a0),d0
-  bsr.s      .set_bitplane_pointer_in_copperlist
+  bsr        .set_bitplane_pointer_in_copperlist
   bra.s      .end_split
 .check_split_below_panel:
   cmp.w      #32,d0
@@ -312,6 +312,8 @@ background_update:
   bne.s      .end_split
   move.l     #$01fe0000,(a2)
 .end_split:
+  tst.b      ig_om_background_do_scroll(a4)
+  beq.s      .exit
   ; set correct end/start rows for both ranges
   tst.w      ig_om_background_range_2_row_start(a4)
   bge.s      .no_switch_to_split
