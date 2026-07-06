@@ -118,6 +118,9 @@ bob_draw:
   clr.w      bob_restore_1a+bob_restore_bltsize(a0)
   clr.w      bob_restore_1b+bob_restore_bltsize(a0)
 
+  ; default for BLTAFWM (lowword) and BLTALWM (highword)
+  moveq.l    #-1,d7
+
   ; get bob dimensions
   move.w     bob_ypos(a0),d0                                                  ; d0 = min y
   swap       d0
@@ -131,9 +134,23 @@ bob_draw:
   move.w     d3,d1
   swap       d1                                                               ; highword d1 = bob height
   move.w     bob_xpos(a0),d2                                                  ; d2 = min x
+  swap       d2
+  move.w     bobtype_width_words(a2),d2                                       ; highword d2 = blitter width in words
+  swap       d2
+  moveq.l    #0,d3
   move.w     d2,d3
   add.w      bobtype_width(a2),d3
   subq.w     #1,d3                                                            ; d3 = max x (-1 so it's the last column inside the bob, bot the first column right to the bob)
+  moveq.l    #0,d4                                                            ; highword d4 = add to modulo
+  
+  ; adjust BLTALWM
+  move.w     d2,d5
+  and.w      #$000f,d5
+  beq.s      .bltalwm_is_fine
+  swap       d7
+  clr.w      d7
+  swap       d7
+.bltalwm_is_fine:
 
   ;
   ; check if bob is completely outside screen
@@ -169,9 +186,8 @@ bob_draw:
   neg.w      d6
   add.w      d6,d6
   lea.l      ig_om_bob_blt_height(a4),a3
-  move.w     (a3,d6.w),d7
   swap       d0
-  sub.w      d7,d0
+  sub.w      (a3,d6.w),d0
   swap       d0                                                               ; highword d0 = reduced bob height for blit (lines*bitplanes)
   clr.w      d0                                                               ; d0 = adjusted min y
   add.w      d6,d6
@@ -202,7 +218,48 @@ bob_draw:
 .check_left_border:
   tst.w      d2
   bge.s      .check_right_border
-  ; TODO HYD-33
+  move.w     d2,d5
+  neg.w      d5
+  move.w     d5,d6
+  and.w      #$000f,d5
+  beq.s      .check_left_border_exact_word
+
+  ; TODO left border clipping WITH shift (more AND less than 16 pixels taken away)
+  if         0
+  lea.l      .left_border_intersection_bltafwm_tab(pc),a3
+  add.w      d5,d5
+  move.w     (a3,d5.w),d7                                                     ; d7 = adjusted BLTAFWM
+  swap       d7
+  move.w     #$f000,d7
+  swap       d7
+  lsr.w      #4,d6
+  addq.w     #1,d6
+  swap       d2
+  sub.w      d6,d2
+  swap       d2                                                               ; highword d2 = reduced blitter width in bytes
+  add.w      d6,d6
+  swap       d4
+  add.w      d6,d4
+  swap       d4                                                               ; highword d4 = adjusted add to modulo
+  move.w     d6,a5                                                            ; a5 = offset for gfx and mask
+  clr.w      d2                                                               ; d2 = adjusted min x
+  endif
+
+  ; bob can't intersect left AND right border
+  bra.s      .check_borders_end
+
+.check_left_border_exact_word:
+  lsr.w      #4,d6
+  swap       d2
+  sub.w      d6,d2
+  swap       d2                                                               ; highword d2 = reduced blitter width in bytes
+  add.w      d6,d6
+  swap       d4
+  add.w      d6,d4
+  swap       d4                                                               ; highword d4 = adjusted add to modulo
+  move.w     d6,a5                                                            ; a5 = offset for gfx and mask
+  clr.w      d2                                                               ; d2 = adjusted min x
+
   ; bob can't intersect left AND right border
   bra.s      .check_borders_end
 
@@ -210,10 +267,46 @@ bob_draw:
 .check_right_border:
   cmp.w      #IgScreenWidth-1,d3
   ble.s      .check_borders_end
-  ; TODO HYD-33
-  nop
+  move.w     d3,d6
+  sub.w      #IgScreenWidth-1,d6
+  move.w     d6,d5
+  and.w      #$000f,d5
+  beq.s      .check_right_border_exact_word
+
+  lea.l      .right_border_intersection_bltalwm_tab(pc),a3
+  add.w      d5,d5
+  swap       d7
+  move.w     (a3,d5.w),d7
+  swap       d7                                                               ; highword d7 = adjusted BLTALWM
+  move.w     d3,d5
+  sub.w      #IgScreenWidth-1,d5
+  lsr.w      #4,d5
+  addq.w     #1,d5
+  swap       d2
+  sub.w      d5,d2
+  swap       d2                                                               ; highword d2 = reduced blitter width in bytes
+  add.w      d5,d5
+  swap       d4
+  add.w      d5,d4
+  swap       d4                                                               ; highword d4 = adjusted add to modulo
+  move.w     #IgScreenWidth-1,d3                                              ; d3 = reduced max x
+  bra.s      .check_borders_end
+.check_right_border_exact_word:
+  lsr.w      #4,d6
+  swap       d2
+  sub.w      d6,d2
+  swap       d4
+  move.w     d2,d4
+  add.w      d4,d4
+  swap       d4                                                               ; highword d4 = adjusted add to modulo
+  swap       d2                                                               ; highword d2 = reduced blitter width in bytes
+  move.w     #IgScreenWidth-1,d3                                              ; d3 = reduced max x
 
 .check_borders_end:
+
+;
+; check if bob intersects the ranges border and needs to be splitted
+;
 
 .check_split:
   lea.l      ig_om_background_range_1_row_start(a4),a1
@@ -246,28 +339,28 @@ bob_draw:
   bsr.s      .draw_in_range
   bra.s      .end_draw_bob
 .split_necessary:
-  move.w     d4,d7
-  sub.w      d0,d7                                                            ; d7 = lines to cut from top of bob in range 2
+  move.w     d4,d6
+  sub.w      d0,d6                                                            ; d6 = lines to cut from top of bob in range 2
   ; first draw part in range 2
   move.l     (a1),d5                                                          ; offset in framebuffer
   lea.l      bob_restore_1a(a0),a1
-  move.w     d7,d1
+  move.w     d6,d1
   add.w      d1,d1
   lea.l      ig_om_bob_blt_height(a4),a3
   move.w     (a3,d1.w),d1
-  move.w     d7,d3
+  move.w     d6,d3
   add.w      d3,d3
   add.w      d3,d3
   lea.l      bobtype_row_offsets(a2),a3
   move.l     (a3,d3.w),d3
-  movem.l    d0-d2/d7,-(sp)
+  movem.l    d0-d2/d4/d6,-(sp)
   move.w     d4,d0
   bsr.s      .draw_in_range
-  movem.l    (sp)+,d0-d2/d7
+  movem.l    (sp)+,d0-d2/d4/d6
   ; then draw part in range 1
   lea.l      bob_restore_1b(a0),a1
   swap       d1
-  sub.w      d7,d1
+  sub.w      d6,d1
   add.w      d1,d1
   lea.l      ig_om_bob_blt_height(a4),a3
   move.w     (a3,d1.w),d1
@@ -285,12 +378,13 @@ bob_draw:
 ;   a1   - pointer to bob_restore-struct
 ;   a2   - pointer to bobtype-struct
 ;   a5.l - offset for gfx and mask (because of screen border clipping)
-;   d0.w - ypos
-;   d1.w - reduce blitter height by this value
-;   d2.w - xpos
+;   d0.w - ypos / highword d0 = bob height for blit (lines*bitplanes)
+;   d1.w - reduce blitter height by this value / highword d1 = bob height
+;   d2.w - xpos / highword d2 = blitter width in words
 ;   d3.l - add this value to source offset
-;   d4.w - first row of range
+;   d4.w - first row of range / highword d4 = add to modulo
 ;   d5.l - offset of first row of range in framebuffer
+;   d7.w - BLTAFWM / highword d7 = BLTALWM
 .draw_in_range:
   move.w     d0,d6
   sub.w      d4,d6
@@ -304,8 +398,9 @@ bob_draw:
   add.l      d6,d5                                                            ; offset in framebuffer to bob position
   swap       d0                                                               ; bob height for blit (lines*bitplanes)
   sub.w      d1,d0
-  move.w     bobtype_width_words(a2),d1
   move.w     d2,d4
+  swap       d2
+  move.w     d2,d1
   move.l     bob_anim_offset(a0),d2
   add.l      d3,d2
   add.l      a5,d2
@@ -322,8 +417,9 @@ bob_draw:
 ;   d0.w - blitter height (lines*bitplanes)
 ;   d1.w - blitter width in words
 ;   d2.l - anim offset plus additional offset for gfx and mask pointer (multiplies of lines*bitplanes to skip upper lines of bob)
-;   d4.w - 0 = no shift, >0 = shift by pixels
+;   d4.w - 0 = no shift, >0 = shift by pixels / highword d4 = add to modulo
 ;   d5.l - offset in framebuffer
+;   d7.w - BLTAFWM / highword d7 = BLTALWM
 .do_blit:
   move.w     d5,bob_restore_offset(a1)
 
@@ -332,20 +428,24 @@ bob_draw:
   tst.b      d4
   bne.s      .do_blit_with_shift
 
-  ; no pixel shift - full masked copy
-  move.w     #$ffff,d6
-  move.w     d6,BLTAFWM(a6)
-  move.w     d6,BLTALWM(a6)
+  ; a-channel masks and blitter controls
+  move.w     d7,BLTAFWM(a6)
+  swap       d7
+  move.w     d7,BLTALWM(a6)
+  swap       d7
   move.w     #%0000111111001010,BLTCON0(a6)
   clr.w      BLTCON1(a6)
   ; modulos
-  move.w     bobtype_src_mod_no_shift(a2),d7
-  move.w     d7,BLTAMOD(a6)
-  move.w     d7,BLTBMOD(a6)
-  move.w     bobtype_trg_mod_no_shift(a2),d7
-  move.w     d7,BLTCMOD(a6)
-  move.w     d7,BLTDMOD(a6)
-  move.w     d7,bob_restore_modulo(a1)
+  move.w     bobtype_src_mod_no_shift(a2),d6
+  swap       d4
+  add.w      d4,d6
+  move.w     d6,BLTAMOD(a6)
+  move.w     d6,BLTBMOD(a6)
+  move.w     bobtype_trg_mod_no_shift(a2),d6
+  add.w      d4,d6
+  move.w     d6,BLTCMOD(a6)
+  move.w     d6,BLTDMOD(a6)
+  move.w     d6,bob_restore_modulo(a1)
   ; pointers
   move.l     bobtype_data_pointer(a2),d6
   add.l      d2,d6
@@ -366,20 +466,25 @@ bob_draw:
 
 .do_blit_with_shift:
   ; pixel shift - full masked copy
-  move.w     #$ffff,BLTAFWM(a6)
-  clr.w      BLTALWM(a6)
+  move.w     d7,BLTAFWM(a6)
+  swap       d7
+  move.w     d7,BLTALWM(a6)
+  swap       d7
   ror.w      #4,d4
   move.w     d4,BLTCON1(a6)
   or.w       #%0000111111001010,d4
   move.w     d4,BLTCON0(a6)
   ; modulos
-  move.w     bobtype_src_mod_shift(a2),d7
-  move.w     d7,BLTAMOD(a6)
-  move.w     d7,BLTBMOD(a6)
-  move.w     bobtype_trg_mod_shift(a2),d7
-  move.w     d7,BLTCMOD(a6)
-  move.w     d7,BLTDMOD(a6)
-  move.w     d7,bob_restore_modulo(a1)
+  move.w     bobtype_src_mod_shift(a2),d6
+  swap       d4
+  add        d4,d6
+  move.w     d6,BLTAMOD(a6)
+  move.w     d6,BLTBMOD(a6)
+  move.w     bobtype_trg_mod_shift(a2),d6
+  add        d4,d6
+  move.w     d6,BLTCMOD(a6)
+  move.w     d6,BLTDMOD(a6)
+  move.w     d6,bob_restore_modulo(a1)
   ; pointers
   move.l     bobtype_data_pointer(a2),d6
   add.l      d2,d6
@@ -397,5 +502,41 @@ bob_draw:
   move.w     d0,bob_restore_bltsize(a1)
   ; end
   rts
+
+.right_border_intersection_bltalwm_tab:
+  dc.w       %1111111111111111
+  dc.w       %1111111111111110
+  dc.w       %1111111111111100
+  dc.w       %1111111111111000
+  dc.w       %1111111111110000
+  dc.w       %1111111111100000
+  dc.w       %1111111111000000
+  dc.w       %1111111110000000
+  dc.w       %1111111100000000
+  dc.w       %1111111000000000
+  dc.w       %1111110000000000
+  dc.w       %1111100000000000
+  dc.w       %1111000000000000
+  dc.w       %1110000000000000
+  dc.w       %1100000000000000
+  dc.w       %1000000000000000
+
+.left_border_intersection_bltafwm_tab:
+  dc.w       %1000000000000000
+  dc.w       %1100000000000000
+  dc.w       %1110000000000000
+  dc.w       %1111000000000000
+  dc.w       %1111100000000000
+  dc.w       %1111110000000000
+  dc.w       %1111111000000000
+  dc.w       %1111111100000000
+  dc.w       %1111111110000000
+  dc.w       %1111111111000000
+  dc.w       %1111111111100000
+  dc.w       %1111111111110000
+  dc.w       %1111111111111000
+  dc.w       %1111111111111100
+  dc.w       %1111111111111110
+  dc.w       %1111111111111111
 
   endif                                                                       ; ifnd INGAME_BOB_ASM

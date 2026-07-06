@@ -217,9 +217,9 @@ class TiledSource extends AbstractSource {
 					properties.get("spawn_add_to_level_ypos") : "0"); // property is optional
 			levelYpos += spawnAddToLevelYpos;
 			var ypos = Integer.parseInt(properties.get("spawn_screen_ypos")); // property is obligatory
-			// if (Integer.parseInt(attributes.getNamedItem("id").getNodeValue()) == 13) {
+			//if (Integer.parseInt(attributes.getNamedItem("id").getNodeValue()) == 16) {
 			spawnInfo.add(new EnemySpawnInfo(enemyType, xpos, ypos, levelYpos));
-			// }
+			//}
 		});
 		//
 		spawnInfo.sort(Comparator.comparing(EnemySpawnInfo::levelYpos));
