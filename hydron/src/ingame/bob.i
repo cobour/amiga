@@ -13,7 +13,7 @@ BobStatusRestoreOnly equ 0
 BobStatusActive      equ 1
 
                            rsreset
-bob_restore_offset:        rs.w       1                     ; offset for restore
+bob_restore_offset:        rs.l       1                     ; offset for restore
 bob_restore_bltsize:       rs.w       1                     ; bltsize for restore
 bob_restore_modulo:        rs.w       1                     ; modulo for restore
 bob_restore_sizeof:        rs.b       0

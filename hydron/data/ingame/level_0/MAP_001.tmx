@@ -381,7 +381,7 @@
     <property name="spawn_screen_ypos" type="int" value="-20"/>
    </properties>
   </object>
-  <object id="16" type="ET00" gid="449" x="-16" y="5012" width="32" height="32">
+  <object id="16" type="ET00" gid="449" x="-6" y="5012" width="32" height="32">
    <properties>
     <property name="spawn_add_to_level_ypos" type="int" value="108"/>
     <property name="spawn_screen_ypos" type="int" value="144"/>

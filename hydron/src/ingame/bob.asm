@@ -24,16 +24,16 @@ bob_clear:
   clr.l      bob_xpos(a0)
   clr.l      bob_ypos(a0)
   clr.l      bob_anim_offset(a0)
-  clr.w      bob_restore_1a+bob_restore_offset(a0)
+  clr.l      bob_restore_1a+bob_restore_offset(a0)
   clr.w      bob_restore_1a+bob_restore_bltsize(a0)
   clr.w      bob_restore_1a+bob_restore_modulo(a0)
-  clr.w      bob_restore_2a+bob_restore_offset(a0)
+  clr.l      bob_restore_2a+bob_restore_offset(a0)
   clr.w      bob_restore_2a+bob_restore_bltsize(a0)
   clr.w      bob_restore_2a+bob_restore_modulo(a0)
-  clr.w      bob_restore_1b+bob_restore_offset(a0)
+  clr.l      bob_restore_1b+bob_restore_offset(a0)
   clr.w      bob_restore_1b+bob_restore_bltsize(a0)
   clr.w      bob_restore_1b+bob_restore_modulo(a0)
-  clr.w      bob_restore_2b+bob_restore_offset(a0)
+  clr.l      bob_restore_2b+bob_restore_offset(a0)
   clr.w      bob_restore_2b+bob_restore_bltsize(a0)
   clr.w      bob_restore_2b+bob_restore_modulo(a0)
   rts
@@ -77,6 +77,7 @@ bob_restore:
   lea.l      bob_restore_2a(a0),a4
   move.l     (a3)+,(a4)+
   move.l     (a3)+,(a4)+
+  move.l     (a3)+,(a4)+
   move.l     (a3),(a4)
   move.l     d4,a4
   rts
@@ -87,8 +88,7 @@ bob_restore:
 ;   a3   - pointer to bob_restore-struct
 ;   d3.w - BLTSIZE
 .do_restore:
-  moveq.l    #0,d4
-  move.w     bob_restore_offset(a3),d4
+  move.l     bob_restore_offset(a3),d4
   move.l     a2,d0
   add.l      d4,d0                                                            ; source pointer
   move.l     a1,d1
@@ -225,25 +225,21 @@ bob_draw:
   beq.s      .check_left_border_exact_word
 
   ; TODO left border clipping WITH shift (more AND less than 16 pixels taken away)
-  if         0
   lea.l      .left_border_intersection_bltafwm_tab(pc),a3
   add.w      d5,d5
   move.w     (a3,d5.w),d7                                                     ; d7 = adjusted BLTAFWM
-  swap       d7
-  move.w     #$f000,d7
-  swap       d7
-  lsr.w      #4,d6
-  addq.w     #1,d6
-  swap       d2
-  sub.w      d6,d2
-  swap       d2                                                               ; highword d2 = reduced blitter width in bytes
-  add.w      d6,d6
-  swap       d4
-  add.w      d6,d4
-  swap       d4                                                               ; highword d4 = adjusted add to modulo
-  move.w     d6,a5                                                            ; a5 = offset for gfx and mask
-  clr.w      d2                                                               ; d2 = adjusted min x
-  endif
+  ; do NOT clr.w d2 because the negative xpos is needed in .do_blit
+  ;lsr.w      #4,d6
+  ;subq.w     #1,d6
+  ;swap       d2
+  ;sub.w      d6,d2
+  ;swap       d2                                                               ; highword d2 = reduced blitter width in bytes
+  ;add.w      d6,d6
+  ;swap       d4
+  ;sub.w      d6,d4
+  ;swap       d4                                                               ; highword d4 = adjusted add to modulo
+  ;move.w     d6,a5                                                            ; a5 = offset for gfx and mask
+  ;clr.w      d2                                                               ; d2 = adjusted min x
 
   ; bob can't intersect left AND right border
   bra.s      .check_borders_end
@@ -393,9 +389,6 @@ bob_draw:
   add.l      (a3,d6.w),d5                                                     ; offset in framebuffer of first row of bob
   moveq.l    #0,d6
   move.w     d2,d6
-  lsr.w      #4,d6
-  lsl.w      #1,d6
-  add.l      d6,d5                                                            ; offset in framebuffer to bob position
   swap       d0                                                               ; bob height for blit (lines*bitplanes)
   sub.w      d1,d0
   move.w     d2,d4
@@ -403,11 +396,40 @@ bob_draw:
   move.w     d2,d1
   move.l     bob_anim_offset(a0),d2
   add.l      d3,d2
-  add.l      a5,d2
+  add.l      a5,d2                                                            ; source offset (gfx and mask)
+  tst.w      d6
+  blt.s      .draw_in_range_negative_xpos
+  lsr.w      #4,d6
+  lsl.w      #1,d6
+  add.l      d6,d5                                                            ; offset in framebuffer to bob position
   and.w      #$000f,d4                                                        ; 0 = no shift, >0 = shift by pixels
   beq.s      .draw_in_range_no_shift
   addq.w     #1,d1
 .draw_in_range_no_shift:
+  bra.s      .do_blit
+
+.draw_in_range_negative_xpos:
+  ; only executed if clipping with left screen border occurs
+  subq.l     #2,d5                                                            ; target offset
+  moveq.l    #0,d3
+  move.w     d6,d3
+  neg.w      d3
+  move.w     d3,d6
+  and.w      #$000f,d3
+  neg.w      d3
+  add.w      #16,d3
+  move.w     d3,d4                                                            ; shift by pixels
+
+  lea.l      .neg_xpos_adjustments(pc),a3
+  move.w     d6,d3
+  lsr.w      #4,d3
+  lsl.w      #3,d3
+  add.l      (a3,d3.w),d2
+  add.w      4(a3,d3.w),d1
+  swap       d4
+  add.w      6(a3,d3.w),d4
+  swap       d4
+
   ; intended fall-through
 
 ; in:
@@ -421,7 +443,7 @@ bob_draw:
 ;   d5.l - offset in framebuffer
 ;   d7.w - BLTAFWM / highword d7 = BLTALWM
 .do_blit:
-  move.w     d5,bob_restore_offset(a1)
+  move.l     d5,bob_restore_offset(a1)
 
   WAITBLT
 
@@ -522,21 +544,33 @@ bob_draw:
   dc.w       %1000000000000000
 
 .left_border_intersection_bltafwm_tab:
-  dc.w       %1000000000000000
-  dc.w       %1100000000000000
-  dc.w       %1110000000000000
-  dc.w       %1111000000000000
-  dc.w       %1111100000000000
-  dc.w       %1111110000000000
-  dc.w       %1111111000000000
-  dc.w       %1111111100000000
-  dc.w       %1111111110000000
-  dc.w       %1111111111000000
-  dc.w       %1111111111100000
-  dc.w       %1111111111110000
-  dc.w       %1111111111111000
-  dc.w       %1111111111111100
-  dc.w       %1111111111111110
   dc.w       %1111111111111111
+  dc.w       %0111111111111111
+  dc.w       %0011111111111111
+  dc.w       %0001111111111111
+  dc.w       %0000111111111111
+  dc.w       %0000011111111111
+  dc.w       %0000001111111111
+  dc.w       %0000000111111111
+  dc.w       %0000000011111111
+  dc.w       %0000000001111111
+  dc.w       %0000000000111111
+  dc.w       %0000000000011111
+  dc.w       %0000000000001111
+  dc.w       %0000000000000111
+  dc.w       %0000000000000011
+  dc.w       %0000000000000001
+
+.neg_xpos_adjustments:
+
+  dc.l       0                                                                ; add to source offset
+  dc.w       1                                                                ; add to blitter width in words
+  dc.w       0                                                                ; add to modulo
+
+  dc.l       2                                                                ; add to source offset
+  dc.w       0                                                                ; add to blitter width in words
+  dc.w       2                                                                ; add to modulo
+
+; FIXME : more entries needed when bobs of 48px or greater are used
 
   endif                                                                       ; ifnd INGAME_BOB_ASM
