@@ -26,8 +26,6 @@ ig_start:
   move.l     df_idx_ptr_rawdata(a0),a1
   ; REMOVE ME - test values
 
-  clr.b      c_om_next_frame_ready(a4)
-  clr.b      c_om_vbl(a4)
   clr.b      ig_om_end_mainloop(a4)
 
   bsr        buffers_init                       ; MUST be called FIRST, because sets vars needed by other inits
@@ -43,8 +41,6 @@ ig_start:
   bsr        .init_music
 
 .main_loop:
-  clr.b      c_om_next_frame_ready(a4)
-
   tst.b      ig_om_end_mainloop(a4)
   bne.s      .exit
 
@@ -60,14 +56,18 @@ ig_start:
   bsr        enemies_restore
   bsr        enemies_draw
 
-  move.b     #1,c_om_next_frame_ready(a4)
-  clr.b      c_om_vbl(a4)
   ifd        RED_TIMING
   move.w     #$0f00,COLOR00(a6)                 ; end of preparation of next frame
   endif                                         ; ifd RED_TIMING
-.ml_wait_vbl:
-  tst.b      c_om_vbl(a4)
-  beq.s      .ml_wait_vbl
+
+  ; check position of vertical beam, MUST be below visible area
+.wait_for_beam:
+  move.l     VPOSR(a6),d0
+  and.l      #$0001ff00,d0
+  cmp.l      #$00012b00,d0
+  ble.s      .wait_for_beam
+  ; swap buffers
+  bsr        buffers_swap
 
   ; TEST CODE - fade out on mouse click
   lea.l      .is_fade_out(pc),a0
@@ -87,7 +87,6 @@ ig_start:
   bra.s      .main_loop
 
 .exit:
-  clr.b      c_om_next_frame_ready(a4)
   bsr        buffers_clear
   bsr        _mt_end
 
@@ -119,30 +118,17 @@ ig_start:
   add.l      #ig_cm_datfile,a1
   bra        datafiles_load_and_unzip           ; implicit rts
 
+;
+; FIXME: Remove IRQ completely?
+;
 lvl3_irq_handler:
-  movem.l    a4/a6,-(sp)
+  move.l     a6,-(sp)
   lea.l      CUSTOM,a6
-  move.l     other_mem_ptr(pc),a4
 
   ; clear Copper-IRQ-Bit
   move.w     #%0000000000010000,INTREQ(a6)
 
-  ; set vbl flag in common om struct
-  move.b     #1,c_om_vbl(a4)
-
-  ; is end-of-mainloog trigger set?
-  tst.b      ig_om_end_mainloop(a4)
-  bne.s      .exit
-
-  ; is frame rendered completely into backbuffer?
-  tst.b      c_om_next_frame_ready(a4)
-  beq.s      .exit
-
-  ; swap buffers
-  bsr        buffers_swap
-
-.exit:
-  movem.l    (sp)+,a4/a6
+  move.l     (sp)+,a6
   rte
 
 
