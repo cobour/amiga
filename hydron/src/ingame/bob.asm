@@ -224,22 +224,12 @@ bob_draw:
   and.w      #$000f,d5
   beq.s      .check_left_border_exact_word
 
-  ; TODO left border clipping WITH shift (more AND less than 16 pixels taken away)
+  ; left border clipping WITH shift
   lea.l      .left_border_intersection_bltafwm_tab(pc),a3
   add.w      d5,d5
   move.w     (a3,d5.w),d7                                                     ; d7 = adjusted BLTAFWM
-  ; do NOT clr.w d2 because the negative xpos is needed in .do_blit
-  ;lsr.w      #4,d6
-  ;subq.w     #1,d6
-  ;swap       d2
-  ;sub.w      d6,d2
-  ;swap       d2                                                               ; highword d2 = reduced blitter width in bytes
-  ;add.w      d6,d6
-  ;swap       d4
-  ;sub.w      d6,d4
-  ;swap       d4                                                               ; highword d4 = adjusted add to modulo
-  ;move.w     d6,a5                                                            ; a5 = offset for gfx and mask
-  ;clr.w      d2                                                               ; d2 = adjusted min x
+  ; most of the adjustments are done in.draw_in_range_negative_xpos because I need the info about the unaltered xpos there
+  ; do NOT clr.w d2 because the negative xpos is needed!!
 
   ; bob can't intersect left AND right border
   bra.s      .check_borders_end
@@ -419,17 +409,16 @@ bob_draw:
   neg.w      d3
   add.w      #16,d3
   move.w     d3,d4                                                            ; shift by pixels
-
-  lea.l      .neg_xpos_adjustments(pc),a3
-  move.w     d6,d3
-  lsr.w      #4,d3
-  lsl.w      #3,d3
-  add.l      (a3,d3.w),d2
-  add.w      4(a3,d3.w),d1
+  lsr.w      #4,d6
+  beq.s      .neg_xpos_under_16
+  lsl.w      #1,d6
+  add.l      d6,d2                                                            ; source offset
   swap       d4
-  add.w      6(a3,d3.w),d4
+  add.w      d6,d4                                                            ; modulo
   swap       d4
-
+  bra.s      .do_blit
+.neg_xpos_under_16:
+  addq.w     #1,d1                                                            ; blitter width in words
   ; intended fall-through
 
 ; in:
@@ -560,17 +549,5 @@ bob_draw:
   dc.w       %0000000000000111
   dc.w       %0000000000000011
   dc.w       %0000000000000001
-
-.neg_xpos_adjustments:
-
-  dc.l       0                                                                ; add to source offset
-  dc.w       1                                                                ; add to blitter width in words
-  dc.w       0                                                                ; add to modulo
-
-  dc.l       2                                                                ; add to source offset
-  dc.w       0                                                                ; add to blitter width in words
-  dc.w       2                                                                ; add to modulo
-
-; FIXME : more entries needed when bobs of 48px or greater are used
 
   endif                                                                       ; ifnd INGAME_BOB_ASM

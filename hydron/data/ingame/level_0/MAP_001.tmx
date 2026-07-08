@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.12.2" orientation="orthogonal" renderorder="right-down" width="16" height="320" tilewidth="16" tileheight="16" infinite="0" nextlayerid="3" nextobjectid="17">
+<map version="1.10" tiledversion="1.12.2" orientation="orthogonal" renderorder="right-down" width="16" height="320" tilewidth="16" tileheight="16" infinite="0" nextlayerid="3" nextobjectid="18">
  <tileset firstgid="1" source="Hydron_Tiles_01.tsx"/>
  <tileset firstgid="449" source="enemies_32x32.tsx"/>
  <layer id="1" name="tiles layer" width="16" height="320">
@@ -333,10 +333,10 @@
     <property name="spawn_screen_ypos" type="int" value="112"/>
    </properties>
   </object>
-  <object id="8" type="ET00" gid="449" x="177" y="4896" width="32" height="32">
+  <object id="8" type="ET00" gid="449" x="-20.3333" y="4875" width="32" height="32">
    <properties>
-    <property name="spawn_add_to_level_ypos" type="int" value="224"/>
-    <property name="spawn_screen_ypos" type="int" value="0"/>
+    <property name="spawn_add_to_level_ypos" type="int" value="245"/>
+    <property name="spawn_screen_ypos" type="int" value="-8"/>
    </properties>
   </object>
   <object id="9" type="ET00" gid="449" x="193" y="5120" width="32" height="32">
@@ -381,10 +381,16 @@
     <property name="spawn_screen_ypos" type="int" value="-20"/>
    </properties>
   </object>
-  <object id="16" type="ET00" gid="449" x="-6" y="5012" width="32" height="32">
+  <object id="16" type="ET00" gid="449" x="-20" y="5012" width="32" height="32">
    <properties>
     <property name="spawn_add_to_level_ypos" type="int" value="108"/>
     <property name="spawn_screen_ypos" type="int" value="144"/>
+   </properties>
+  </object>
+  <object id="17" type="ET00" gid="449" x="-6" y="4944" width="32" height="32">
+   <properties>
+    <property name="spawn_add_to_level_ypos" type="int" value="176"/>
+    <property name="spawn_screen_ypos" type="int" value="80"/>
    </properties>
   </object>
  </objectgroup>
