@@ -1,0 +1,7 @@
+rom = "/Users/frank/Library/Mobile Documents/com~apple~CloudDocs/Amiga/Kickstart-ROMs/Kickstart-v1.3-rev34.5-1987-Commodore-A500-A1000-A2000-CDTV.rom"
+
+[machine]
+profile = "A500OCS"
+
+[floppy.df0]
+path = "/Users/frank/Development/projects/amiga/hydron/dist/Hydron.adf"
