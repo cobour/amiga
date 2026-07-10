@@ -39,6 +39,8 @@ enemies_init:
   move.l     ig_om_enemies_spawn_data_pointer(a4),a1
   move.l     ig_om_enemies_spawn_data_end_pointer(a4),d7
 .init_types_loop:
+  cmp.l      a1,d7
+  beq.s      .init_types_loop_end
   move.l     df_tld_enm_enemytype(a1),d0
   bsr        datafiles_get_pointer
   move.l     df_idx_ptr_rawdata(a0),a2                                ; pointer to enemytype-struct
@@ -56,8 +58,8 @@ enemies_init:
   move.l     d0,bobtype_mask_pointer(a3)
   ; next
   lea.l      df_tld_enm_sizeof(a1),a1
-  cmp.l      a1,d7
-  bne.s      .init_types_loop
+  bra.s      .init_types_loop
+.init_types_loop_end:
 
   ; first spawn check, maybe enemies are there at the very beginning
   bsr.s      enemies_spawn

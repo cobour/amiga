@@ -20,6 +20,7 @@ bob_init:
 ; in:
 ;   a0 - pointer to bob-struct
 bob_clear:
+  clr.l      bob_bobtype_pointer(a0)
   move.w     #-1,bob_status(a0)
   clr.l      bob_xpos(a0)
   clr.l      bob_ypos(a0)
@@ -488,11 +489,11 @@ bob_draw:
   ; modulos
   move.w     bobtype_src_mod_shift(a2),d6
   swap       d4
-  add        d4,d6
+  add.w      d4,d6
   move.w     d6,BLTAMOD(a6)
   move.w     d6,BLTBMOD(a6)
   move.w     bobtype_trg_mod_shift(a2),d6
-  add        d4,d6
+  add.w      d4,d6
   move.w     d6,BLTCMOD(a6)
   move.w     d6,BLTDMOD(a6)
   move.w     d6,bob_restore_modulo(a1)
