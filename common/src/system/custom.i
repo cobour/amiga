@@ -42,8 +42,13 @@ BLTAMOD       equ $64
 BLTDMOD       equ $66
 DSKSYNC       equ $7e
 COP1LC        equ $80
+COP1LCH       equ $80
+COP1LCL       equ $82
 COP2LC        equ $84
+COP2LCH       equ $84
+COP2LCL       equ $86
 COPJMP1       equ $88
+COPJMP2       equ $8a
 DIWSTRT       equ $8e
 DIWSTOP       equ $90
 DDFSTRT       equ $92
