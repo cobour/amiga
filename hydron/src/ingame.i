@@ -32,7 +32,7 @@ ig_cm_cl_sprite01_off:                    rs.l       3
 ig_cm_cl_reset_color17:                   rs.l       1
 ig_cm_cl_reuse_sprites:                   rs.l       8
 ig_cm_cl_wait_and_bitplane_pointers:      rs.l       13
-ig_cm_cl_irq:                             rs.l       3
+ig_cm_cl_wait_below_viewport:             rs.l       2
 ig_cm_cl_end:                             rs.l       1
 ig_cm_cl_sizeof:                          rs.b       0
 

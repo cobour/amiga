@@ -708,8 +708,5 @@
   dc.w       $ffdf,$fffe                                                            ; when above re-setting of bitplane pointers already has a $ffdffffe, then this wait is overwritten and needs to be replaced once it is no longer necessary above
   dc.w       $2bd1,$fffe
 
-; trigger Copper-IRQ
-  dc.w       INTREQ,%1000000000010000
-
 ; end
   dc.w       $ffff,$fffe
