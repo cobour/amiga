@@ -36,8 +36,6 @@ ig_start:
   bsr        bob_init
   bsr        enemies_init
   bsr        ctrl_take_system
-  lea.l      lvl3_irq_handler(pc),a0
-  bsr        ctrl_set_handler
   bsr        .init_music
 
 .main_loop:
@@ -117,19 +115,5 @@ ig_start:
   move.l     chip_mem_ptr(pc),a1
   add.l      #ig_cm_datfile,a1
   bra        datafiles_load_and_unzip           ; implicit rts
-
-;
-; FIXME: Remove IRQ completely?
-;
-lvl3_irq_handler:
-  move.l     a6,-(sp)
-  lea.l      CUSTOM,a6
-
-  ; clear Copper-IRQ-Bit
-  move.w     #%0000000000010000,INTREQ(a6)
-
-  move.l     (sp)+,a6
-  rte
-
 
   endif                                         ; ifnd INGAME_ASM
