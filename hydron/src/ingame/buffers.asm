@@ -124,7 +124,6 @@ buffers_swap:
   move.l     ig_om_buffers_backbuffer(a4),a0
   move.l     ig_buffers_copperlist_pointer(a0),a0
   move.l     a0,COP1LC(a6)
-  move.w     #$0000,COPJMP1(a6)
 
   ; increment framecount
   moveq.l    #1,d0
