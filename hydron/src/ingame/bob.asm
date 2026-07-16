@@ -90,11 +90,22 @@ bob_restore:
 ;   d3.w - BLTSIZE
 .do_restore:
   move.l     bob_restore_offset(a3),d4
+  move.w     bob_restore_modulo(a3),d2
+
+  tst.l      d4
+  bge.s      .offset_is_fine
+  ; when restoring bobs from the left edge we need to adjust the restore blitsize to prevent blitting outside of the framebuffer
+  neg.w      d4
+  add.w      d4,d2
+  lsr.w      #1,d4
+  sub.w      d4,d3
+  moveq.l    #0,d4
+.offset_is_fine:
+
   move.l     a2,d0
   add.l      d4,d0                                                            ; source pointer
   move.l     a1,d1
   add.l      d4,d1                                                            ; target pointer
-  move.w     bob_restore_modulo(a3),d2
   move.w     #$ffff,d6
   WAITBLT
   move.w     d6,BLTAFWM(a6)

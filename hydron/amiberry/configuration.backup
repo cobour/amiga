@@ -1,4 +1,4 @@
-config_description=
+config_description=UAE default configuration
 config_hardware=true
 config_host=true
 config_version=8.2.2
@@ -14,6 +14,7 @@ amiberry.hardfile_path=./
 amiberry.cd_path=/Users/frank/Documents/Amiberry/CDROMs/
 ; host-specific
 amiberry.middle_mouse=true
+amiberry.start_not_captured=true
 amiberry.soundcard=0
 amiberry.soundcardname=Q24i-10
 ; common
@@ -125,6 +126,8 @@ gfx_api_options=hardware
 immediate_blits=false
 ntsc=false
 genlock=false
+show_leds=true
+power_led_dim=128
 chipset=ocs
 chipset_refreshrate=49.920410
 collision_level=full
@@ -164,8 +167,8 @@ fpu_strict=false
 rtg_nocustom=true
 rtg_modes=0x112
 rtg_noautomodes=false
-debug_mem=false
-log_illegal_mem=false
+debug_mem=true
+log_illegal_mem=true
 kbd_lang=us
 input.config=0
 input.joymouse_speed_analog=100
