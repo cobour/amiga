@@ -5,3 +5,6 @@ revision = "OCS"
 
 [floppy.df0]
 path = "/Users/frank/Development/projects/amiga/hydron/dist/Hydron.adf"
+
+[input]
+joystick = "keyboard"
