@@ -45,12 +45,14 @@ ig_start:
   bsr        buffers_set_pointers
 
   bsr        fade_ingame_update
-  bsr        player_update                      ; TODO: only update of position and fire new bullets
+  bsr        player_update
+  bsr        player_weapon_update
   bsr        panel_update
   bsr        enemies_update
   bsr        background_update                  ; MUST be called before any update-routines that modify the bitplanes
-
   bsr        bob_update
+
+  bsr        player_and_weapon_draw
   bsr        enemies_restore
   bsr        enemies_draw
 

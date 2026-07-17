@@ -269,12 +269,10 @@ player_update:
 .not_right:
 .anim_chosen:
 
-  bsr        player_weapon_update
+  rts
 
-  ; *******************************
-  ; begin of drawing to sprite data
-  ; *******************************
 
+player_and_weapon_draw:
   ; init working pointers
   move.l     ig_om_buffers_backbuffer(a4),a0
   move.l     ig_buffers_sprites_pointer(a0),a1
@@ -483,7 +481,6 @@ player_weapon_fire:
   rts
 
 player_weapon_update:
-  movem.l    d0-d1/d4-d5,-(sp)
 
   ; update all bullet positions
   lea.l      ig_om_player_bullets_stack_0(a4),a0
@@ -503,7 +500,6 @@ player_weapon_update:
 
   nop                                                                             ; TODO: jsr to pointer when multiple weapons are available (maybe height or anything else must be updated, too)
 
-  movem.l    (sp)+,d0-d1/d4-d5
   rts
 
 .position_update_per_stack:
