@@ -35,7 +35,7 @@ import de.spozzfroin.amiga.datatool.util.BinaryValueConverter;
 
 class TiledSource extends AbstractSource {
 
-	private record EnemySpawnInfo(String enemyType, int xpos, int ypos, int levelYpos) {
+	private record EnemySpawnInfo(String enemyType, int xpos, int ypos, int levelYpos, String movement) {
 		// empty
 	}
 
@@ -90,7 +90,7 @@ class TiledSource extends AbstractSource {
 	}
 
 	private int getEnemySpawnInfoLength() {
-		return this.enemySpawnInfos.size() * 16; // df_tld_enm_sizeof
+		return this.enemySpawnInfos.size() * 20; // df_tld_enm_sizeof
 	}
 
 	@Override
@@ -111,6 +111,11 @@ class TiledSource extends AbstractSource {
 			BINARY_VALUE_CONVERTER.writeWord(e.ypos, data);
 			BINARY_VALUE_CONVERTER.writeWord(0, data); // no fraction
 			BINARY_VALUE_CONVERTER.writeLong(e.levelYpos, data);
+			if (e.movement != null && !e.movement.isEmpty()) {
+				BINARY_VALUE_CONVERTER.writeLong(e.movement, data);
+			} else {
+				BINARY_VALUE_CONVERTER.writeLong(0, data);
+			}
 		});
 	}
 
@@ -217,9 +222,10 @@ class TiledSource extends AbstractSource {
 					properties.get("spawn_add_to_level_ypos") : "0"); // property is optional
 			levelYpos += spawnAddToLevelYpos;
 			var ypos = Integer.parseInt(properties.get("spawn_screen_ypos")); // property is obligatory
-			//if (Integer.parseInt(attributes.getNamedItem("id").getNodeValue()) == 16) {
-			spawnInfo.add(new EnemySpawnInfo(enemyType, xpos, ypos, levelYpos));
-			//}
+			var movement = properties.get("movement"); // property is optional, but null is handled correctly
+			// if (Integer.parseInt(attributes.getNamedItem("id").getNodeValue()) == 16) {
+			spawnInfo.add(new EnemySpawnInfo(enemyType, xpos, ypos, levelYpos, movement));
+			// }
 		});
 		//
 		spawnInfo.sort(Comparator.comparing(EnemySpawnInfo::levelYpos));

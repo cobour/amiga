@@ -3,6 +3,7 @@
  <image source="enemies_32x32_tileset.png" width="512" height="128"/>
  <tile id="0" type="ET00">
   <properties>
+   <property name="movement" value="EMxx"/>
    <property name="spawn_add_to_level_ypos" type="int" value="0"/>
    <property name="spawn_screen_ypos" type="int" value="0"/>
   </properties>

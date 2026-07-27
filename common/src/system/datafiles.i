@@ -45,6 +45,7 @@ df_tld_enm_enemytype:    rs.l       1              ; enemytype to spawn (should 
 df_tld_enm_xpos:         rs.l       1              ; spawn xpos in screen-coordinates as fixed-point value
 df_tld_enm_ypos:         rs.l       1              ; spawn ypos in screen-coordinates as fixed-point value
 df_tld_enm_level_ypos:   rs.l       1              ; ypos of level in level-coordinates that triggers the spawn
+df_tld_enm_movement:     rs.l       1              ; id of movement, must e replaced with pointer to actual movement data in memory
 df_tld_enm_sizeof:       rs.b       0
 
 ; TiledSource metadata
@@ -59,5 +60,13 @@ df_tld_enm_rawsize:      rs.l       1              ; size of enemy spawn info (=
 ; SvgPathSource metadata
                          rsreset
 df_svgp_steps:           rs.w       1              ; number of steps
+df_svgp_size:            rs.l       1              ; size of step table in bytes
+
+; SvgPathSource rawdata per step
+                         rsreset
+df_svgp_step_xpos_add:   rs.l       1              ; add to xpos
+df_svgp_step_ypos_add:   rs.l       1              ; add to ypos
+df_svgp_step_direction:  rs.w       1              ; direction number (0 = right, incrementing counter-clockwise)
+df_svgp_step_sizeof:     rs.b       0
 
                          endif                     ; ifnd DATAFILES_I

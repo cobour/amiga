@@ -35,6 +35,19 @@ enemies_init:
   add.l      d1,a1
   move.l     a1,ig_om_enemies_spawn_data_end_pointer(a4)
 
+  ; init enemy spawn info / replace movement id with pointer
+  move.l     ig_om_enemies_spawn_data_pointer(a4),a1
+  move.l     ig_om_enemies_spawn_data_end_pointer(a4),d7
+.init_spawn_info_loop:
+  move.l     df_tld_enm_movement(a1),d0
+  beq.s      .init_spawn_info_loop_next
+  bsr        datafiles_get_pointer
+  move.l     a0,df_tld_enm_movement(a1)
+.init_spawn_info_loop_next:
+  lea.l      df_tld_enm_sizeof(a1),a1
+  cmp.l      a1,d7
+  bne.s      .init_spawn_info_loop
+
   ; init enemytypes and bobtypes
   move.l     ig_om_enemies_spawn_data_pointer(a4),a1
   move.l     ig_om_enemies_spawn_data_end_pointer(a4),d7
@@ -68,6 +81,7 @@ enemies_init:
   rts
 
 enemies_spawn:
+  moveq.l    #0,d5
   move.l     ig_om_enemies_spawn_data_pointer(a4),a2
   move.l     ig_om_enemies_spawn_data_end_pointer(a4),d6
   cmp.l      d6,a2
@@ -98,8 +112,16 @@ enemies_spawn:
   move.l     df_tld_enm_enemytype(a2),a0
   move.l     a0,enemy_enemytype_pointer(a1)
   move.l     enemytype_bobtype_pointer(a0),bob_bobtype_pointer(a1)
+  clr.l      enemy_move_next_step(a1)
+  move.l     df_tld_enm_movement(a2),a0
+  cmp.l      d5,a0                                                    ; d5 = zero
+  beq.s      .next_spawn_info
+  move.l     df_idx_ptr_rawdata(a0),a3
+  move.l     a3,enemy_move_next_step(a1)
+  add.l      df_idx_metadata+df_svgp_size(a0),a3
+  move.l     a3,enemy_move_end_of_table(a1)
 
-  ; next spawn info
+.next_spawn_info:
   lea.l      df_tld_enm_sizeof(a2),a2
   cmp.l      a2,d6
   bne.s      .spawn_loop
@@ -110,7 +132,49 @@ enemies_spawn:
 
 enemies_update:
   bsr.s      enemies_spawn
-  ; do not move right now
+  bsr.s      enemies_move
+  rts
+
+enemies_move:
+  ; move enemies
+  moveq.l    #0,d5
+  lea.l      ig_om_enemies(a4),a0
+  moveq.l    #EnemiesCount-1,d7
+.move_loop:
+  tst.w      bob_status(a0)
+  blt.s      .move_loop_next
+  move.l     enemy_move_next_step(a0),a1
+  cmp.l      d5,a1                                                    ; d5 = zero
+  beq.s      .move_loop_next
+  ; apply step
+  move.l     df_svgp_step_xpos_add(a1),d0
+  move.l     df_svgp_step_ypos_add(a1),d1
+  move.w     df_svgp_step_direction(a1),d2
+  move.l     bob_bobtype_pointer(a0),a3
+  move.w     bobtype_width_shift(a3),d3
+  lsl.w      d3,d2
+  add.l      d0,bob_xpos(a0)
+  add.l      d1,bob_ypos(a0)
+  move.w     d2,bob_anim_offset+2(a0)
+  ; switch to next step (or stay at last step)
+  lea.l      df_svgp_step_sizeof(a1),a1
+  cmp.l      enemy_move_end_of_table(a0),a1
+  beq.s      .move_loop_end_of_table
+  move.l     a1,enemy_move_next_step(a0)
+  bra.s      .move_loop_next
+.move_loop_end_of_table:
+  ; check if bob is no longer drawn, means it exited the visible screen, means it can be removed
+  move.w     bob_restore_1a+bob_restore_bltsize(a0),d0
+  swap       d0
+  move.w     bob_restore_2a+bob_restore_bltsize(a0),d0
+  tst.l      d0
+  bne.s      .move_loop_next
+  ; remove enemy/bob
+  bsr        bob_clear_quick
+.move_loop_next:
+  lea.l      enemy_sizeof(a0),a0
+  dbf        d7,.move_loop
+
   rts
 
 enemies_restore:

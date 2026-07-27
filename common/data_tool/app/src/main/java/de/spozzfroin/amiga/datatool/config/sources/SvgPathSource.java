@@ -120,6 +120,7 @@ class SvgPathSource extends AbstractSource {
 		var metadata = new ByteArrayOutputStream();
 		// see datafiles.i df_svgp_*
 		BINARY_VALUE_CONVERTER.writeWord(this.numberOfSteps, metadata);
+		BINARY_VALUE_CONVERTER.writeLong(this.length(), metadata);
 		return Arrays.asList(IndexEntry.create(this.getId(), metadata.toByteArray(), this));
 	}
 

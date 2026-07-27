@@ -22,6 +22,7 @@ bob_restore_sizeof:        rs.b       0
 bobtype_gfx_id:            rs.l       1                     ; ID of gfx file that is associated to this bobtype
 bobtype_width:             rs.w       1                     ; width of bob in pixels
 bobtype_height:            rs.w       1                     ; height of bob in pixels
+bobtype_width_shift:       rs.w       1                     ; how many bits for lsl.w when calculating the anim offset from anim number (e.g. rotation)
 bobtype_width_words:       rs.w       1                     ; width of bob in words
 bobtype_height_blt:        rs.w       1                     ; height for blitter (height * bitplanes)
 bobtype_data_pointer:      rs.l       1                     ; pointer to gfx data

@@ -14,6 +14,8 @@ enemytype_sizeof:           rs.b       0
                             rsreset
 enemy_bob_struct:           rs.b       bob_sizeof            ; embedded bob-struct
 enemy_enemytype_pointer:    rs.l       1                     ; pointer to enemytype-struct
+enemy_move_next_step:       rs.l       1                     ; pointer to next step of movement table OR zero when there is no movement table
+enemy_move_end_of_table:    rs.l       1                     ; pointer directly behind movement table
 enemy_sizeof:               rs.b       0
 
                             endif                            ; ifnd ENEMIES_I

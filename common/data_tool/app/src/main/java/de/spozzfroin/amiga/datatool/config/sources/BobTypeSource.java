@@ -63,9 +63,17 @@ class BobTypeSource extends AbstractSource {
 		var gfxSource = (IffSource) optSource.get();
 		var outputStream = new ByteArrayOutputStream();
 		//
+		var width_temp = (this.width / 8);
+		var width_shift = 0;
+		while (width_temp != 1) {
+			width_temp /= 2;
+			width_shift++;
+		}
+		//
 		BINARY_VALUE_CONVERTER.writeLong(this.gfxId, outputStream); // bobtype_gfx_id
 		BINARY_VALUE_CONVERTER.writeWord(this.width, outputStream); // bobtype_width
 		BINARY_VALUE_CONVERTER.writeWord(this.height, outputStream); // bobtype_height
+		BINARY_VALUE_CONVERTER.writeWord(width_shift, outputStream); // bobtype_width_shift
 		BINARY_VALUE_CONVERTER.writeWord(this.width / 16, outputStream); // bobtype_width_words
 		BINARY_VALUE_CONVERTER.writeWord(this.height * gfxSource.getBitplanes(), outputStream); // bobtype_height_blt
 		BINARY_VALUE_CONVERTER.writeLong(0, outputStream); // bobtype_data_pointer

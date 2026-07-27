@@ -44,6 +44,7 @@ targetFiles:
         id: MS02
       - filename: ingame/level_0/rotating_enemy_hybris_32x32.iff
         id: TEST
+        flattenedTileFormat: 32x32
 
   - filename: F100
     description: ingame_other_common
@@ -93,8 +94,8 @@ targetFiles:
         reversedVertically: true
       - filename: ingame/level_0/simple_topleft_to_downright.svg
         id: EM01
-        numberOfSteps: 250
-        numberOfDirections: 16
+        numberOfSteps: 100
+        numberOfDirections: 32
       - filename: .bobtype
         id: BT00
         gfxId: TEST
