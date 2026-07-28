@@ -22,6 +22,8 @@ LOADER_DD_ASM equ 1
   ; fade color zero to black on KS 1.x
   move.w     20(a6),d0                                 ; version of exec.library
   lea.l      CUSTOM,a6
+  lea.l      .copperlist(pc),a0
+  move.l     a0,COP1LC(a6)
   move.w     #%0011111111111111,INTENA(a6)             ; no ints
   move.w     #%0011111111111111,INTREQ(a6)             ; at all
   cmp.b      #36,d0                                    ; KS 2.x or greater
@@ -29,7 +31,7 @@ LOADER_DD_ASM equ 1
   move.w     #$0eee,d1
   move.l     #$1ff00,d3
 .fade_out_loop:
-  move.w     d1,$180(a6)
+  move.w     d1,6(a0)
   beq.s      .fade_out_end
 .fade_out_wait_vbl:  
   move.l     VPOSR(a6),d0
@@ -44,6 +46,7 @@ LOADER_DD_ASM equ 1
   bne.s      .fade_out_wait_vbl2
   bra.s      .fade_out_loop
 .fade_out_end:
+  clr.w      6(a0)
 
   ; check memory requirements
 
@@ -88,6 +91,11 @@ LOADER_DD_ASM equ 1
   cmp.l      a3,a2
   bne.s      .copy_loop
   jmp        (a1)
+
+.copperlist:
+  dc.w       BPLCON0,BplColorOn
+  dc.w       COLOR00,$0fff
+  dc.w       $ffff,$fffe
 
 error:
   move.w     #$f00,COLOR00(a6)
