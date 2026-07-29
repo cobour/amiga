@@ -1,0 +1,482 @@
+diff --git a/hydron/src/ingame.i b/hydron/src/ingame.i
+index d47d42b..1414b63 100644
+--- a/hydron/src/ingame.i
++++ b/hydron/src/ingame.i
+@@ -70,6 +70,15 @@ ig_om_player_max_ypos:                    rs.w       1
+ ig_om_player_left_for_frames:             rs.w       1                                                       ; player is moving left for x number of frames (for decision which animation frame to show)
+ ig_om_player_right_for_frames:            rs.w       1                                                       ; player is moving right for x number of frames (for decision which animation frame to show)
+ ig_om_player_centered_for_frames:         rs.w       1                                                       ; player is centered for x number of frames (for decision which animation frame to show)
++ig_om_player_bullettype_stack_0:          rs.l       1                                                       ; pointer to bullettype struct for bullets in bullet stack 0
++ig_om_player_bullettype_stack_1:          rs.l       1                                                       ; pointer to bullettype struct for bullets in bullet stack 1
++ig_om_player_bullettype_stack_2:          rs.l       1                                                       ; pointer to bullettype struct for bullets in bullet stack 2
++ig_om_player_default_cw_bullet_stack_0:   rs.l       PlayerBulletsMaxCountStacked                            ; default control words for each bullet in bullet stack 0 with xpos outside of visible screen
++ig_om_player_default_cw_bullet_stack_1:   rs.l       PlayerBulletsMaxCountStacked                            ; default control words for each bullet in bullet stack 1 with xpos outside of visible screen
++ig_om_player_default_cw_bullet_stack_2:   rs.l       PlayerBulletsMaxCountStacked                            ; default control words for each bullet in bullet stack 2 with xpos outside of visible screen
++ig_om_player_cw_offset_player_45:         rs.l       1                                                       ; offset inside sprite data of sprites 4 and 5 where first control word of player (ship or satellite) is located
++ig_om_player_cw_offset_player_67:         rs.l       1                                                       ; offset inside sprite data of sprites 6 and 7 where first control word of player (ship or satellite) is located
++;ig_om_player_cw_offsets_bullets:          rs.l       PlayerBulletsMaxCountStacked                            ; offsets inside sprite data where first control word of bullet is located; applies for sprites 2-7 because they contain bullet stacks first, sprites 0-1 have no bullets
+ ig_om_player_bullets_stack_0:             rs.b       ig_player_bullet_sizeof*PlayerBulletsMaxCountStacked    ; player bullets structs of stack 0
+ ig_om_player_bullets_stack_1:             rs.b       ig_player_bullet_sizeof*PlayerBulletsMaxCountStacked    ; player bullets structs of stack 1
+ ig_om_player_bullets_stack_2:             rs.b       ig_player_bullet_sizeof*PlayerBulletsMaxCountStacked    ; player bullets structs of stack 2
+diff --git a/hydron/src/ingame/player.asm b/hydron/src/ingame/player.asm
+index 5d1ca11..15f275d 100644
+--- a/hydron/src/ingame/player.asm
++++ b/hydron/src/ingame/player.asm
+@@ -6,6 +6,35 @@ INGAME_PLAYER_ASM equ 1
+ 
+ player_init:
+ 
++  bsr        player_weapon_set_type
++
++  ; calc default control words for each bullet stack
++  lea.l      ig_om_player_default_cw_bullet_stack_0(a4),a0
++  move.l     ig_om_player_bullettype_stack_0(a4),a1
++  bsr.s      .calc_default_cw
++  lea.l      ig_om_player_default_cw_bullet_stack_1(a4),a0
++  move.l     ig_om_player_bullettype_stack_1(a4),a1
++  bsr.s      .calc_default_cw
++  lea.l      ig_om_player_default_cw_bullet_stack_2(a4),a0
++  move.l     ig_om_player_bullettype_stack_2(a4),a1
++  bsr.s      .calc_default_cw
++  bra.s      .go_on
++.calc_default_cw:
++  moveq.l    #PlayerBulletsMaxCountStacked-1,d7
++  moveq.l    #0,d3                                                                ; ypos
++.calc_default_cw_loop:
++  move.w     #260,d4
++  move.w     d3,d5
++  move.w     ig_player_bullettype_height(a1),d6
++  bsr        calc_pos_ctl
++  move.w     d1,(a0)+
++  move.w     d2,(a0)+
++  add.w      ig_player_bullettype_height(a1),d3
++  addq.w     #1,d3
++  dbf        d7,.calc_default_cw_loop
++  rts
++
++.go_on:
+   ; init player ship gfx and metadata
+   move.l     #"PLYR",d0
+   bsr        datafiles_get_pointer
+@@ -102,6 +131,20 @@ player_init:
+   move.w     #PlayerFireDelay,ig_om_player_bullets_fire_delay(a4)
+   move.w     #PlayerFireDelay,ig_om_player_bullets_fire_delay_count(a4)           ; so bullet can be fired immediately
+ 
++  ; init sprite data for both buffers
++  ;  - fill with all gfx data
++  ;  - bullet control words with positions outside of visible screen
++  ;  - player (ship/satellites) control words with valid position inside visible screen
++  ; init ig_cm_player_sprites_buffer_0
++  bsr        .init_sprite_data
++  ; copy ig_cm_player_sprites_buffer_0 to ig_cm_player_sprites_buffer_1
++  move.w     #(ig_player_sprite_sizeof/2)-1,d7
++  lea.l      ig_cm_player_sprites_buffer_0(a5),a0
++  lea.l      ig_cm_player_sprites_buffer_1(a5),a1
++.sprite_data_copy_loop:
++  move.w     (a0)+,(a1)+
++  dbf        d7,.sprite_data_copy_loop
++
+   ; set sprite pointers in copperlist
+   move.l     ig_om_buffer_one+ig_buffers_copperlist_pointer(a4),a0
+   lea.l      ig_cm_player_sprites_buffer_0(a5),a3
+@@ -170,113 +213,10 @@ player_init:
+ 
+   rts
+ 
+-player_update:
+-
+-  move.l     ig_om_player_xpos(a4),d4
+-  move.l     ig_om_player_ypos(a4),d5
+-
+-  ; read joystick, update player position and check against boundaries
+-  bsr        joystick_read
+-  btst       #JsDown,d0
+-  beq.s      .test_up
+-  add.l      ig_om_player_speed(a4),d5
+-  cmp.l      ig_om_player_max_ypos(a4),d5
+-  ble.s      .test_up
+-  move.l     ig_om_player_max_ypos(a4),d5
+-.test_up:
+-  btst       #JsUp,d0
+-  beq.s      .test_left
+-  sub.l      ig_om_player_speed(a4),d5
+-  cmp.l      ig_om_player_min_ypos(a4),d5
+-  bge.s      .test_left
+-  move.l     ig_om_player_min_ypos(a4),d5
+-.test_left:
+-  btst       #JsLeft,d0
+-  beq.s      .test_right
+-  sub.l      ig_om_player_speed(a4),d4
+-  add.w      #1,ig_om_player_left_for_frames(a4)
+-  clr.w      ig_om_player_right_for_frames(a4)
+-  clr.w      ig_om_player_centered_for_frames(a4)
+-  cmp.l      ig_om_player_min_xpos(a4),d4
+-  bge.s      .test_right
+-  move.l     ig_om_player_min_xpos(a4),d4
+-.test_right:
+-  btst       #JsRight,d0
+-  beq.s      .test_fire
+-  add.l      ig_om_player_speed(a4),d4
+-  add.w      #1,ig_om_player_right_for_frames(a4)
+-  clr.w      ig_om_player_left_for_frames(a4)
+-  clr.w      ig_om_player_centered_for_frames(a4)
+-  cmp.l      ig_om_player_max_xpos(a4),d4
+-  ble.s      .test_fire
+-  move.l     ig_om_player_max_xpos(a4),d4
+-.test_fire:
+-  move.l     d4,ig_om_player_xpos(a4)
+-  move.l     d5,ig_om_player_ypos(a4)
+-  add.w      #1,ig_om_player_bullets_fire_delay_count(a4)                         ; increment fire delay counter
+-  btst       #JsFire,d0
+-  beq.s      .test_end
+-  bsr        player_weapon_fire
+-.test_end:
+-
+-  and.b      #1<<JsLeft|1<<JsRight,d0
+-  tst.b      d0
+-  bne.s      .not_centered
+-
+-  ; choose anim step for player ship when joystick is centered
+-  ; move back softly (when it was hard right or hard left, then switch to right or left first)
+-  clr.w      ig_om_player_left_for_frames(a4)
+-  clr.w      ig_om_player_right_for_frames(a4)
+-  add.w      #1,ig_om_player_centered_for_frames(a4)
+-  cmp.w      #PlayerShipAnimSwitchDelay/2,ig_om_player_centered_for_frames(a4)
+-  ble.s      .centered_soft_back
+-  move.b     #PlayerShipAnimCentered,ig_om_player_anim_offset+3(a4)               ; default
+-  bra.s      .anim_chosen
+-.centered_soft_back:
+-  cmp.b      #PlayerShipAnimHardLeft,ig_om_player_anim_offset+3(a4)
+-  bne.s      .centered_check_hard_right
+-  move.b     #PlayerShipAnimLeft,ig_om_player_anim_offset+3(a4)
+-  bra.s      .anim_chosen
+-.centered_check_hard_right:
+-  cmp.b      #PlayerShipAnimHardRight,ig_om_player_anim_offset+3(a4)
+-  bne.s      .not_centered
+-  move.b     #PlayerShipAnimRight,ig_om_player_anim_offset+3(a4)
+-  bra.s      .anim_chosen
+-.not_centered:
+-
+-  ; choose anim step for player ship when joystick is left or right
+-  move.w     ig_om_player_left_for_frames(a4),d0
+-  tst.w      d0
+-  beq.s      .not_left
+-  cmp.w      #PlayerShipAnimSwitchDelay,d0
+-  blt.s      .not_hard_left
+-  move.b     #PlayerShipAnimHardLeft,ig_om_player_anim_offset+3(a4)
+-  bra.s      .anim_chosen
+-.not_hard_left:
+-  moveq.l    #PlayerShipAnimLeft,d1
+-  move.b     #PlayerShipAnimLeft,ig_om_player_anim_offset+3(a4)
+-  bra.s      .anim_chosen
+-.not_left:
+-  move.w     ig_om_player_right_for_frames(a4),d0
+-  tst.w      d0
+-  beq.s      .not_right
+-  cmp.w      #PlayerShipAnimSwitchDelay,d0
+-  blt.s      .not_hard_right
+-  move.b     #PlayerShipAnimHardRight,ig_om_player_anim_offset+3(a4)
+-  bra.s      .anim_chosen
+-.not_hard_right:
+-  move.b     #PlayerShipAnimRight,ig_om_player_anim_offset+3(a4)
+-.not_right:
+-.anim_chosen:
+-
+-  rts
+-
++.init_sprite_data:
+ 
+-player_and_weapon_draw:
+   ; init working pointers
+-  move.l     ig_om_buffers_backbuffer(a4),a0
+-  move.l     ig_buffers_sprites_pointer(a0),a1
+-
++  lea.l      ig_cm_player_sprites_buffer_0(a5),a1
+   lea.l      ig_om_player_sprite_0_work_pointer(a4),a3
+   move.l     a1,(a3)+
+   lea.l      ig_player_sprite1(a1),a2
+@@ -293,9 +233,10 @@ player_and_weapon_draw:
+   move.l     a2,(a3)+
+   lea.l      ig_player_sprite7(a1),a2
+   move.l     a2,(a3)
+-  
++
+   ; draw bullet stack 0 bullets to SPR2+SPR3
+-  lea.l      ig_om_player_bullets_stack_0_list(a4),a1
++  lea.l      ig_om_player_default_cw_bullet_stack_0(a4),a0
++  move.l     ig_om_player_bullettype_stack_0(a4),a1
+   move.l     ig_om_player_sprite_2_work_pointer(a4),a2
+   move.l     ig_om_player_sprite_3_work_pointer(a4),a3
+   bsr        .draw_bullet_stack
+@@ -303,20 +244,28 @@ player_and_weapon_draw:
+   move.l     a3,ig_om_player_sprite_3_work_pointer(a4)
+ 
+   ; draw bullet stack 1 bullets to SPR4+SPR5
+-  lea.l      ig_om_player_bullets_stack_1_list(a4),a1
++  lea.l      ig_om_player_default_cw_bullet_stack_1(a4),a0
++  move.l     ig_om_player_bullettype_stack_1(a4),a1
+   move.l     ig_om_player_sprite_4_work_pointer(a4),a2
++  move.l     a2,ig_om_player_cw_offset_player_45(a4)
+   move.l     ig_om_player_sprite_5_work_pointer(a4),a3
+   bsr        .draw_bullet_stack
+   move.l     a2,ig_om_player_sprite_4_work_pointer(a4)
+   move.l     a3,ig_om_player_sprite_5_work_pointer(a4)
++  sub.l      ig_om_player_cw_offset_player_45(a4),a2
++  move.l     a2,ig_om_player_cw_offset_player_45(a4)
+ 
+   ; draw bullet stack 2 bullets to SPR6+SPR7
+-  lea.l      ig_om_player_bullets_stack_2_list(a4),a1
++  lea.l      ig_om_player_default_cw_bullet_stack_2(a4),a0
++  move.l     ig_om_player_bullettype_stack_2(a4),a1
+   move.l     ig_om_player_sprite_6_work_pointer(a4),a2
++  move.l     a2,ig_om_player_cw_offset_player_67(a4)
+   move.l     ig_om_player_sprite_7_work_pointer(a4),a3
+   bsr        .draw_bullet_stack
+   move.l     a2,ig_om_player_sprite_6_work_pointer(a4)
+   move.l     a3,ig_om_player_sprite_7_work_pointer(a4)
++  sub.l      ig_om_player_cw_offset_player_67(a4),a2
++  move.l     a2,ig_om_player_cw_offset_player_67(a4)
+ 
+   ; TODO: draw satellites / side guns TO SPR0+SPR1 and SPR2+SPR3
+ 
+@@ -334,7 +283,7 @@ player_and_weapon_draw:
+   move.w     ig_om_player_xpos(a4),d4                                             ; no fraction needed
+   move.w     ig_om_player_ypos(a4),d5                                             ; no fraction needed
+   move.w     #PlayerShipHeight,d6
+-  bsr        .calc_pos_ctl
++  bsr        calc_pos_ctl
+ 
+   moveq.l    #0,d0
+   move.w     ig_om_player_gfx_width_bytes(a4),d0
+@@ -361,6 +310,24 @@ player_and_weapon_draw:
+ 
+   rts
+ 
++; in:
++;   a0 - pointer to default control words for bullets
++;   a1 - pointer to bullettype of bullet stack
++;   a2 - pointer to first sprite data
++;   a3 - pointer to second sprite data
++.draw_bullet_stack:
++  moveq.l    #PlayerBulletsMaxCountStacked-1,d7
++  move.l     ig_player_bullettype_gfx_width_bytes(a1),d0
++  move.w     ig_player_bullettype_initial_anim_offset(a1),d3                      ; maybe a TODO here
++  move.l     ig_player_bullettype_gfx_pointer(a1),a1
++.draw_bullets_stack_loop:
++  move.w     (a0)+,d1
++  move.w     (a0)+,d2
++  bsr.s      .write_control_words_and_gfx_to_sprite_data
++.draw_bullets_stack_loop_next:
++  dbf        d7,.draw_bullets_stack_loop
++  rts
++
+ ; in:
+ ;  d0.l - width of source gfx in bytes
+ ;  d1.w - SPRxPOS
+@@ -371,6 +338,9 @@ player_and_weapon_draw:
+ ;  a2.l - pointer to first sprite data
+ ;  a3.l - pointer to second sprite data
+ .write_control_words_and_gfx_to_sprite_data:
++  move.w     d7,-(sp)
++  move.l     a1,-(sp)
++
+   ; control words
+   move.w     d1,(a2)+
+   move.w     d2,(a2)+
+@@ -394,6 +364,8 @@ player_and_weapon_draw:
+   add.l      d0,a1
+   dbf        d7,.copy_loop
+ 
++  move.l     (sp)+,a1
++  move.w     (sp)+,d7
+   rts
+ 
+ ; in:
+@@ -403,7 +375,7 @@ player_and_weapon_draw:
+ ; out:
+ ;   d1.w - SPRxPOS
+ ;   d2.w - SPRxCTL
+-.calc_pos_ctl:
++calc_pos_ctl:
+ 
+   ; add beam start pos
+   add.w      #IgScreenStartX,d4
+@@ -434,32 +406,152 @@ player_and_weapon_draw:
+ .no_h0_h_start:
+   rts
+ 
+-; in:
+-;   a1 - pointer to bullet stack struct
+-;   a2 - pointer to first sprite data
+-;   a3 - pointer to second sprite data
+-.draw_bullet_stack:
+-  moveq.l    #PlayerBulletsMaxCountStacked-1,d7
+-.draw_bullets_stack_loop:
+-  move.l     (a1)+,a0
+-  cmp.l      #0,a0
+-  beq.s      .draw_bullets_stack_loop_next
+-  tst.b      ig_player_bullet_active(a0)
+-  beq.s      .draw_bullets_stack_loop_next
+-  ; actually active bullet
+-  movem.l    d7/a0-a1,-(sp)
+-  move.w     ig_player_bullet_xpos(a0),d4                                         ; no fraction needed
+-  move.w     ig_player_bullet_ypos(a0),d5                                         ; no fraction needed
+-  move.w     ig_player_bullet_height(a0),d6
+-  bsr.s      .calc_pos_ctl
+-  move.l     ig_player_bullet_gfx_width_bytes(a0),d0
+-  move.w     ig_player_bullet_anim_offset(a0),d3
+-  move.l     ig_player_bullet_gfx_pointer(a0),a1
+-  bsr        .write_control_words_and_gfx_to_sprite_data
+-  movem.l    (sp)+,d7/a0-a1
+-.draw_bullets_stack_loop_next:
+-  addq.l     #4,a0
+-  dbf        d7,.draw_bullets_stack_loop
++player_update:
++
++  move.l     ig_om_player_xpos(a4),d4
++  move.l     ig_om_player_ypos(a4),d5
++
++  ; read joystick, update player position and check against boundaries
++  bsr        joystick_read
++  btst       #JsDown,d0
++  beq.s      .test_up
++  add.l      ig_om_player_speed(a4),d5
++  cmp.l      ig_om_player_max_ypos(a4),d5
++  ble.s      .test_up
++  move.l     ig_om_player_max_ypos(a4),d5
++.test_up:
++  btst       #JsUp,d0
++  beq.s      .test_left
++  sub.l      ig_om_player_speed(a4),d5
++  cmp.l      ig_om_player_min_ypos(a4),d5
++  bge.s      .test_left
++  move.l     ig_om_player_min_ypos(a4),d5
++.test_left:
++  btst       #JsLeft,d0
++  beq.s      .test_right
++  sub.l      ig_om_player_speed(a4),d4
++  add.w      #1,ig_om_player_left_for_frames(a4)
++  clr.w      ig_om_player_right_for_frames(a4)
++  clr.w      ig_om_player_centered_for_frames(a4)
++  cmp.l      ig_om_player_min_xpos(a4),d4
++  bge.s      .test_right
++  move.l     ig_om_player_min_xpos(a4),d4
++.test_right:
++  btst       #JsRight,d0
++  beq.s      .test_fire
++  add.l      ig_om_player_speed(a4),d4
++  add.w      #1,ig_om_player_right_for_frames(a4)
++  clr.w      ig_om_player_left_for_frames(a4)
++  clr.w      ig_om_player_centered_for_frames(a4)
++  cmp.l      ig_om_player_max_xpos(a4),d4
++  ble.s      .test_fire
++  move.l     ig_om_player_max_xpos(a4),d4
++.test_fire:
++  move.l     d4,ig_om_player_xpos(a4)
++  move.l     d5,ig_om_player_ypos(a4)
++  add.w      #1,ig_om_player_bullets_fire_delay_count(a4)                         ; increment fire delay counter
++  btst       #JsFire,d0
++  beq.s      .test_end
++  bsr        player_weapon_fire
++.test_end:
++
++  and.b      #1<<JsLeft|1<<JsRight,d0
++  tst.b      d0
++  bne.s      .not_centered
++
++  ; choose anim step for player ship when joystick is centered
++  ; move back softly (when it was hard right or hard left, then switch to right or left first)
++  clr.w      ig_om_player_left_for_frames(a4)
++  clr.w      ig_om_player_right_for_frames(a4)
++  add.w      #1,ig_om_player_centered_for_frames(a4)
++  cmp.w      #PlayerShipAnimSwitchDelay/2,ig_om_player_centered_for_frames(a4)
++  ble.s      .centered_soft_back
++  move.b     #PlayerShipAnimCentered,ig_om_player_anim_offset+3(a4)               ; default
++  bra.s      .anim_chosen
++.centered_soft_back:
++  cmp.b      #PlayerShipAnimHardLeft,ig_om_player_anim_offset+3(a4)
++  bne.s      .centered_check_hard_right
++  move.b     #PlayerShipAnimLeft,ig_om_player_anim_offset+3(a4)
++  bra.s      .anim_chosen
++.centered_check_hard_right:
++  cmp.b      #PlayerShipAnimHardRight,ig_om_player_anim_offset+3(a4)
++  bne.s      .not_centered
++  move.b     #PlayerShipAnimRight,ig_om_player_anim_offset+3(a4)
++  bra.s      .anim_chosen
++.not_centered:
++
++  ; choose anim step for player ship when joystick is left or right
++  move.w     ig_om_player_left_for_frames(a4),d0
++  tst.w      d0
++  beq.s      .not_left
++  cmp.w      #PlayerShipAnimSwitchDelay,d0
++  blt.s      .not_hard_left
++  move.b     #PlayerShipAnimHardLeft,ig_om_player_anim_offset+3(a4)
++  bra.s      .anim_chosen
++.not_hard_left:
++  moveq.l    #PlayerShipAnimLeft,d1
++  move.b     #PlayerShipAnimLeft,ig_om_player_anim_offset+3(a4)
++  bra.s      .anim_chosen
++.not_left:
++  move.w     ig_om_player_right_for_frames(a4),d0
++  tst.w      d0
++  beq.s      .not_right
++  cmp.w      #PlayerShipAnimSwitchDelay,d0
++  blt.s      .not_hard_right
++  move.b     #PlayerShipAnimHardRight,ig_om_player_anim_offset+3(a4)
++  bra.s      .anim_chosen
++.not_hard_right:
++  move.b     #PlayerShipAnimRight,ig_om_player_anim_offset+3(a4)
++.not_right:
++.anim_chosen:
++
++  rts
++
++
++player_and_weapon_draw:
++  ; calc control words for player ship and apply in sprite data
++  move.w     ig_om_player_xpos(a4),d4
++  move.w     ig_om_player_ypos(a4),d5
++  move.w     #PlayerShipHeight,d6
++  bsr        calc_pos_ctl
++  move.l     ig_om_buffers_backbuffer(a4),a0
++  move.l     ig_buffers_sprites_pointer(a0),a0
++  lea.l      ig_player_sprite4(a0),a2
++  lea.l      ig_player_sprite5(a0),a3
++  move.l     ig_om_player_cw_offset_player_45(a4),d0
++  add.l      d0,a2
++  add.l      d0,a3
++  move.w     d1,(a2)+
++  move.w     d2,(a2)
++  bset       #7,d2                                                                ; set attach bit
++  move.w     d1,(a3)+
++  move.w     d2,(a3)+
++  bclr       #7,d2                                                                ; clear attach bit
++  lea.l      ig_player_sprite6(a0),a2
++  lea.l      ig_player_sprite7(a0),a3
++  move.l     ig_om_player_cw_offset_player_67(a4),d0
++  add.l      d0,a2
++  add.l      d0,a3
++  addq.w     #8,d1                                                                ; 6+7 are placed exactly to the right of 4+5
++  move.w     d1,(a2)+
++  move.w     d2,(a2)
++  bset       #7,d2                                                                ; set attach bit
++  move.w     d1,(a3)+
++  move.w     d2,(a3)+
++
++  ; TODO: check if anim step of player ship changed and draw gfx data if necessary
++  ; TODO: set control words of bullets if they are active (start next to player ship in sprite data)
++  ; TODO: IMPORTANT set sprite data pointers in copperlist so that no unused bullet slots of sprite data are pointed to (otherwise problem when player ship is on top and all bullets are just moved out of visible screen)
++  rts
++
++player_weapon_set_type:
++  ; for now always set simple type
++  lea.l      player_bullettype_simple_for_stack_0(pc),a0
++  move.l     a0,ig_om_player_bullettype_stack_0(a4)
++  lea.l      player_bullettype_simple_for_stack_1(pc),a0
++  move.l     a0,ig_om_player_bullettype_stack_1(a4)
++  lea.l      player_bullettype_simple_for_stack_2(pc),a0
++  move.l     a0,ig_om_player_bullettype_stack_2(a4)
+   rts
+ 
+ player_weapon_fire:
