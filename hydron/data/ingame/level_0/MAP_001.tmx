@@ -327,28 +327,154 @@
 </data>
  </layer>
  <objectgroup id="2" name="enemies layer">
-  <object id="19" type="ET00" gid="449" x="-32" y="4520" width="32" height="32">
+  <object id="1" type="ET00" gid="449" x="-32" y="4910" width="32" height="32">
    <properties>
     <property name="movement" value="EM01"/>
     <property name="spawn_add_to_level_ypos" type="int" value="200"/>
     <property name="spawn_screen_ypos" type="int" value="0"/>
    </properties>
   </object>
-  <object id="20" type="ET00" gid="449" x="-32" y="4495" width="32" height="32">
+  <object id="2" type="ET00" gid="449" x="-32" y="4890" width="32" height="32">
    <properties>
     <property name="movement" value="EM01"/>
     <property name="spawn_add_to_level_ypos" type="int" value="200"/>
     <property name="spawn_screen_ypos" type="int" value="0"/>
    </properties>
   </object>
-  <object id="21" type="ET00" gid="449" x="-32" y="4470" width="32" height="32">
+  <object id="3" type="ET00" gid="449" x="-31" y="4870" width="32" height="32">
    <properties>
     <property name="movement" value="EM01"/>
     <property name="spawn_add_to_level_ypos" type="int" value="200"/>
     <property name="spawn_screen_ypos" type="int" value="0"/>
    </properties>
   </object>
-  <object id="22" type="ET00" gid="449" x="-32" y="4445" width="32" height="32">
+  <object id="4" type="ET00" gid="449" x="-32" y="4850" width="32" height="32">
+   <properties>
+    <property name="movement" value="EM01"/>
+    <property name="spawn_add_to_level_ypos" type="int" value="200"/>
+    <property name="spawn_screen_ypos" type="int" value="0"/>
+   </properties>
+  </object>
+  <object id="5" type="ET00" gid="449" x="-32" y="4830" width="32" height="32">
+   <properties>
+    <property name="movement" value="EM01"/>
+    <property name="spawn_add_to_level_ypos" type="int" value="200"/>
+    <property name="spawn_screen_ypos" type="int" value="0"/>
+   </properties>
+  </object>
+  <object id="6" type="ET00" gid="449" x="-32" y="4810" width="32" height="32">
+   <properties>
+    <property name="movement" value="EM01"/>
+    <property name="spawn_add_to_level_ypos" type="int" value="200"/>
+    <property name="spawn_screen_ypos" type="int" value="0"/>
+   </properties>
+  </object>
+  <object id="7" type="ET00" gid="449" x="-32" y="4790" width="32" height="32">
+   <properties>
+    <property name="movement" value="EM01"/>
+    <property name="spawn_add_to_level_ypos" type="int" value="200"/>
+    <property name="spawn_screen_ypos" type="int" value="0"/>
+   </properties>
+  </object>
+  <object id="8" type="ET00" gid="449" x="-32" y="4770" width="32" height="32">
+   <properties>
+    <property name="movement" value="EM01"/>
+    <property name="spawn_add_to_level_ypos" type="int" value="200"/>
+    <property name="spawn_screen_ypos" type="int" value="0"/>
+   </properties>
+  </object>
+  <object id="9" type="ET00" gid="449" x="-32" y="4750" width="32" height="32">
+   <properties>
+    <property name="movement" value="EM01"/>
+    <property name="spawn_add_to_level_ypos" type="int" value="200"/>
+    <property name="spawn_screen_ypos" type="int" value="0"/>
+   </properties>
+  </object>
+  <object id="10" type="ET00" gid="449" x="-32" y="4730" width="32" height="32">
+   <properties>
+    <property name="movement" value="EM01"/>
+    <property name="spawn_add_to_level_ypos" type="int" value="200"/>
+    <property name="spawn_screen_ypos" type="int" value="0"/>
+   </properties>
+  </object>
+  <object id="11" type="ET00" gid="449" x="-32" y="4710" width="32" height="32">
+   <properties>
+    <property name="movement" value="EM01"/>
+    <property name="spawn_add_to_level_ypos" type="int" value="200"/>
+    <property name="spawn_screen_ypos" type="int" value="0"/>
+   </properties>
+  </object>
+  <object id="12" type="ET00" gid="449" x="-32" y="4690" width="32" height="32">
+   <properties>
+    <property name="movement" value="EM01"/>
+    <property name="spawn_add_to_level_ypos" type="int" value="200"/>
+    <property name="spawn_screen_ypos" type="int" value="0"/>
+   </properties>
+  </object>
+  <object id="13" type="ET00" gid="449" x="-32" y="4670" width="32" height="32">
+   <properties>
+    <property name="movement" value="EM01"/>
+    <property name="spawn_add_to_level_ypos" type="int" value="200"/>
+    <property name="spawn_screen_ypos" type="int" value="0"/>
+   </properties>
+  </object>
+  <object id="14" type="ET00" gid="449" x="-32" y="4650" width="32" height="32">
+   <properties>
+    <property name="movement" value="EM01"/>
+    <property name="spawn_add_to_level_ypos" type="int" value="200"/>
+    <property name="spawn_screen_ypos" type="int" value="0"/>
+   </properties>
+  </object>
+  <object id="15" type="ET00" gid="449" x="-32" y="4630" width="32" height="32">
+   <properties>
+    <property name="movement" value="EM01"/>
+    <property name="spawn_add_to_level_ypos" type="int" value="200"/>
+    <property name="spawn_screen_ypos" type="int" value="0"/>
+   </properties>
+  </object>
+  <object id="16" type="ET00" gid="449" x="-32" y="4610" width="32" height="32">
+   <properties>
+    <property name="movement" value="EM01"/>
+    <property name="spawn_add_to_level_ypos" type="int" value="200"/>
+    <property name="spawn_screen_ypos" type="int" value="0"/>
+   </properties>
+  </object>
+  <object id="17" type="ET00" gid="449" x="-32" y="4590" width="32" height="32">
+   <properties>
+    <property name="movement" value="EM01"/>
+    <property name="spawn_add_to_level_ypos" type="int" value="200"/>
+    <property name="spawn_screen_ypos" type="int" value="0"/>
+   </properties>
+  </object>
+  <object id="18" type="ET00" gid="449" x="-32" y="4570" width="32" height="32">
+   <properties>
+    <property name="movement" value="EM01"/>
+    <property name="spawn_add_to_level_ypos" type="int" value="200"/>
+    <property name="spawn_screen_ypos" type="int" value="0"/>
+   </properties>
+  </object>
+  <object id="19" type="ET00" gid="449" x="-32" y="4550" width="32" height="32">
+   <properties>
+    <property name="movement" value="EM01"/>
+    <property name="spawn_add_to_level_ypos" type="int" value="200"/>
+    <property name="spawn_screen_ypos" type="int" value="0"/>
+   </properties>
+  </object>
+  <object id="20" type="ET00" gid="449" x="-32" y="4530" width="32" height="32">
+   <properties>
+    <property name="movement" value="EM01"/>
+    <property name="spawn_add_to_level_ypos" type="int" value="200"/>
+    <property name="spawn_screen_ypos" type="int" value="0"/>
+   </properties>
+  </object>
+  <object id="21" type="ET00" gid="449" x="-32" y="4510" width="32" height="32">
+   <properties>
+    <property name="movement" value="EM01"/>
+    <property name="spawn_add_to_level_ypos" type="int" value="200"/>
+    <property name="spawn_screen_ypos" type="int" value="0"/>
+   </properties>
+  </object>
+  <object id="22" type="ET00" gid="449" x="-32" y="4490" width="32" height="32">
    <properties>
     <property name="movement" value="EM01"/>
     <property name="spawn_add_to_level_ypos" type="int" value="200"/>
