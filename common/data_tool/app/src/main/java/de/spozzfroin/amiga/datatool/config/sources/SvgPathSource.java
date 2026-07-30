@@ -37,7 +37,7 @@ class SvgPathSource extends AbstractSource {
 
 	private static final BinaryValueConverter BINARY_VALUE_CONVERTER = BinaryValueConverter.getInstance();
 
-	private int numberOfSteps;
+	private List<Integer> numberOfSteps;
 	private int numberOfDirections;
 	private List<Step> steps;
 	private List<Direction> degreeToDirection;
@@ -51,14 +51,15 @@ class SvgPathSource extends AbstractSource {
 		return SourceType.SVG_PATH;
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public void initFromConfig(LinkedHashMap<String, Object> parameter) {
 		super.initFromConfig(parameter);
 		//
 		if (parameter.containsKey("numberOfSteps")) {
-			this.numberOfSteps = (int) parameter.get("numberOfSteps");
+			this.numberOfSteps = (List<Integer>) parameter.get("numberOfSteps");
 		} else {
-			this.numberOfSteps = -1;
+			this.numberOfSteps = null;
 		}
 		//
 		if (parameter.containsKey("numberOfDirections")) {
@@ -75,29 +76,32 @@ class SvgPathSource extends AbstractSource {
 		var userAgent = new UserAgentAdapter();
 		var bridgeContext = new BridgeContext(userAgent, new DocumentLoader(userAgent));
 		bridgeContext.setDynamicState(BridgeContext.DYNAMIC);
+		//
 		var svgDocument = new SAXSVGDocumentFactory(XMLResourceDescriptor.getXMLParserClassName())
 				.createDocument(new File(config.getSourceFolder() + this.getFilename()).toURI().toString());
 		new GVTBuilder().build(bridgeContext, svgDocument);
-		var path = (SVGOMPathElement) svgDocument.getElementsByTagName("path").item(0); // first path only
-		float pointLength = path.getTotalLength() / this.numberOfSteps;
-		//
-		this.calcDegreeToDirectionTab();
-		//
-		IntStream.range(0, this.numberOfSteps).forEach(i -> {
-			var source = SVGPathSupport.getPointAtLength(path, pointLength * i);
-			var target = SVGPathSupport.getPointAtLength(path, pointLength * (i + 1));
-			var xAdd = target.getX() - source.getX();
-			var yAdd = target.getY() - source.getY();
-			var degree = this.calcDegree(xAdd, yAdd);
-			var direction = this.degreeToDirection.stream().filter(s -> s.contains(degree)).findAny().get();
-			var step = new Step(xAdd, yAdd, direction.direction);
-			this.steps.add(step);
+		IntStream.range(0, this.numberOfSteps.size()).forEach(pathNumber -> {
+			var path = (SVGOMPathElement) svgDocument.getElementsByTagName("path").item(pathNumber);
+			float pointLength = path.getTotalLength() / this.numberOfSteps.get(pathNumber);
+			//
+			this.calcDegreeToDirectionTab();
+			//
+			IntStream.range(0, this.numberOfSteps.get(pathNumber)).forEach(i -> {
+				var source = SVGPathSupport.getPointAtLength(path, pointLength * i);
+				var target = SVGPathSupport.getPointAtLength(path, pointLength * (i + 1));
+				var xAdd = target.getX() - source.getX();
+				var yAdd = target.getY() - source.getY();
+				var degree = this.calcDegree(xAdd, yAdd);
+				var direction = this.degreeToDirection.stream().filter(s -> s.contains(degree)).findAny().get();
+				var step = new Step(xAdd, yAdd, direction.direction);
+				this.steps.add(step);
+			});
 		});
 	}
 
 	@Override
 	public int length() {
-		return this.numberOfSteps * 10; // 2 longs (x- and y-add) and one word (direction) per step
+		return this.getTotalNumberOfSteps() * 10; // 2 longs (x- and y-add) and one word (direction) per step
 	}
 
 	@Override
@@ -119,7 +123,7 @@ class SvgPathSource extends AbstractSource {
 	public List<IndexEntry> getIndex() {
 		var metadata = new ByteArrayOutputStream();
 		// see datafiles.i df_svgp_*
-		BINARY_VALUE_CONVERTER.writeWord(this.numberOfSteps, metadata);
+		BINARY_VALUE_CONVERTER.writeWord(this.getTotalNumberOfSteps(), metadata);
 		BINARY_VALUE_CONVERTER.writeLong(this.length(), metadata);
 		return Arrays.asList(IndexEntry.create(this.getId(), metadata.toByteArray(), this));
 	}
@@ -148,5 +152,9 @@ class SvgPathSource extends AbstractSource {
 		});
 		// last (direction right, right half)
 		this.degreeToDirection.add(new Direction(360f - halfRange, 360.0f, 0));
+	}
+
+	private int getTotalNumberOfSteps() {
+		return this.numberOfSteps.stream().mapToInt(Integer::intValue).sum();
 	}
 }

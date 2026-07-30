@@ -94,8 +94,15 @@ targetFiles:
         reversedVertically: true
       - filename: ingame/level_0/simple_topleft_to_downright.svg
         id: EM01
-        numberOfSteps: 100
         numberOfDirections: 32
+        numberOfSteps:
+          - 100
+      - filename: ingame/level_0/simple_multiple_paths.svg
+        id: EM02
+        numberOfDirections: 32
+        numberOfSteps:
+          - 100
+          - 60
       - filename: .bobtype
         id: BT00
         gfxId: TEST
