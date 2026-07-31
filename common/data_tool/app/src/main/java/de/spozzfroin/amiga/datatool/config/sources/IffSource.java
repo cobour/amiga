@@ -210,6 +210,7 @@ class IffSource extends AbstractSource {
 		CHUNK_PROCESSORS.add(new BmhdProcessor());
 		CHUNK_PROCESSORS.add(new CamgProcessor());
 		CHUNK_PROCESSORS.add(new CmapProcessor());
+		CHUNK_PROCESSORS.add(new GrabProcessor());
 		CHUNK_PROCESSORS.add(new BodyProcessor());
 	}
 
@@ -358,6 +359,19 @@ class IffSource extends AbstractSource {
 					break;
 				}
 			} while (i < chunkSize);
+		}
+	}
+
+	private static class GrabProcessor implements ChunkProcessor {
+		@Override
+		public String id() {
+			return "GRAB";
+		}
+
+		@Override
+		public void process(FileInputStream src, IffSource uow) throws IOException {
+			int chunkSize = BINARY_VALUE_CONVERTER.readLong(src);
+			src.skip(chunkSize);
 		}
 	}
 
