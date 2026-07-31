@@ -42,7 +42,7 @@ targetFiles:
     sources:      
       - filename: ingame/level_0/vision.mod
         id: MS02
-      - filename: ingame/level_0/rotating_enemy_hybris_32x32.iff
+      - filename: ingame/level_0/Moon_Enemy32xrotate_01.iff
         id: TEST
         flattenedTileFormat: 32x32
 
