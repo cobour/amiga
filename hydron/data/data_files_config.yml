@@ -103,6 +103,11 @@ targetFiles:
         numberOfSteps:
           - 100
           - 60
+      - filename: ingame/level_0/little_loop.svg
+        id: EM03
+        numberOfDirections: 32
+        numberOfSteps:
+          - 300
       - filename: .bobtype
         id: BT00
         gfxId: TEST
