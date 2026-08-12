@@ -968,7 +968,7 @@
     <property name="spawn_screen_ypos" type="int" value="0"/>
    </properties>
   </object>
-  <object id="24" type="ET00" gid="449" x="38" y="12828" width="32" height="32">
+  <object id="24" type="ET00" gid="449" x="38" y="11628" width="32" height="32">
    <properties>
     <property name="movement" value="EM03"/>
     <property name="spawn_screen_ypos" type="int" value="256"/>
