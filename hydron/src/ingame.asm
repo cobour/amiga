@@ -20,10 +20,6 @@ ig_start:
   move.b     #$05,c_om_lives(a4)
   move.l     #$012345,c_om_score(a4)
   move.l     #$123456,c_om_hiscore(a4)
-  ;
-  move.l     #"EM01",d0
-  bsr        datafiles_get_pointer
-  move.l     df_idx_ptr_rawdata(a0),a1
   ; REMOVE ME - test values
 
   clr.b      ig_om_end_mainloop(a4)
