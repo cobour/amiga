@@ -27,6 +27,22 @@ Built of two attached sprites resulting in 16 pixels width and unlimited height.
 
 All playershots are drawn only above the playersprite initially and because shots always move faster as the player himself they cannot interfere.
 
+# Backgrounds
+
+The backgrounds will be built of 16x16 pixels blocks and put together with Tiled. May use full color palette (00-63, except 17) giving massive options for design.
+
+Maybe use mainly the EHB pseudo colors (colors 32-63) for background blocks to create a dark environment.
+
+# Blitter objects for enemies, enemyshots and upgrades
+
+Enemies and enemyshots are drawn as blitter objects (aka bobs).
+
+# Basic concept for enemies
+
+I have a flexible system in mind that makes it possible to move the enemies along bezier curves and optionally insert custom assembler code for updating enemies so they will be able to chase the player etc.
+
+The basic idea that I have for the enemies is that there will not be many but they will be big and robust. So my intention is to create an atmosphere of tightness and uneasiness for the player.
+
 # Usage of color palette
 
 | Color   | Usage                                                                                           |
@@ -35,31 +51,37 @@ All playershots are drawn only above the playersprite initially and because shot
 | 01-15   | usable for backgrounds, enemies, enemyshots ; may change each level for unique color design     |
 | 16      | transparent color for attached hardware sprites and sprite 0 and 1 for panel. usable for backgrounds, enemies, enemyshots ; may change each level for unique color design |
 | 17      | reserved for panel copper effect ; may be used for player ship and satellites but NOT elsewhere |
-| 18-31   | for player ship, player satellites and playershots sprites ; may NOT change each level          |
-| 32      | EHB pseudo color  ; always black and solid                                                      |
-| 33-48   | EHB pseudo colors ; automatically changed each level by "master-colors" 01-16                   |
-| 49      | EHB pseudo color  ; automatically set by "master-color" 17 ; reserved for panel copper effect ; may NOT be used elsewhere |
-| 50-63   | EHB pseudo colors ; automatically set by "master-colors" 18-31 ; stay the same each level       |
+| 18-31   | for player ship, player satellites and playershots sprites, may also be used for backgrounds, enemies, enemyshots ; may NOT change each level          |
+| 32      | EHB pseudo color ; may be used for backgrounds, enemies, enemyshots ; always black and solid                                                      |
+| 33-48   | EHB pseudo colors ; may be used for backgrounds, enemies, enemyshots ; automatically changed each level by "master-colors" 01-16                   |
+| 49      | EHB pseudo color ; automatically set by "master-color" 17 ; reserved for panel copper effect ; may NOT be used elsewhere |
+| 50-63   | EHB pseudo colors ; may be used for backgrounds, enemies, enemyshots ; automatically set by "master-colors" 18-31 ; stay the same each level       |
 
 IFF files for 16-color hardware sprites (player ship, player satellites, player bullets) must have a palette with color 00 as transparent/black and colors 01-15 that match colors 17-31 from the table above.  
 IFF files for panel just have 2 colors, where color 00 is transparent/black and color 01 may be any color (set in the game by copper effect for each scanline).
+IFF files for everything else must have 64-color palette that matches color 00-31 and their EHB pseudo colors as colors 32-63 OR (possible with e.g. Grafx2) be native EHB-files with 32 colors that match colors 00-31
 
 ![palette usage](HYDRON_Usage-of-color-palette.png)
 
-# Backgrounds
+# Which colors to use for specific assets
 
-The backgrounds will be built of 16x16 pixels blocks and put together with Tiled. May use full color palette (00-63) giving massive options for design.
+## Panel
 
-Maybe use mainly the EHB pseudo colors (colors 32-63) for background blocks to create a dark environment.
+1 bitplane (2 colors). Color 00 is transparent, color 01 may be any value (is set ingame by copper color effect).
 
-# Blitter objects for enemies, enemyshots and upgrades
+## Player ship
 
-Enemies and enemyshots are drawn as blitter objects (aka bobs). So they may use the full palette (00-63) when used for a single level exclusively. Optionally use colors 17-32 and 49-63 only for reusing in multiple levels (maybe for enemyshots).
+4 bitplanes (16 colors). Color 00 is transparent, colors 01-15 must match colors 17-31 from full palette.
 
-Upgrades may use colors 17-32 and 49-63 only because they will appear in all levels.
+## Player bullets
 
-# Basic concept for enemies
+4 bitplanes (16 colors). Color 00 is transparent, color 01 must NOT be used (interferes with copper color effect for panel). color 02-15 must match colors 18-31 from full palette.
 
-I have a flexible system in mind that makes it possible to move the enemies along bezier curves and optionally insert custom assembler code for updating enemies so they will be able to chase the player etc.
+## Player upgrades (TODO)
 
-The basic idea that I have for the enemies is that there will not be many but they will be big and robust. So my intention is to create an atmosphere of tightness and uneasiness for the player.
+6 bitplanes (64 colors EHB mode). Color 00 is transparent, color 17 may NOT be used (interferes with copper color effect for panel). All colors must match full palette.
+Because upgrades will appear in every level, only the common parts of the palette may be used (color 00 transparent, colors 18-31 , EHB peeudo colors 50-63).
+
+## All level specific bitplane assets (enemies, enemy bullets, backgrounds)
+
+6 bitplanes (64 colors EHB mode). Color 00 is transparent, color 17 may NOT be used (interferes with copper color effect for panel). All colors must match full palette.
