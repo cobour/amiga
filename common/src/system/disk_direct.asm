@@ -70,7 +70,7 @@ dd_load_file:
 
   moveq.l    #0,d7
   move.w     d0,d7
-  divu       #11,d7                             ; low-word: ergebnis, high-word: rest
+  divu       #11,d7
   move.w     d7,d2                              ; track
   swap       d7                                 ; block offset inside track
 .load_file_loop:
@@ -107,8 +107,6 @@ dd_load_file:
 ;   d0 - number of blocks to read
 ;   d5 - first block
 ;   a0 - target pointer
-; out:
-;   d5 - bytes read
 .read_blocks:  
   movem.l    d0-d4/d6-a6,-(sp)
   move.w     d0,-(sp)
@@ -147,8 +145,6 @@ dd_load_file:
   dbf        d0,.track_loop
 
   move.w     (sp)+,d0
-  move.w     d0,d5
-  mulu       #512,d5                            ; calc bytes read
   movem.l    (sp)+,d0-d4/d6-a6
   rts
 
