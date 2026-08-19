@@ -17,7 +17,7 @@ import de.spozzfroin.amiga.datatool.config.IndexEntry;
 import de.spozzfroin.amiga.datatool.config.TargetFile;
 import de.spozzfroin.amiga.datatool.util.BinaryValueConverter;
 
-class IffSource extends AbstractSource {
+class IffSource extends AbstractSource implements GfxSource {
 
 	private static final BinaryValueConverter BINARY_VALUE_CONVERTER = BinaryValueConverter.getInstance();
 
@@ -182,15 +182,18 @@ class IffSource extends AbstractSource {
 		throw new IllegalStateException(String.format("No ChunkProcessor found for ID: %s", chunkID));
 	}
 
-	int getWidth() {
+	@Override
+	public int getWidth() {
 		return this.width;
 	}
 
-	int getHeight() {
+	@Override
+	public int getHeight() {
 		return this.height;
 	}
 
-	int getBitplanes() {
+	@Override
+	public int getBitplanes() {
 		return this.bitplanes;
 	}
 

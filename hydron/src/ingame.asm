@@ -90,10 +90,10 @@ ig_start:
   rts
 
 .init_music:
-  move.l     #"MS02",d0
+  move.l     #"MODS",d0
   bsr        datafiles_get_pointer
   move.l     df_idx_ptr_rawdata(a0),a1
-  move.l     #"MP02",d0
+  move.l     #"MODP",d0
   bsr        datafiles_get_pointer
   move.l     df_idx_ptr_rawdata(a0),a0
   moveq.l    #0,d0

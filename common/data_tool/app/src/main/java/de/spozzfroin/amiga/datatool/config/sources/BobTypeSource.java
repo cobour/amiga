@@ -60,7 +60,7 @@ class BobTypeSource extends AbstractSource {
 		if (optSource.isEmpty()) {
 			throw new IllegalArgumentException("gfxId not found!");
 		}
-		var gfxSource = (IffSource) optSource.get();
+		var gfxSource = (GfxSource) optSource.get();
 		var outputStream = new ByteArrayOutputStream();
 		//
 		var width_temp = (this.width / 8);

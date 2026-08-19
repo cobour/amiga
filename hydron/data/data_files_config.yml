@@ -41,35 +41,42 @@ targetFiles:
     memoryType: CHIP
     sources:      
       - filename: ingame/level_0/vision.mod
-        id: MS02
-      - filename: ingame/level_0/Moon_Enemy32xrotate_01.iff
+        id: MODS # MUST be the same in all levels
+      - filename: ingame/level_0/Moon_Enemy32xrotate_01.png
         id: TEST
         flattenedTileFormat: 32x32
+        colorsLimit: 64
 
   - filename: F100
     description: ingame_other_common
     memoryType: OTHER
     sources:
-      - filename: ingame/common/panel_score.iff
+      - filename: ingame/common/panel_score.png
         id: PASC
         withMask: false
-      - filename: ingame/common/panel_hiscore.iff
+        colorsLimit: 2
+      - filename: ingame/common/panel_hiscore.png
         id: PAHI
         withMask: false
-      - filename: ingame/common/panel_lives.iff
+        colorsLimit: 2
+      - filename: ingame/common/panel_lives.png
         id: PALI
         withMask: false
-      - filename: ingame/common/panel_font.iff
+        colorsLimit: 2
+      - filename: ingame/common/panel_font.png
         id: PAFO
         withMask: false
+        colorsLimit: 2
       - filename: ingame/common/ingame_panel_copper_colors.asm
         id: PACO
-      - filename: ingame/common/player_bullets_0.iff
+      - filename: ingame/common/player_bullets_0.png
         id: PBU0
         withMask: false
-      - filename: ingame/common/player.iff
+        colorsLimit: 16
+      - filename: ingame/common/player.png
         id: PLYR
         withMask: false
+        colorsLimit: 16
 
   - filename: F101
     description: ingame_other_level_0
@@ -80,17 +87,18 @@ targetFiles:
       - F000
     sources:
       - filename: ingame/level_0/vision.mod
-        id: MP02
-      - filename: ingame/level_0/tiles.iff
-        id: COLS
+        id: MODP # MUST be the same in all levels
+      - filename: ingame/level_0/Hydron_Tiles.png
+        id: COLS # MUST be the same in all levels
         colorsOnly: true
         colorsLimit: 32
-      - filename: ingame/level_0/tiles.iff
-        id: TLS0
+      - filename: ingame/level_0/Hydron_Tiles.png
+        id: TLS0 # MUST be the same in all levels
         withMask: false
         flattenedTileFormat: 16x16
+        colorsLimit: 64
       - filename: ingame/level_0/MAP_001.tmx
-        id: MAPT
+        id: MAPT # MUST be the same in all levels
         reversedVertically: true
       - filename: ingame/level_0/simple_topleft_to_downright.svg
         id: EM01

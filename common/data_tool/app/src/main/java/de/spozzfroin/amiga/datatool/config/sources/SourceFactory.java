@@ -32,6 +32,8 @@ public class SourceFactory {
 			return new BobTypeSource(targetFile);
 		case "enemytype":
 			return new EnemyTypeSource(targetFile);
+		case "png":
+			return new PngSource(targetFile);
 		default:
 			throw new RuntimeException("unknown extension: " + extension);
 		}
