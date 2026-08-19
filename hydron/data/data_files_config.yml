@@ -35,6 +35,14 @@ targetFiles:
         priority: 32
       - filename: ingame/common/ingame_copperlist.asm
         id: IGCL
+      - filename: ingame/common/enemy_hit.wav
+        id: SEH0
+        volume: 64
+        priority: 32
+      - filename: ingame/common/explosion.wav
+        id: SEX0
+        volume: 64
+        priority: 32
 
   - filename: F001
     description: ingame_chip_level_0
