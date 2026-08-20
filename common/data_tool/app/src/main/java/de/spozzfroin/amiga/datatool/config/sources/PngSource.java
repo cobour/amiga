@@ -265,8 +265,7 @@ class PngSource extends AbstractSource implements GfxSource {
 
 	@Override
 	public void calcAdditionalData(Config config) throws Exception {
-		// TODO Auto-generated method stub
-
+		// not needed
 	}
 
 	@Override
