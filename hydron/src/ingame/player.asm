@@ -6,6 +6,11 @@ INGAME_PLAYER_ASM equ 1
 
 player_init:
 
+  ; init player status variables
+  move.b     #PlayerStatusNormal,ig_om_player_status(a4)
+  clr.b      ig_om_player_no_hit_countdown(a4)
+  move.w     #PlayerRespawnBegin,ig_om_player_respawn_ypos(a4)
+
   ; init player ship gfx and metadata
   move.l     #"PLYR",d0
   bsr        datafiles_get_pointer
@@ -17,8 +22,8 @@ player_init:
   lsr.w      #3,d0
   move.w     d0,ig_om_player_gfx_width_bytes(a4)
   move.l     #$00010000,ig_om_player_speed(a4)                                    ; alternatively move 1 and a half pixel per frame with #$00018000
-  move.l     #$00700000,ig_om_player_xpos(a4)
-  move.l     #$00d00000,ig_om_player_ypos(a4)
+  clr.l      ig_om_player_xpos(a4)
+  clr.l      ig_om_player_ypos(a4)
   clr.l      ig_om_player_min_xpos(a4)
   move.l     #$00100000,ig_om_player_min_ypos(a4)
   move.l     #$00e00000,ig_om_player_max_xpos(a4)
@@ -172,6 +177,36 @@ player_init:
 
 player_update:
 
+  ; update no-hit-countdown and status
+  tst.b      ig_om_player_no_hit_countdown(a4)
+  beq.s      .end_of_update_to_status_and_no_hit_countdown
+  sub.b      #1,ig_om_player_no_hit_countdown(a4)
+  tst.b      ig_om_player_no_hit_countdown(a4)
+  bne.s      .end_of_update_to_status_and_no_hit_countdown
+  move.b     #PlayerStatusNormal,ig_om_player_status(a4)
+.end_of_update_to_status_and_no_hit_countdown:
+
+  ; game over? => do not show player ship
+  tst.b      c_om_lives(a4)
+  bgt.s      .still_alive
+  clr.w      ig_om_player_xpos(a4)
+  move.w     #IgScreenHeight,ig_om_player_ypos(a4)
+  bra        .exit
+.still_alive:
+
+  ; currently respawning?
+  tst.w      ig_om_player_respawn_ypos(a4)
+  beq.s      .no_current_respawn
+  move.l     #$00700000,ig_om_player_xpos(a4)
+  move.w     ig_om_player_respawn_ypos(a4),d0
+  add.w      #(IgScreenHeight-PlayerRespawnBegin),d0
+  move.w     d0,ig_om_player_ypos(a4)
+  clr.w      ig_om_player_ypos+2(a4)
+  sub.w      #1,ig_om_player_respawn_ypos(a4)
+  move.b     #PlayerShipAnimCentered,ig_om_player_anim_offset+3(a4)
+  bra        .exit
+.no_current_respawn:
+
   move.l     ig_om_player_xpos(a4),d4
   move.l     ig_om_player_ypos(a4),d5
 
@@ -269,6 +304,7 @@ player_update:
 .not_right:
 .anim_chosen:
 
+.exit:
   rts
 
 
@@ -319,6 +355,10 @@ player_and_weapon_draw:
   move.l     a3,ig_om_player_sprite_7_work_pointer(a4)
 
   ; TODO: draw satellites / side guns TO SPR0+SPR1 and SPR2+SPR3
+  btst       #0,ig_om_player_no_hit_countdown(a4)
+  bne.s      .do_not_draw_player_addons
+  nop                                                                             ; draw here
+.do_not_draw_player_addons:
 
   ; end of sprite data SPR0-SPR3    
   move.l     ig_om_player_sprite_0_work_pointer(a4),a2
@@ -331,6 +371,9 @@ player_and_weapon_draw:
   clr.l      (a2)
 
   ; draw player ship to sprite data
+  move.b     ig_om_player_no_hit_countdown(a4),d4
+  btst       #0,d4
+  bne.s      .do_not_draw_player_ship
   move.w     ig_om_player_xpos(a4),d4                                             ; no fraction needed
   move.w     ig_om_player_ypos(a4),d5                                             ; no fraction needed
   move.w     #PlayerShipHeight,d6
@@ -344,9 +387,8 @@ player_and_weapon_draw:
   move.l     ig_om_player_sprite_4_work_pointer(a4),a2
   move.l     ig_om_player_sprite_5_work_pointer(a4),a3
   bsr.s      .write_control_words_and_gfx_to_sprite_data
-  ; end of sprite data SPR4 and SPR5
-  clr.l      (a2)
-  clr.l      (a3)
+  move.l     a2,ig_om_player_sprite_4_work_pointer(a4)
+  move.l     a3,ig_om_player_sprite_5_work_pointer(a4)
 
   addq.w     #8,d1                                                                ; 6+7 are placed exactly to the right of 4+5
   moveq.l    #2,d3                                                                ; 6+7 are placed exactly to the right of 4+5
@@ -355,7 +397,18 @@ player_and_weapon_draw:
   move.l     ig_om_player_sprite_6_work_pointer(a4),a2
   move.l     ig_om_player_sprite_7_work_pointer(a4),a3
   bsr.s      .write_control_words_and_gfx_to_sprite_data
+  move.l     a2,ig_om_player_sprite_6_work_pointer(a4)
+  move.l     a3,ig_om_player_sprite_7_work_pointer(a4)
+.do_not_draw_player_ship:
+
+  ; end of sprite data SPR4 and SPR5
+  move.l     ig_om_player_sprite_4_work_pointer(a4),a2
+  move.l     ig_om_player_sprite_5_work_pointer(a4),a3
+  clr.l      (a2)
+  clr.l      (a3)
   ; end of sprite data SPR6 and SPR7
+  move.l     ig_om_player_sprite_6_work_pointer(a4),a2
+  move.l     ig_om_player_sprite_7_work_pointer(a4),a3
   clr.l      (a2)
   clr.l      (a3)
 
@@ -464,6 +517,10 @@ player_and_weapon_draw:
 
 player_weapon_fire:
   movem.l    d0-d1/d4-d5,-(sp)
+
+  ; if player can not be hit do not let player shoot
+  cmp.b      #PlayerStatusNoHit,ig_om_player_status(a4)
+  beq.s      .exit
 
   ; check fire delay
   move.w     ig_om_player_bullets_fire_delay(a4),d0

@@ -146,11 +146,12 @@ panel_update:
   move.l     ig_om_buffers_backbuffer(a4),a0
   move.l     ig_buffers_copperlist_pointer(a0),a1
   bsr.s      panel_draw_lives
-  clr.b      ig_om_panel_redraw_lives(a4)
+  sub.b      #1,ig_om_panel_redraw_lives(a4)
 
 .check_score:
   tst.b      ig_om_panel_redraw_score(a4)
   beq.s      .exit
+  sub.b      #1,ig_om_panel_redraw_score(a4)
   move.l     ig_buffers_copperlist_pointer(a0),a1
   bsr        panel_draw_score
   move.l     c_om_hiscore(a4),d0
@@ -160,7 +161,6 @@ panel_update:
   move.l     ig_buffers_copperlist_pointer(a0),a1
   bsr        panel_draw_hiscore
 .no_hiscore_update:
-  clr.b      ig_om_panel_redraw_score(a4)
 
 .exit:
   movem.l    (sp)+,d0-d2/a0-a3

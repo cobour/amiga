@@ -39,10 +39,13 @@ targetFiles:
         id: SEH0
         volume: 64
         priority: 32
-      - filename: ingame/common/explosion.wav
-        id: SEX0
+      - filename: ingame/common/explosion_30db.wav
+        id: SLEX
         volume: 64
         priority: 32
+      - filename: ingame/common/explosion_32.png
+        id: GLEX
+        colorsLimit: 64
 
   - filename: F001
     description: ingame_chip_level_0
@@ -85,6 +88,11 @@ targetFiles:
         id: PLYR
         withMask: false
         colorsLimit: 16
+      - filename: .bobtype
+        id: BLEX
+        gfxId: GLEX
+        width: 32
+        height: 32
 
   - filename: F101
     description: ingame_other_level_0
@@ -132,6 +140,11 @@ targetFiles:
       - filename: .enemytype
         id: ET00
         bobtypeId: BT00
+        boundingBox:
+          - 4
+          - 4
+          - 28
+          - 28
 
 diskimageFiles:
   - filename: Hydron.adf

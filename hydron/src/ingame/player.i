@@ -21,6 +21,14 @@ PlayerShipHeight             equ 22
 PlayerBulletsMaxHeight       equ 16
 PlayerBulletsMaxCountStacked equ 4                                                                                                      ; maximum number of bullets that are displayed in one stack (player bullets are shown in max 3 stacks)
 
+; player status and no-hit-countdown
+PlayerStatusNormal           equ 0
+PlayerStatusNoHit            equ 1
+PlayerNoHitCountdown         equ 100                                                                                                    ; (odd means do not draw player ship, even means draw player ship)
+
+; player respawn initial ypos add
+PlayerRespawnBegin           equ 50
+
 ; struct holding data for hardware sprites
                                            rsreset                                                                                      ; contains one long for each control word pair and another long at the end for null bytes
 ig_player_sprite0:                         rs.l       1                                                                                 ; player satellites --- just empty for now

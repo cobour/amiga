@@ -7,6 +7,8 @@ INGAME_I           equ 1
                                           include    "src/ingame/player.i"
                                           include    "src/ingame/bob.i"
                                           include    "src/ingame/enemies.i"
+                                          include    "src/ingame/collisions.i"
+                                          include    "src/ingame/explosions.i"
                                           include    "../common/src/system/fade.i"
                                           include    "../common/src/system/datafiles.i"
 
@@ -55,8 +57,11 @@ ig_cm_sizeof:                             rs.b       0
                                           rsreset
 ig_om_common:                             rs.b       c_om_sizeof
 ig_om_end_mainloop:                       rs.b       1                                                       ; boolean (continue looping or not)
-ig_om_dummy:                              rs.b       1                                                       ; padding byte
+ig_om_trigger_fade_out_countdown:         rs.b       1                                                       ; zero = do nothing, >0 = countdown to zero, then trigger fade out
 ; ingame/player.asm
+ig_om_player_status:                      rs.b       1                                                       ; 0 = normal, 1 = player can not be hit (after being killed) - see PlayerStatus... defines
+ig_om_player_no_hit_countdown:            rs.b       1                                                       ; countdown until player can be hit again (0 = player can be hit)
+ig_om_player_respawn_ypos:                rs.w       1                                                       ; zero = no current respawn, >0 respawning player ship (flies in from below screen) this is the ypos of the player (calc this value +256 -height of player ship)
 ig_om_player_gfx_ptr:                     rs.l       1                                                       ; pointer to the beginning of the gfx rawdata
 ig_om_player_anim_offset:                 rs.l       1                                                       ; offset to the current anim step (to be added to ig_om_player_gfx_ptr)
 ig_om_player_gfx_width_bytes:             rs.w       1                                                       ; width of the source graphics in bytes
@@ -90,8 +95,8 @@ ig_om_player_sprite_7_work_pointer:       rs.l       1                          
 ; ingame/panel.asm
 ig_om_panel_font_pointer:                 rs.l       1                                                       ; pointer to the font rawdata
 ig_om_panel_cl_offset:                    rs.l       1                                                       ; offset to the area of the copperlist where the panel values must be drawn
-ig_om_panel_redraw_lives:                 rs.b       1                                                       ; boolean / must lives counter be drawn?
-ig_om_panel_redraw_score:                 rs.b       1                                                       ; boolean / must score be drawn? (if new score is higher than old hiscore => update and redraw hiscore as well)
+ig_om_panel_redraw_lives:                 rs.b       1                                                       ; (countdown)-boolean / must lives counter be drawn? 
+ig_om_panel_redraw_score:                 rs.b       1                                                       ; (countdown)-boolean / must score be drawn? (if new score is higher than old hiscore => update and redraw hiscore as well)
 ig_om_panel_backup_for_fade:              rs.b       256                                                     ; backup of all SPRxDATA content after panel is initialised (as reference for flood-effect while fade ind or out)
 ; ingame/buffers.asm
 ig_om_buffers_frontbuffer:                rs.l       1                                                       ; pointer to current frontbuffer struct, set in game loop by call to buffers_set_pointers
@@ -138,6 +143,10 @@ ig_om_enemies:                            rs.b       enemy_sizeof*EnemiesCount  
 ig_om_enemies_framebuffer_offsets:        rs.l       IgScreenHeight                                          ; offsets for all rows in framebuffer (table to avoid mulu)
 ig_om_enemies_spawn_data_pointer:         rs.l       1                                                       ; pointer to enemies spawn data
 ig_om_enemies_spawn_data_end_pointer:     rs.l       1                                                       ; pointer to end of enemies spawn data
+; ingame/explosions.asm
+ig_om_explosions_sfx_large:               rs.l       1                                                       ; pointer to struct to issue sfx for large explosion
+ig_om_explosions_bobtype_large:           rs.l       1                                                       ; pointer to bobtype struct for large explosion
+ig_om_explosions_anims:                   rs.b       explosion_sizeof*ExplosionsCount                        ; explosion-anim-structs
 ; data files area
 ig_om_datfile:                            rs.b       0                                                       ; variable filesizes, therefore this MUST be the last entry in this struct
 ig_om_sizeof:                             rs.b       0

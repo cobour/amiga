@@ -157,6 +157,13 @@ public class TargetFile {
 					return src;
 				}
 			}
+		} else if (this.relatedParent != null) {
+			for (var relatedFile : this.relatedParent.getRelatedFiles()) {
+				src = relatedFile.getSources().stream().filter(s -> s.getId().isEqualTo(id)).findFirst();
+				if (src.isPresent()) {
+					return src;
+				}
+			}
 		}
 		return Optional.empty();
 	}

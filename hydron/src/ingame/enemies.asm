@@ -10,6 +10,8 @@ enemies_init:
 .init_structs_loop:
   bsr        bob_clear
   clr.l      enemy_enemytype_pointer(a0)
+  clr.l      enemy_bounding_box(a0)
+  clr.l      enemy_bounding_box+4(a0)
   lea.l      enemy_sizeof(a0),a0
   dbf        d7,.init_structs_loop
 
@@ -106,7 +108,7 @@ enemies_spawn:
   bra.s      .no_more_spawns
 
 .add_enemy:
-  move.w     #1,bob_status(a1)
+  move.w     #BobStatusActive,bob_status(a1)
   move.l     df_tld_enm_xpos(a2),bob_xpos(a1)
   move.l     df_tld_enm_ypos(a2),bob_ypos(a1)
   move.l     df_tld_enm_enemytype(a2),a0
@@ -156,6 +158,24 @@ enemies_move:
   add.l      d0,bob_xpos(a0)
   add.l      d1,bob_ypos(a0)
   move.w     d2,bob_anim_offset+2(a0)
+  ; update bounding box
+  move.l     enemy_enemytype_pointer(a0),a2
+  lea.l      enemytype_bounding_box(a2),a2
+  move.w     (a2)+,d0
+  move.w     (a2)+,d1
+  move.w     (a2)+,d2
+  move.w     (a2),d3
+  move.w     bob_xpos(a0),d6
+  add.w      d6,d0
+  add.w      d6,d2
+  move.w     bob_ypos(a0),d6
+  add.w      d6,d1
+  add.w      d6,d3
+  lea.l      enemy_bounding_box(a0),a2
+  move.w     d0,(a2)+
+  move.w     d1,(a2)+
+  move.w     d2,(a2)+
+  move.w     d3,(a2)
   ; switch to next step (or stay at last step)
   lea.l      df_svgp_step_sizeof(a1),a1
   cmp.l      enemy_move_end_of_table(a0),a1
@@ -181,7 +201,6 @@ enemies_restore:
   move.l     ig_om_bob_targetbuffer(a4),a1                            ; base pointer of target buffer
   move.l     ig_om_buffer_three(a4),a2                                ; base pointer of source buffer
 
-  ; restore
   lea.l      ig_om_enemies(a4),a0
   moveq.l    #EnemiesCount-1,d7
 .restore_loop:
@@ -194,11 +213,6 @@ enemies_restore:
   rts
 
 enemies_draw:
-  move.l     a5,-(sp)
-  move.l     ig_om_bob_targetbuffer(a4),a1                            ; base pointer of target buffer
-  move.l     ig_om_buffer_three(a4),a2                                ; base pointer of source buffer
-
-  ; draw
   lea.l      ig_om_enemies(a4),a0
   moveq.l    #EnemiesCount-1,d7
 .draw_loop:
@@ -209,7 +223,7 @@ enemies_draw:
   lea.l      enemy_sizeof(a0),a0
   dbf        d7,.draw_loop
 
-  move.l     (sp)+,a5
+  move.l     chip_mem_ptr(pc),a5
   rts
 
   endif                                                               ; ifnd ENEMIES_ASM
