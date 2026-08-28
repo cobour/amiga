@@ -164,7 +164,7 @@
 		{
 			"label": "Run data-tool",
 			"type": "shell",
-			"command": "../gradlew run --args='config.file=../../../hydron/data/data_files_config.yml vasm=../common/bin/macos/vasmm68k_mot'",
+			"command": "../gradlew run --configuration-cache --args='config.file=../../../hydron/data/data_files_config.yml vasm=../common/bin/macos/vasmm68k_mot'",
 			"options": {
 				"cwd": "../common/data_tool/app/"
 			},
