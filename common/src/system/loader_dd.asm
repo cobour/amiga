@@ -6,11 +6,11 @@ LOADER_DD_ASM equ 1
   include    "../common/src/system/custom.i"
 
   ; check cpu type and get vbr
-  move.l     $4.w,a6
-  btst       #0,297(a6)                                ; 68010 or greater?
+  move.w     $128(a6),d3                               ; exec AttnFlags
+  btst       #0,d3                                     ; 68010 or greater?
   beq.s      .just_68000
   lea.l      .get_vbr_handler(pc),a5
-  jsr        -30(a6)                                   ; Supervisor
+  jsr        -$1e(a6)                                  ; Supervisor
   bra.s      .check_cpu_type_end
 .get_vbr_handler:
   dc.l       $4e7a2801                                 ; = movec vbr,d2
@@ -18,6 +18,7 @@ LOADER_DD_ASM equ 1
 .just_68000:
   moveq.l    #0,d2
 .check_cpu_type_end:
+  jsr        -$96(a6)                                  ; SuperState
 
   ; fade color zero to black on KS 1.x
   move.w     20(a6),d0                                 ; version of exec.library
@@ -29,19 +30,19 @@ LOADER_DD_ASM equ 1
   cmp.b      #36,d0                                    ; KS 2.x or greater
   bge.s      .fade_out_end
   move.w     #$0eee,d1
-  move.l     #$1ff00,d3
+  move.l     #$1ff00,d4
 .fade_out_loop:
   move.w     d1,6(a0)
   beq.s      .fade_out_end
 .fade_out_wait_vbl:  
   move.l     VPOSR(a6),d0
-  and.l      d3,d0
+  and.l      d4,d0
   cmp.l      #300<<8,d0
   bne.s      .fade_out_wait_vbl
   sub.w      #$0111,d1
 .fade_out_wait_vbl2:  
   move.l     VPOSR(a6),d0
-  and.l      d3,d0
+  and.l      d4,d0
   cmp.l      #302<<8,d0
   bne.s      .fade_out_wait_vbl2
   bra.s      .fade_out_loop
@@ -114,6 +115,8 @@ load_main_code:
 
   move.w     dd_track(pc),d0
   move.w     dd_drive(pc),d1
+  ; d2 (vbr base) is still set
+  ; d3 (cpu type) is still set
   move.l     a0,a4
   add.l      #MAIN_CODE_SIZE,a4
   move.l     #$400,a5

@@ -232,5 +232,8 @@ ctrl_cur_lvl3hdl:
 ctrl_vbr:
   dc.l       0
 
+cpu_type:
+  dc.w       0                                         ; exec AttnFlags
+
   endif                                                ; ifnd CONTROL_ASM
  

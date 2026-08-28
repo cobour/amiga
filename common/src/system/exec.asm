@@ -151,8 +151,6 @@ exec_free_mem:
 
   endif                                              ; ifd STANDARD_EXE
 
-  ifd        BOOTBLOCK
-
 ; Performs a reset
 exec_reboot:
 
@@ -166,7 +164,7 @@ exec_reboot:
   not.l      ExecBase                                ; invalidate ExecBase in memory => lets boot-checks fail and force exec to init everything
   lea.l      .2(pc),a5
   jsr        Supervisor(a6)
-  CNOP       0,4
+  cnop       0,4
 .2:  
   lea.l      EndOfKickstartROM,a0
   sub.l      KickstartOffsetResetFunc(a0),a0
@@ -174,19 +172,56 @@ exec_reboot:
   subq.l     #2,a0
   reset
   jmp        (a0)
+  cnop       0,4
 
   else                                               ; ifd USE_TRACKDISK
 
-  ; exec is thrashed, just do nothing until user resets
-  lea.l      CustomBase,a6
-.1:
-  move.w     #%0000000111111111,DMACON(a6)           ; no dma at all
-  move.w     #$0000,COLOR00(a6)
-  bra.s      .1
+  ; silence all of irq and dma
+  lea.l      CUSTOM,a6
+  move.w     #$7fff,d0
+  move.w     d0,INTENA(a6)
+  move.w     d0,INTREQ(a6)
+  move.w     d0,DMACON(a6)
+
+  ; read/clear cia irqs
+  lea.l      CIAA,a0
+  move.b     CIAICR(a0),d0
+  move.b     #$7f,CIAICR(a0)
+  lea.l      CIAB,a0
+  move.b     CIAICR(a0),d0
+  move.b     #$7f,CIAICR(a0)
+
+  ; exec is thrashed, so reset with rom function
+  cnop       0,4
+  lea.l      2.l,a0                                  ; pointer to the absolute bootstrap vector
+
+  move.w     cpu_type(pc),d0
+  btst       #3,d0                                   ; 68040 or greater?
+  bne.s      .is_68040_or_greater
+  btst       #1,d0                                   ; 68020 or greater?
+  beq.s      .do_reset                               ; it is an 68000 or 68010, so there are no caches to clear
+
+  ; clear cpu caches (only executed on 68020 and 68030)
+  moveq.l    #0,d0
+  dc.l       $4e7b0002                               ; = movec d0,cacr
+  nop
+  nop
+  bra.s      .do_reset
+
+.is_68040_or_greater:
+  ; clear cpu caches (only executed on 68040 and 68060)
+  dc.w       $f478                                   ; = cpusha bc
+  nop
+  nop
+
+.do_reset:
+  reset                                              ; toggle hardware reset line
+  nop                                                ; give the hardware some time to settle
+  nop                                                ; give the hardware some time to settle
+  jmp        (a0)                                    ; jump into the mapped rom init code
+  cnop       0,4
 
   endif                                              ; ifd USE_TRACKDISK
-
-  endif                                              ; ifd BOOTBLOCK
 
 chip_mem_ptr:
   dc.l       0

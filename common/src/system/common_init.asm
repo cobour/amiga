@@ -25,6 +25,8 @@ common_init:
   move.w     d1,(a0)
   lea.l      ctrl_vbr(pc),a0           ; control.asm
   move.l     d2,(a0)
+  lea.l      cpu_type(pc),a0           ; control.asm
+  move.w     d3,(a0)
   endif                                ; ifd USE_DISK_DMA
   endif                                ; ifd STANDARD_EXE
 

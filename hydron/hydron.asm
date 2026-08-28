@@ -33,19 +33,9 @@ main_code_start:
   bsr        exec_free_mem
   moveq.l    #0,d0
   rts
-  bsr        exec_free_mem
-  moveq.l    #1,d0
-  rts
-  endif                                                ; ifd STANDARD_EXE
-
-  ifd        USE_TRACKDISK
+  else                                                 ; ifd STANDARD_EXE
   bsr        exec_reboot
-  endif                                                ; ifd USE_TRACKDISK
-
-  ifd        USE_DISK_DMA
-.loop_forever:
-  bra.s      .loop_forever
-  endif                                                ; ifd USE_DISK_DMA
+  endif                                                ; ifd STANDARD_EXE
 
   include    "../common/src/system/common_init.asm"
   include    "../common/src/system/exec.asm"
