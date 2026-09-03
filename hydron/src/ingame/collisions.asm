@@ -3,6 +3,8 @@ INGAME_COLLISIONS_ASM equ 1
 
   include    "src/ingame.i"
 
+  ifnd       UNITTEST
+
 coll_player_enemies:
 
   ; can player be hit?
@@ -44,7 +46,7 @@ coll_player_enemies:
   move.w     (a1),d4
   cmp.w      d4,d1
   bgt.s      .enemies_loop_next                                         ; enemy completely above player ship => no collision
-  bra.s      coll_player_was_hit                                        ; implicit rts
+  bra.s      .coll_player_was_hit                                       ; implicit rts
 .enemies_loop_next:
   lea.l      enemy_sizeof(a0),a0
   dbf        d7,.enemies_loop
@@ -60,8 +62,7 @@ coll_player_enemies:
   dc.w       5,1,28,20                                                  ; right
   dc.w       7,1,25,20                                                  ; hard right
 
-; INTERNAL USE ONLY
-coll_player_was_hit:
+.coll_player_was_hit:
   ; update player status
   move.b     #PlayerStatusNoHit,ig_om_player_status(a4)
   move.b     #PlayerNoHitCountdown,ig_om_player_no_hit_countdown(a4)
@@ -87,6 +88,115 @@ coll_player_was_hit:
 .no_game_over:
 
   ; later maybe: fade out everything but the panel, reset to respawn position, fade in again
+
+  rts
+
+coll_enemies_bullets:
+  lea.l      ig_om_enemies(a4),a0
+  moveq.l    #EnemiesCount-1,d7
+.enemies_loop:
+  tst.w      bob_status(a0)
+  blt.s      .enemies_loop_next
+  move.w     d7,-(sp)
+  move.w     ig_om_coll_bullet_loop_counter(a4),d7
+  tst.w      d7
+  blt.s      .no_bullets
+  lea.l      enemy_bounding_box(a0),a1
+  lea.l      ig_om_coll_bullet_lines(a4),a2
+  bsr.s      .coll_check_one_enemy
+.no_bullets:
+  move.w     (sp)+,d7
+.enemies_loop_next:
+  lea.l      enemy_sizeof(a0),a0
+  dbf        d7,.enemies_loop
+
+  rts
+
+  endif                                                                 ; ifnd UNITTEST
+
+  ifd        UNITTEST
+coll_check_one_enemy:
+  endif                                                                 ; ifd UNITTEST
+
+; checks an array of lines (represent moving bullets) against the bounding box of one enemy
+; in:
+;   a1.l = pointer to bounding box of enemy (see coll_bounding_box_sizeof)
+;   a2.l = pointer to line array (see coll_line_sizeof)
+;   d7.w = counter for line array (number of lines - 1)
+.coll_check_one_enemy:
+
+  ; cache enemy bounding box into registers
+  move.w     (a1)+,d3                                                   ; d3 = left
+  move.w     (a1)+,d5                                                   ; d5 = top
+  move.w     (a1)+,d4                                                   ; d4 = right
+  move.w     (a1)+,d6                                                   ; d6 = bottom
+
+.lines_loop:
+  ; fetch line coordinates from array (y2 >= y1)
+  move.w     (a2)+,d0                                                   ; d0 = x1
+  move.w     (a2)+,d1                                                   ; d1 = y1
+  move.w     (a2)+,d2                                                   ; d2 = x2
+  move.w     (a2)+,a3                                                   ; a3 = y2
+
+  ; vertical range check
+  cmp.w      d5,a3
+  blt.s      .lines_loop_next
+  cmp.w      d6,d1
+  bgt.s      .lines_loop_next
+
+  ; is direction down left or down right?
+  cmp.w      d0,d2
+  bge.s      .direction_down_right
+  exg.l      d0,d2
+.direction_down_right:
+
+  ; bounding box checks
+  cmp.w      d4,d0
+  bgt.s      .lines_loop_next
+  cmp.w      d3,d2
+  blt.s      .lines_loop_next
+
+  ; calculate midpoint to see if line actually crosses the boundary
+  move.w     d0,d1                                                      ; d1 = min x
+  add.w      d2,d1                                                      ; d1 = x1 + x2
+  asr.w      #1,d1                                                      ; d1 = mid x
+
+  move.w     a3,d0                                                      ; d0 = y2
+  add.w      -6(a2),d0                                                  ; d0 = y1 + y2
+  asr.w      #1,d0                                                      ; d0 = mid y
+
+  ; check midpoint against bounding box
+  cmp.w      d3,d1
+  blt.s      .lines_loop_next
+  cmp.w      d4,d1
+  bgt.s      .lines_loop_next
+  cmp.w      d5,d0
+  blt.s      .lines_loop_next
+  cmp.w      d6,d0
+  bgt.s      .lines_loop_next
+
+.intersect:
+
+  ifd        UNITTEST
+  moveq.l    #1,d0                                                      ; Output: 1 (Hit)
+  bra.s      .exit
+  endif                                                                 ; ifd UNITTEST
+
+  move.l     (a2)+,a3                                                   ; get coll_line_bullet_pointer
+  ; TODO: 1. reduce hitpoints of enemy (destroy enemy when hitpoints are depleted)
+  ;       2. mark bullet as removable (decision if it is actually removed belongs to the weapon type!)
+  move.w     #$000f,COLOR00(a6)                                         ; REMOVE ME
+  bra.s      .lines_loop_next_after_hit
+
+.lines_loop_next:
+  addq.l     #4,a2                                                      ; skip coll_line_bullet_pointer
+.lines_loop_next_after_hit:
+  dbf        d7,.lines_loop
+
+  ifd        UNITTEST
+  moveq.l    #0,d0                                                      ; Output: 0 (Miss)
+.exit:
+  endif                                                                 ; ifd UNITTEST
 
   rts
 

@@ -52,7 +52,7 @@ ig_start:
 
   bsr        fade_ingame_update
   bsr        player_update
-  bsr        player_weapon_update
+  bsr        player_weapon_update                       ; MUST be called after player_update (because player_update spawns new bullets)
   bsr        panel_update
   bsr        enemies_update
   bsr        background_update                          ; MUST be called before any update-routines that modify the bitplanes
@@ -60,6 +60,7 @@ ig_start:
   bsr        explosions_update
 
   bsr        coll_player_enemies
+  bsr        coll_enemies_bullets
 
   bsr        player_and_weapon_draw
   bsr        explosions_restore

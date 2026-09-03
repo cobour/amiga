@@ -131,6 +131,28 @@
                 "--fullscreen=0"
             ],
             "preLaunchTask": "Run data-tool"
+        },
+        {
+            "type": "amiga-assembly",
+            "request": "launch",
+            "name": "Run UNITTEST",
+            "stopOnEntry": false,
+            "trace": false,
+            "program": "${workspaceFolder}/uae/dh0test/HydronUnitTest",
+            "remoteProgram": "SYS:HydronUnitTest",
+            "emulatorType": "fs-uae",
+            "emulatorArgs": [
+                "--chip_memory=1024",
+                "--slow_memory=1024",
+                "--kickstart_file=/Users/frank/Development/projects/kickroms/kick31.rom",
+                "--hard_drive_0=${workspaceFolder}/uae/dh0test",
+                "--joystick_port_1=keyboard",
+                "--amiga_model=A500",
+                "--automatic_input_grab=0",
+                "--video_sync=0",
+                "--fullscreen=0"
+            ],
+            "preLaunchTask": "Build UNITTEST"
         }
     ]
 }

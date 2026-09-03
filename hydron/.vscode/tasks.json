@@ -162,6 +162,42 @@
 			"problemMatcher": []
 		},
 		{
+			"label": "Build UNITTEST",
+			"type": "amigaassembly",
+			"vasm": {
+				"enabled": true,
+				"command": "${config:amiga-assembly.binDir}/vasmm68k_mot",
+				"args": [
+					"-m68000",
+					"-Fhunk",
+					"-linedebug",
+					"-DUNITTEST",
+					"-DSTANDARD_EXE",
+					"-DUSE_DOS"
+				]
+			},
+			"vlink": {
+				"enabled": true,
+				"command": "${config:amiga-assembly.binDir}/vlink",
+				"includes": "test/unittest.asm",
+				"excludes": "",
+				"createStartupSequence": true,
+				"createExeFileParentDir": true,
+				"exefilename": "../uae/dh0test/HydronUnitTest",
+				"entrypoint": "test/unittest.asm",
+				"args": [
+					"-bamigahunk",
+					"-Bstatic"
+				]
+			},
+			"problemMatcher": [],
+			"group": {
+				"kind": "build",
+				"isDefault": true
+			},
+			"dependsOn": []
+		},
+		{
 			"label": "Run data-tool",
 			"type": "shell",
 			"command": "../gradlew run --configuration-cache --args='config.file=../../../hydron/data/data_files_config.yml vasm=../common/bin/macos/vasmm68k_mot'",

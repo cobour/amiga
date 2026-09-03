@@ -147,6 +147,9 @@ ig_om_enemies_spawn_data_end_pointer:     rs.l       1                          
 ig_om_explosions_sfx_large:               rs.l       1                                                       ; pointer to struct to issue sfx for large explosion
 ig_om_explosions_bobtype_large:           rs.l       1                                                       ; pointer to bobtype struct for large explosion
 ig_om_explosions_anims:                   rs.b       explosion_sizeof*ExplosionsCount                        ; explosion-anim-structs
+; ingame/collisions.asm
+ig_om_coll_bullet_loop_counter:           rs.w       1                                                       ; loop counter for bullet lines      (as parameter to coll_check_one_enemy)
+ig_om_coll_bullet_lines:                  rs.b       coll_line_sizeof*3*PlayerBulletsMaxCountStacked         ; array of coll_line_sizeof structs  (as parameter to coll_check_one_enemy)
 ; data files area
 ig_om_datfile:                            rs.b       0                                                       ; variable filesizes, therefore this MUST be the last entry in this struct
 ig_om_sizeof:                             rs.b       0
