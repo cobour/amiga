@@ -146,6 +146,7 @@ ig_om_enemies_spawn_data_end_pointer:     rs.l       1                          
 ; ingame/explosions.asm
 ig_om_explosions_sfx_large:               rs.l       1                                                       ; pointer to struct to issue sfx for large explosion
 ig_om_explosions_bobtype_large:           rs.l       1                                                       ; pointer to bobtype struct for large explosion
+ig_om_explosions_bobtype_small:           rs.l       1                                                       ; pointer to bobtype struct for small explosion
 ig_om_explosions_anims:                   rs.b       explosion_sizeof*ExplosionsCount                        ; explosion-anim-structs
 ; ingame/collisions.asm
 ig_om_coll_bullet_loop_counter:           rs.w       1                                                       ; loop counter for bullet lines      (as parameter to coll_check_one_enemy)

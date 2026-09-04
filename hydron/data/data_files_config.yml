@@ -46,6 +46,9 @@ targetFiles:
       - filename: ingame/common/explosion_32.png
         id: GLEX
         colorsLimit: 64
+      - filename: ingame/common/explosion_16.png
+        id: GSEX
+        colorsLimit: 64
 
   - filename: F001
     description: ingame_chip_level_0
@@ -93,6 +96,11 @@ targetFiles:
         gfxId: GLEX
         width: 32
         height: 32
+      - filename: .bobtype
+        id: BSEX
+        gfxId: GSEX
+        width: 16
+        height: 16
 
   - filename: F101
     description: ingame_other_level_0
