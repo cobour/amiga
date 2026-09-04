@@ -143,8 +143,8 @@ enemies_move:
   lea.l      ig_om_enemies(a4),a0
   moveq.l    #EnemiesCount-1,d7
 .move_loop:
-  tst.w      bob_status(a0)
-  blt.s      .move_loop_next
+  cmp.w      #BobStatusActive,bob_status(a0)
+  bne.s      .move_loop_next
   move.l     enemy_move_next_step(a0),a1
   cmp.l      d5,a1                                                    ; d5 = zero
   beq.s      .move_loop_next

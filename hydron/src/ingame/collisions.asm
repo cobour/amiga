@@ -31,8 +31,8 @@ coll_player_enemies:
   lea.l      ig_om_enemies(a4),a0
   moveq.l    #EnemiesCount-1,d7
 .enemies_loop:
-  tst.w      bob_status(a0)
-  blt.s      .enemies_loop_next
+  cmp.w      #BobStatusActive,bob_status(a0)
+  bne.s      .enemies_loop_next
   lea.l      enemy_bounding_box(a0),a1
   move.w     (a1)+,d4
   cmp.w      d4,d2
@@ -120,10 +120,12 @@ coll_check_one_enemy:
 
 ; checks an array of lines (represent moving bullets) against the bounding box of one enemy
 ; in:
+;   a0.l = pointer to enemy (see enemy_sizeof)
 ;   a1.l = pointer to bounding box of enemy (see coll_bounding_box_sizeof)
 ;   a2.l = pointer to line array (see coll_line_sizeof)
 ;   d7.w = counter for line array (number of lines - 1)
 .coll_check_one_enemy:
+  move.l     a6,-(sp)
 
   ; cache enemy bounding box into registers
   move.w     (a1)+,d3                                                   ; d3 = left
@@ -180,16 +182,13 @@ coll_check_one_enemy:
   ifd        UNITTEST
   moveq.l    #1,d0                                                      ; Output: 1 (Hit)
   bra.s      .exit
+  else                                                                  ; ifd UNITTEST
+  bsr.s      .enemy_hit_by_bullet
+  bra.s      .lines_loop_next_after_hit
   endif                                                                 ; ifd UNITTEST
 
-  move.l     (a2)+,a3                                                   ; get coll_line_bullet_pointer
-  ; TODO: 1. reduce hitpoints of enemy (destroy enemy when hitpoints are depleted)
-  ;       2. mark bullet as removable (decision if it is actually removed belongs to the weapon type!)
-  move.w     #$000f,COLOR00(a6)                                         ; REMOVE ME
-  bra.s      .lines_loop_next_after_hit
-
 .lines_loop_next:
-  addq.l     #4,a2                                                      ; skip coll_line_bullet_pointer
+  addq.l     #8,a2                                                      ; skip coll_line_bullet_pointer and coll_line_bullet_stack_pointer
 .lines_loop_next_after_hit:
   dbf        d7,.lines_loop
 
@@ -198,6 +197,55 @@ coll_check_one_enemy:
 .exit:
   endif                                                                 ; ifd UNITTEST
 
+  move.l     (sp)+,a6
   rts
+
+  ifnd       UNITTEST
+
+; DIRTIES A6!!
+.enemy_hit_by_bullet:
+  move.l     (a2)+,a3                                                   ; get coll_line_bullet_pointer
+  move.l     (a2)+,a6                                                   ; get coll_line_bullet_stack_pointer
+
+  ; remove bullet from bullet stack (reset ig_player_bullet_active and remove from stack list)
+  ; IMPORTANT: if PlayerBulletsMaxCountStacked (currently 4) is changed, this must be changed, too
+  ; each bullet is represented by two collision lines (left and right border), so maybe the bullet is already removed
+  ; maybe tst.b ig_player_bullet_active(a3) and bra to .bullet_removed immediately?
+  clr.b      ig_player_bullet_active(a3)
+  cmp.l      (a6),a3
+  bne.s      .not_in_first_slot
+  clr.l      (a6)
+  bra.s      .bullet_removed
+.not_in_first_slot:
+  cmp.l      4(a6),a3
+  bne.s      .not_in_second_slot
+  move.l     (a6),4(a6)
+  clr.l      (a6)
+  bra.s      .bullet_removed
+.not_in_second_slot:
+  cmp.l      8(a6),a3
+  bne.s      .not_in_third_slot
+  move.l     4(a6),8(a6)
+  move.l     (a6),4(a6)
+  clr.l      (a6)
+  bra.s      .bullet_removed
+.not_in_third_slot:
+  cmp.l      12(a6),a3
+  bne.s      .not_in_fourth_slot
+  move.l     8(a6),12(a6)
+  move.l     4(a6),8(a6)
+  move.l     (a6),4(a6)
+  clr.l      (a6)
+  ; end of list, no bra necessary
+.not_in_fourth_slot:
+.bullet_removed:
+
+  ; remove enemy
+  move.w     #BobStatusRestoreOnly,bob_status(a0)
+
+  ; trigger explosion
+  bra        explosions_new_for_enemy                                   ; implicit rts
+
+  endif                                                                 ; ifnd UNITTEST
 
   endif                                                                 ; ifnd INGAME_COLLISIONS_ASM

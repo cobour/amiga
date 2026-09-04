@@ -504,7 +504,7 @@ player_and_weapon_draw:
   move.w     ig_player_bullet_xpos(a0),d4                                         ; no fraction needed
   move.w     ig_player_bullet_ypos(a0),d5                                         ; no fraction needed
   move.w     ig_player_bullet_height(a0),d6
-  bsr.s      .calc_pos_ctl
+  bsr        .calc_pos_ctl
   move.l     ig_player_bullet_gfx_width_bytes(a0),d0
   move.w     ig_player_bullet_anim_offset(a0),d3
   move.l     ig_player_bullet_gfx_pointer(a0),a1
@@ -544,10 +544,13 @@ player_weapon_update:
 
   ; update all bullet positions
   lea.l      ig_om_player_bullets_stack_0(a4),a0
+  lea.l      ig_om_player_bullets_stack_0_list(a4),a2
   bsr.s      .position_update_per_stack
   lea.l      ig_om_player_bullets_stack_1(a4),a0
+  lea.l      ig_om_player_bullets_stack_1_list(a4),a2
   bsr.s      .position_update_per_stack
   lea.l      ig_om_player_bullets_stack_2(a4),a0
+  lea.l      ig_om_player_bullets_stack_2_list(a4),a2
   bsr.s      .position_update_per_stack
 
   move.w     d5,ig_om_coll_bullet_loop_counter(a4)
@@ -592,6 +595,7 @@ player_weapon_update:
   move.w     d4,(a3)+                                                             ; coll_line_x2
   move.w     d3,(a3)+                                                             ; coll_line_y2
   move.l     a0,(a3)+                                                             ; coll_line_bullet_pointer
+  move.l     a2,(a3)+                                                             ; coll_line_bullet_stack_pointer
 
   ;    right line
   add.w      ig_player_bullet_line_right_xadd(a0),d0
@@ -601,6 +605,7 @@ player_weapon_update:
   move.w     d2,(a3)+                                                             ; coll_line_x2
   move.w     d3,(a3)+                                                             ; coll_line_y2
   move.l     a0,(a3)+                                                             ; coll_line_bullet_pointer
+  move.l     a2,(a3)+                                                             ; coll_line_bullet_stack_pointer
 
   ;    inc counter
   addq.w     #2,d5                                                                ; ig_om_coll_bullet_loop_counter
@@ -692,25 +697,25 @@ player_bullet_add_to_stack:
 
   ; init struct ig_player_bullet - MUST be changed accordingly when struct is changed
   move.l     d6,a1                                                                ; restore a1 parameter
-  move.w     #$0100,(a0)+
+  move.w     #$0100,(a0)+                                                         ; ig_player_bullet_active and ig_player_bullet_dummy
   move.l     ig_om_player_xpos(a4),d0
   add.l      (a1)+,d0
-  move.l     d0,(a0)+
+  move.l     d0,(a0)+                                                             ; ig_player_bullet_xpos
   move.l     ig_om_player_ypos(a4),d0
   add.l      (a1)+,d0
-  move.l     d0,(a0)+
-  move.l     (a1)+,(a0)+
-  move.l     (a1)+,(a0)+
-  move.w     (a1)+,(a0)+
-  move.w     (a1)+,(a0)+
-  move.w     (a1)+,(a0)+
-  move.w     (a1)+,(a0)+
-  move.w     (a1)+,(a0)+
-  move.w     (a1)+,(a0)+
-  move.w     (a1)+,(a0)+
-  move.l     (a1)+,(a0)+
-  move.l     (a1)+,(a0)+
-  move.w     (a1),(a0)
+  move.l     d0,(a0)+                                                             ; ig_player_bullet_ypos
+  move.l     (a1)+,(a0)+                                                          ; ig_player_bullet_speed_x
+  move.l     (a1)+,(a0)+                                                          ; ig_player_bullet_speed_y
+  move.w     (a1)+,(a0)+                                                          ; ig_player_bullet_line_left_xadd
+  move.w     (a1)+,(a0)+                                                          ; ig_player_bullet_line_right_xadd
+  move.w     (a1)+,(a0)+                                                          ; ig_player_bullet_min_xpos
+  move.w     (a1)+,(a0)+                                                          ; ig_player_bullet_max_xpos
+  move.w     (a1)+,(a0)+                                                          ; ig_player_bullet_min_ypos
+  move.w     (a1)+,(a0)+                                                          ; ig_player_bullet_max_ypos
+  move.w     (a1)+,(a0)+                                                          ; ig_player_bullet_height
+  move.l     (a1)+,(a0)+                                                          ; ig_player_bullet_gfx_pointer
+  move.l     (a1)+,(a0)+                                                          ; ig_player_bullet_gfx_width_bytes
+  move.w     (a1),(a0)                                                            ; ig_player_bullet_anim_offset
   rts
 
 ; must match struct ig_player_bullettype

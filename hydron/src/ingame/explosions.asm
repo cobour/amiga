@@ -24,6 +24,19 @@ explosions_init:
   add.l      df_iff_rawsize(a0),d0
   move.l     d0,bobtype_mask_pointer(a3)
 
+  ; init small explosion bobtype
+  move.l     #"BSEX",d0
+  bsr        datafiles_get_pointer
+  move.l     df_idx_ptr_rawdata(a0),a3                                              ; pointer to bobtype-struct
+  move.l     a3,ig_om_explosions_bobtype_small(a4)
+  move.l     bobtype_gfx_id(a3),d0
+  bsr        datafiles_get_pointer                                                  ; pointer to gfx-struct
+  move.l     df_idx_ptr_rawdata(a0),d0
+  move.l     d0,bobtype_data_pointer(a3)
+  lea.l      df_idx_metadata(a0),a0
+  add.l      df_iff_rawsize(a0),d0
+  move.l     d0,bobtype_mask_pointer(a3)
+
   ; init anim structs
   moveq.l    #ExplosionsCount-1,d7
   lea.l      ig_om_explosions_anims(a4),a0
@@ -111,6 +124,7 @@ explosions_draw:
 ;   d0.w - xpos
 ;   d1.w - ypos
 explosions_new_large:
+  movem.l    a0/d2/d7,-(sp)
 
   ; play sfx
   movem.w    d0-d1,-(sp)
@@ -119,7 +133,7 @@ explosions_new_large:
   movem.w    (sp)+,d0-d1
 
   ; find anim slot
-  bsr.s      explosions_new
+  bsr        explosions_new
   moveq.l    #0,d2
   cmp.l      d2,a0
   beq.s      .exit
@@ -136,6 +150,75 @@ explosions_new_large:
   move.w     d1,bob_ypos(a0)                                                        ; fraction is irrelevant because explosion does not move
 
 .exit:
+  movem.l    (sp)+,a0/d2/d7
+  rts
+
+; in:
+;   d0.w - xpos
+;   d1.w - ypos
+explosions_new_small:
+  movem.l    a0/d2/d7,-(sp)
+
+  ; play sfx
+  movem.w    d0-d1,-(sp)
+  move.l     ig_om_explosions_sfx_large(a4),a0
+  bsr        _mt_playfx
+  movem.w    (sp)+,d0-d1
+
+  ; find anim slot
+  bsr        explosions_new
+  moveq.l    #0,d2
+  cmp.l      d2,a0
+  beq.s      .exit
+
+  ; init vars
+  move.w     #BobStatusActive,bob_status(a0)
+  move.b     #2,explosion_frame_delay(a0)
+  move.b     #2,explosion_current_frame_delay_counter(a0)
+  move.w     #28,explosion_max_anim_step_offset(a0)
+  move.w     #2,explosion_anim_step_add(a0)
+  move.l     d2,bob_anim_offset(a0)                                                 ; d2 = still zero
+  move.l     ig_om_explosions_bobtype_small(a4),bob_bobtype_pointer(a0)
+  move.w     d0,bob_xpos(a0)                                                        ; fraction is irrelevant because explosion does not move
+  move.w     d1,bob_ypos(a0)                                                        ; fraction is irrelevant because explosion does not move
+
+.exit:
+  movem.l    (sp)+,a0/d2/d7
+  rts
+
+; in:
+;   a0 - pointer to enemy struct (see enemy_sizeof)
+explosions_new_for_enemy:
+  movem.l    d0-d1/a0-a1,-(sp)
+  move.l     bob_bobtype_pointer(a0),a1
+  move.w     bobtype_width(a1),d0
+  move.w     bobtype_height(a1),d1
+
+  ; select explosion
+  cmp.w      #16,d0
+  ble.s      .small_explosion
+
+  ; large explosion
+  sub.w      #32,d0
+  lsr.w      #1,d0
+  add.w      bob_xpos(a0),d0
+  sub.w      #32,d1
+  lsr.w      #1,d1
+  add.w      bob_ypos(a0),d1
+  bsr        explosions_new_large
+  bra.s      .exit
+
+.small_explosion:
+  sub.w      #16,d0
+  lsr.w      #1,d0
+  add.w      bob_xpos(a0),d0
+  sub.w      #16,d1
+  lsr.w      #1,d1
+  add.w      bob_ypos(a0),d1
+  bsr        explosions_new_small
+
+.exit:
+  movem.l    (sp)+,d0-d1/a0-a1
   rts
 
 ; INTERNAL USE ONLY

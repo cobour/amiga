@@ -21,7 +21,7 @@ bob_init:
 ;   a0 - pointer to bob-struct
 bob_clear:
   clr.l      bob_bobtype_pointer(a0)
-  move.w     #-1,bob_status(a0)
+  move.w     #BobStatusInactive,bob_status(a0)
   clr.l      bob_xpos(a0)
   clr.l      bob_ypos(a0)
   clr.l      bob_anim_offset(a0)
@@ -44,7 +44,7 @@ bob_clear:
 ; in:
 ;   a0 - pointer to bob-struct
 bob_clear_quick:
-  move.w     #-1,bob_status(a0)
+  move.w     #BobStatusInactive,bob_status(a0)
   clr.w      bob_restore_1a+bob_restore_bltsize(a0)
   clr.w      bob_restore_2a+bob_restore_bltsize(a0)
   clr.w      bob_restore_1b+bob_restore_bltsize(a0)
@@ -81,6 +81,16 @@ bob_restore:
   move.l     (a3)+,(a4)+
   move.l     (a3),(a4)
   move.l     d4,a4
+  ; clear bltsize of restore 1
+  clr.w      bob_restore_1a+bob_restore_bltsize(a0)
+  clr.w      bob_restore_1b+bob_restore_bltsize(a0)
+  ; check and reset status if necessary
+  cmp.w      #BobStatusRestoreOnly,bob_status(a0)
+  bne.s      .exit
+  tst.w      bob_restore_2a+bob_restore_bltsize(a0)
+  bgt.s      .exit
+  move.w     #BobStatusInactive,bob_status(a0)
+.exit:
   rts
 
 ; in:
