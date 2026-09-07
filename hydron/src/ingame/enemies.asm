@@ -71,6 +71,12 @@ enemies_init:
   lea.l      df_idx_metadata(a0),a0
   add.l      df_iff_rawsize(a0),d0
   move.l     d0,bobtype_mask_pointer(a3)
+  move.l     bobtype_gfx_hit_id(a3),d0
+  beq.s      .no_hit_gfx
+  bsr        datafiles_get_pointer
+  move.l     df_idx_ptr_rawdata(a0),d0
+  move.l     d0,bobtype_hit_data_pointer(a3)
+.no_hit_gfx:
   ; next
   lea.l      df_tld_enm_sizeof(a1),a1
   bra.s      .init_types_loop
@@ -113,6 +119,7 @@ enemies_spawn:
   move.l     df_tld_enm_ypos(a2),bob_ypos(a1)
   move.l     df_tld_enm_enemytype(a2),a0
   move.l     a0,enemy_enemytype_pointer(a1)
+  move.w     enemytype_hitpoints(a0),enemy_hitpoints(a1)
   move.l     enemytype_bobtype_pointer(a0),bob_bobtype_pointer(a1)
   clr.l      enemy_move_next_step(a1)
   move.l     df_tld_enm_movement(a2),a0

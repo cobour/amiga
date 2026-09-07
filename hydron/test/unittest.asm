@@ -109,7 +109,8 @@ test_cd_enemy_bullet___line_25_75_to_45_85___should_be_a_hit:
   PRINT         .name
 .given:
   move.w        .counter(pc),d7
-  lea.l         .enemy_bbox(pc),a1
+  lea.l         .enemy_bbox(pc),a0
+  sub.l         #enemy_bounding_box,a0
   lea.l         .lines(pc),a2
   bra.s         .when
 .enemy_bbox:
@@ -137,7 +138,8 @@ test_cd_enemy_bullet___line_66_114_to_84_128___should_be_no_hit:
   PRINT         .name
 .given:
   move.w        .counter(pc),d7
-  lea.l         .enemy_bbox(pc),a1
+  lea.l         .enemy_bbox(pc),a0
+  sub.l         #enemy_bounding_box,a0
   lea.l         .lines(pc),a2
   bra.s         .when
 .enemy_bbox:
@@ -165,7 +167,8 @@ test_cd_enemy_bullet___line_47_76_to_65_86___should_be_a_hit:
   PRINT         .name
 .given:
   move.w        .counter(pc),d7
-  lea.l         .enemy_bbox(pc),a1
+  lea.l         .enemy_bbox(pc),a0
+  sub.l         #enemy_bounding_box,a0
   lea.l         .lines(pc),a2
   bra.s         .when
 .enemy_bbox:
@@ -193,7 +196,8 @@ test_cd_enemy_bullet___line_67_109_to_50_119___should_be_no_hit:
   PRINT         .name
 .given:
   move.w        .counter(pc),d7
-  lea.l         .enemy_bbox(pc),a1
+  lea.l         .enemy_bbox(pc),a0
+  sub.l         #enemy_bounding_box,a0
   lea.l         .lines(pc),a2
   bra.s         .when
 .enemy_bbox:
@@ -221,7 +225,8 @@ test_cd_enemy_bullet___line_25_105_to_45_115___should_be_a_hit:
   PRINT         .name
 .given:
   move.w        .counter(pc),d7
-  lea.l         .enemy_bbox(pc),a1
+  lea.l         .enemy_bbox(pc),a0
+  sub.l         #enemy_bounding_box,a0
   lea.l         .lines(pc),a2
   bra.s         .when
 .enemy_bbox:
@@ -249,7 +254,8 @@ test_cd_enemy_bullet___line_25_110_to_45_120___should_be_no_hit:
   PRINT         .name
 .given:
   move.w        .counter(pc),d7
-  lea.l         .enemy_bbox(pc),a1
+  lea.l         .enemy_bbox(pc),a0
+  sub.l         #enemy_bounding_box,a0
   lea.l         .lines(pc),a2
   bra.s         .when
 .enemy_bbox:
@@ -277,7 +283,8 @@ test_cd_enemy_bullet___line_5_80_to_25_90___should_be_no_hit:
   PRINT         .name
 .given:
   move.w        .counter(pc),d7
-  lea.l         .enemy_bbox(pc),a1
+  lea.l         .enemy_bbox(pc),a0
+  sub.l         #enemy_bounding_box,a0
   lea.l         .lines(pc),a2
   bra.s         .when
 .enemy_bbox:

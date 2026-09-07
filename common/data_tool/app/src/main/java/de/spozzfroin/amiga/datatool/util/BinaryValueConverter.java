@@ -52,6 +52,10 @@ public class BinaryValueConverter {
 	}
 
 	public void writeLong(String value, OutputStream data) {
+		if (value == null) {
+			this.writeLong(0, data);
+			return;
+		}
 		try {
 			var bytes = value.getBytes();
 			if (bytes.length != 4) {

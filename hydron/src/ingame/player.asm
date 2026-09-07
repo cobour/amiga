@@ -704,6 +704,7 @@ player_bullet_add_to_stack:
   move.l     ig_om_player_ypos(a4),d0
   add.l      (a1)+,d0
   move.l     d0,(a0)+                                                             ; ig_player_bullet_ypos
+  move.w     (a1)+,(a0)+                                                          ; ig_player_bullet_damagepoints
   move.l     (a1)+,(a0)+                                                          ; ig_player_bullet_speed_x
   move.l     (a1)+,(a0)+                                                          ; ig_player_bullet_speed_y
   move.w     (a1)+,(a0)+                                                          ; ig_player_bullet_line_left_xadd
@@ -722,6 +723,7 @@ player_bullet_add_to_stack:
 player_bullettype_simple_for_stack_0:
   dc.w       0,0                                                                  ; xpos in screen coordinates as fixed-point 16/16 value relative to player position
   dc.w       -10,0                                                                ; ypos in screen coordinates as fixed-point 16/16 value relative to player position
+  dc.w       1                                                                    ; damagepoints
   dc.w       -4,0                                                                 ; xpos-add in screen coordinates as fixed-point 16/16 value
   dc.w       -16,0                                                                ; ypos-add in screen coordinates as fixed-point 16/16 value
   dc.w       5,8                                                                  ; xpos add for left/right collision detection line
@@ -738,6 +740,7 @@ player_bullettype_simple_for_stack_0:
 player_bullettype_simple_for_stack_1:
   dc.w       8,0                                                                  ; xpos in screen coordinates as fixed-point 16/16 value relative to player position
   dc.w       -10,0                                                                ; ypos in screen coordinates as fixed-point 16/16 value relative to player position
+  dc.w       1                                                                    ; damagepoints
   dc.w       0,0                                                                  ; xpos-add in screen coordinates as fixed-point 16/16 value
   dc.w       -16,0                                                                ; ypos-add in screen coordinates as fixed-point 16/16 value
   dc.w       6,9                                                                  ; xpos add for left/right collision detection line
@@ -754,6 +757,7 @@ player_bullettype_simple_for_stack_1:
 player_bullettype_simple_for_stack_2:
   dc.w       16,0                                                                 ; xpos in screen coordinates as fixed-point 16/16 value relative to player position
   dc.w       -10,0                                                                ; ypos in screen coordinates as fixed-point 16/16 value relative to player position
+  dc.w       1                                                                    ; damagepoints
   dc.w       4,0                                                                  ; xpos-add in screen coordinates as fixed-point 16/16 value
   dc.w       -16,0                                                                ; ypos-add in screen coordinates as fixed-point 16/16 value
   dc.w       7,10                                                                 ; xpos add for left/right collision detection line

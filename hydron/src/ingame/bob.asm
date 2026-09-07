@@ -25,6 +25,7 @@ bob_clear:
   clr.l      bob_xpos(a0)
   clr.l      bob_ypos(a0)
   clr.l      bob_anim_offset(a0)
+  clr.b      bob_show_hit_gfx(a0)
   clr.l      bob_restore_1a+bob_restore_offset(a0)
   clr.w      bob_restore_1a+bob_restore_bltsize(a0)
   clr.w      bob_restore_1a+bob_restore_modulo(a0)
@@ -45,6 +46,7 @@ bob_clear:
 ;   a0 - pointer to bob-struct
 bob_clear_quick:
   move.w     #BobStatusInactive,bob_status(a0)
+  clr.b      bob_show_hit_gfx(a0)
   clr.w      bob_restore_1a+bob_restore_bltsize(a0)
   clr.w      bob_restore_2a+bob_restore_bltsize(a0)
   clr.w      bob_restore_1b+bob_restore_bltsize(a0)
@@ -480,7 +482,14 @@ bob_draw:
   move.w     d6,BLTDMOD(a6)
   move.w     d6,bob_restore_modulo(a1)
   ; pointers
+  tst.b      bob_show_hit_gfx(a0)
+  bgt.s      .show_hit_gfx
   move.l     bobtype_data_pointer(a2),d6
+  bra.s      .go_on
+.show_hit_gfx:
+  move.l     bobtype_hit_data_pointer(a2),d6
+  sub.b      #1,bob_show_hit_gfx(a0)
+.go_on:
   add.l      d2,d6
   move.l     d6,BLTBPT(a6)
   move.l     bobtype_mask_pointer(a2),d6
@@ -519,7 +528,14 @@ bob_draw:
   move.w     d6,BLTDMOD(a6)
   move.w     d6,bob_restore_modulo(a1)
   ; pointers
+  tst.b      bob_show_hit_gfx(a0)
+  bgt.s      .show_hit_gfx2
   move.l     bobtype_data_pointer(a2),d6
+  bra.s      .go_on2
+.show_hit_gfx2:
+  move.l     bobtype_hit_data_pointer(a2),d6
+  sub.b      #1,bob_show_hit_gfx(a0)
+.go_on2:
   add.l      d2,d6
   move.l     d6,BLTBPT(a6)
   move.l     bobtype_mask_pointer(a2),d6

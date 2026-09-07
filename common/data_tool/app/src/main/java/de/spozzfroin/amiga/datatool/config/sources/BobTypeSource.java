@@ -17,6 +17,7 @@ class BobTypeSource extends AbstractSource {
 	private static final BinaryValueConverter BINARY_VALUE_CONVERTER = BinaryValueConverter.getInstance();
 
 	private String gfxId;
+	private String gfxHitId;
 	private int width;
 	private int height;
 
@@ -39,6 +40,12 @@ class BobTypeSource extends AbstractSource {
 			this.gfxId = (String) parameter.get("gfxId");
 		} else {
 			throw new IllegalArgumentException("gfxId not defined!");
+		}
+		//
+		if (parameter.containsKey("gfxHitId")) {
+			this.gfxHitId = (String) parameter.get("gfxHitId");
+		} else {
+			this.gfxHitId = null;
 		}
 		//
 		if (parameter.containsKey("width")) {
@@ -71,12 +78,14 @@ class BobTypeSource extends AbstractSource {
 		}
 		//
 		BINARY_VALUE_CONVERTER.writeLong(this.gfxId, outputStream); // bobtype_gfx_id
+		BINARY_VALUE_CONVERTER.writeLong(this.gfxHitId, outputStream); // bobtype_gfx_hit_id
 		BINARY_VALUE_CONVERTER.writeWord(this.width, outputStream); // bobtype_width
 		BINARY_VALUE_CONVERTER.writeWord(this.height, outputStream); // bobtype_height
 		BINARY_VALUE_CONVERTER.writeWord(width_shift, outputStream); // bobtype_width_shift
 		BINARY_VALUE_CONVERTER.writeWord(this.width / 16, outputStream); // bobtype_width_words
 		BINARY_VALUE_CONVERTER.writeWord(this.height * gfxSource.getBitplanes(), outputStream); // bobtype_height_blt
 		BINARY_VALUE_CONVERTER.writeLong(0, outputStream); // bobtype_data_pointer
+		BINARY_VALUE_CONVERTER.writeLong(0, outputStream); // bobtype_hit_data_pointer
 		BINARY_VALUE_CONVERTER.writeLong(0, outputStream); // bobtype_mask_pointer
 		BINARY_VALUE_CONVERTER.writeWord((gfxSource.getWidth() - this.width) / 8, outputStream); // bobtype_src_mod_no_shift
 		BINARY_VALUE_CONVERTER.writeWord(((gfxSource.getWidth() - this.width) / 8) - 2, outputStream); // bobtype_src_mod_shift

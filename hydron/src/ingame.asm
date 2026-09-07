@@ -33,6 +33,7 @@ ig_start:
   bsr        bob_init
   bsr        enemies_init
   bsr        explosions_init
+  bsr        coll_init
   bsr        ctrl_take_system
   bsr        .init_music
 

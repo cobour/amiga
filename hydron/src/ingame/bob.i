@@ -20,12 +20,14 @@ bob_restore_sizeof:        rs.b       0
 
                            rsreset
 bobtype_gfx_id:            rs.l       1                     ; ID of gfx file that is associated to this bobtype
+bobtype_gfx_hit_id:        rs.l       1                     ; ID of gfx file that is associated to this bobtype when bob indicates being hit
 bobtype_width:             rs.w       1                     ; width of bob in pixels
 bobtype_height:            rs.w       1                     ; height of bob in pixels
 bobtype_width_shift:       rs.w       1                     ; how many bits for lsl.w when calculating the anim offset from anim number (e.g. rotation)
 bobtype_width_words:       rs.w       1                     ; width of bob in words
 bobtype_height_blt:        rs.w       1                     ; height for blitter (height * bitplanes)
 bobtype_data_pointer:      rs.l       1                     ; pointer to gfx data
+bobtype_hit_data_pointer:  rs.l       1                     ; pointer to gfx data when bob indicates being hit
 bobtype_mask_pointer:      rs.l       1                     ; pointer to mask
 bobtype_src_mod_no_shift:  rs.w       1                     ; source-modulo without pixel shift (xpos is at word-border) if full width of bob is visible
 bobtype_src_mod_shift:     rs.w       1                     ; source-modulo with pixel shift (xpos is NOT at word-border) if full width of bob is visible
@@ -41,6 +43,8 @@ bob_status:                rs.w       1                     ; status of bob
 bob_xpos:                  rs.l       1                     ; xpos in screen coordinates as fixed-point
 bob_ypos:                  rs.l       1                     ; ypos in screen coordinates as fixed-point
 bob_anim_offset:           rs.l       1                     ; offset in gfx (and mask) data for current anim step)
+bob_show_hit_gfx:          rs.b       1                     ; 0 = normal gfx, >0 hit gfx
+bob_dummy_byte:            rs.b       1
 bob_restore_1a:            rs.b       bob_restore_sizeof    ; restore-struct for current blit (all or first part if split)
 bob_restore_1b:            rs.b       bob_restore_sizeof    ; restore-struct fur corrent blit (second part if split)
 bob_restore_2a:            rs.b       bob_restore_sizeof    ; restore-struct for current restore (all or first part if split)

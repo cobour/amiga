@@ -45,6 +45,7 @@ ig_player_sprite_sizeof:                   rs.b       0
                                            rsreset
 ig_player_bullettype_rel_xpos:             rs.l       1                                                                                 ; xpos in screen coordinates as fixed-point 16/16 value relative to player position
 ig_player_bullettype_rel_ypos:             rs.l       1                                                                                 ; ypos in screen coordinates as fixed-point 16/16 value relative to player position
+ig_player_bullettype_damagepoints:         rs.w       1                                                                                 ; number of points enemy hitpoints are reduced when being hit by this bullettype
 ig_player_bullettype_speed_x:              rs.l       1                                                                                 ; xpos-add in screen coordinates as fixed-point 16/16 value
 ig_player_bullettype_speed_y:              rs.l       1                                                                                 ; ypos-add in screen coordinates as fixed-point 16/16 value
 ig_player_bullettype_line_left_xadd:       rs.w       1                                                                                 ; value that is added to the xpos for the left collision detection line
@@ -66,6 +67,7 @@ ig_player_bullet_dummy:                    rs.b       1
 ig_player_bullet_xpos:                     rs.l       1                                                                                 ; xpos in screen coordinates as fixed-point 16/16 value
 ig_player_bullet_ypos:                     rs.l       1                                                                                 ; ypos in screen coordinates as fixed-point 16/16 value
 ; values must match ig_player_bullettype_xxx - begin
+ig_player_bullet_damagepoints:             rs.w       1                                                                                 ; number of points enemy hitpoints are reduced when being hit by this bullettype
 ig_player_bullet_speed_x:                  rs.l       1                                                                                 ; xpos-add in screen coordinates as fixed-point 16/16 value
 ig_player_bullet_speed_y:                  rs.l       1                                                                                 ; ypos-add in screen coordinates as fixed-point 16/16 value
 ig_player_bullet_line_left_xadd:           rs.w       1                                                                                 ; value that is added to the xpos for the left collision detection line

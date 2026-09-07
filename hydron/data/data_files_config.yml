@@ -57,9 +57,14 @@ targetFiles:
       - filename: ingame/level_0/vision.mod
         id: MODS # MUST be the same in all levels
       - filename: ingame/level_0/Moon_Enemy32xrotate_02b.png
-        id: TEST
+        id: E01N
         flattenedTileFormat: 32x32
         colorsLimit: 64
+      - filename: ingame/level_0/Moon_Enemy32xrotate_02b_hit.png
+        id: E01H
+        flattenedTileFormat: 32x32
+        colorsLimit: 64
+        withMask: false
 
   - filename: F100
     description: ingame_other_common
@@ -142,12 +147,14 @@ targetFiles:
           - 300
       - filename: .bobtype
         id: BT00
-        gfxId: TEST
+        gfxId: E01N
+        gfxHitId: E01H
         width: 32
         height: 32
       - filename: .enemytype
         id: ET00
         bobtypeId: BT00
+        hitpoints: 3
         boundingBox:
           - 4
           - 4

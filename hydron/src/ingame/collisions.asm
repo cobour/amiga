@@ -5,6 +5,14 @@ INGAME_COLLISIONS_ASM equ 1
 
   ifnd       UNITTEST
 
+coll_init:
+  ; init enemy being hit sfx
+  move.l     #"SEH0",d0
+  bsr        datafiles_get_pointer
+  lea.l      df_idx_metadata(a0),a0
+  move.l     a0,ig_om_coll_sfx_enemy_being_hit(a4)
+  rts
+
 coll_player_enemies:
 
   ; can player be hit?
@@ -101,7 +109,6 @@ coll_enemies_bullets:
   move.w     ig_om_coll_bullet_loop_counter(a4),d7
   tst.w      d7
   blt.s      .no_bullets
-  lea.l      enemy_bounding_box(a0),a1
   lea.l      ig_om_coll_bullet_lines(a4),a2
   bsr.s      .coll_check_one_enemy
 .no_bullets:
@@ -121,17 +128,16 @@ coll_check_one_enemy:
 ; checks an array of lines (represent moving bullets) against the bounding box of one enemy
 ; in:
 ;   a0.l = pointer to enemy (see enemy_sizeof)
-;   a1.l = pointer to bounding box of enemy (see coll_bounding_box_sizeof)
 ;   a2.l = pointer to line array (see coll_line_sizeof)
 ;   d7.w = counter for line array (number of lines - 1)
 .coll_check_one_enemy:
-  move.l     a6,-(sp)
 
   ; cache enemy bounding box into registers
+  lea.l      enemy_bounding_box(a0),a1
   move.w     (a1)+,d3                                                   ; d3 = left
   move.w     (a1)+,d5                                                   ; d5 = top
   move.w     (a1)+,d4                                                   ; d4 = right
-  move.w     (a1)+,d6                                                   ; d6 = bottom
+  move.w     (a1),d6                                                    ; d6 = bottom
 
 .lines_loop:
   ; fetch line coordinates from array (y2 >= y1)
@@ -197,49 +203,71 @@ coll_check_one_enemy:
 .exit:
   endif                                                                 ; ifd UNITTEST
 
-  move.l     (sp)+,a6
   rts
 
   ifnd       UNITTEST
 
-; DIRTIES A6!!
 .enemy_hit_by_bullet:
   move.l     (a2)+,a3                                                   ; get coll_line_bullet_pointer
-  move.l     (a2)+,a6                                                   ; get coll_line_bullet_stack_pointer
+  move.l     (a2)+,a1                                                   ; get coll_line_bullet_stack_pointer
+
+  ; each bullet is represented by two collision lines (left and right border), so maybe the bullet is already deactivated
+  ; if bullet is already deactivated, there are no further consequences
+  tst.b      ig_player_bullet_active(a3)
+  beq.s      .exit_enemy_hit_by_bullet
 
   ; remove bullet from bullet stack (reset ig_player_bullet_active and remove from stack list)
   ; IMPORTANT: if PlayerBulletsMaxCountStacked (currently 4) is changed, this must be changed, too
-  ; each bullet is represented by two collision lines (left and right border), so maybe the bullet is already removed
-  ; maybe tst.b ig_player_bullet_active(a3) and bra to .bullet_removed immediately?
+  ; if we do undestroyable bullets on future extra weapons, then the stack removal must not be executed
   clr.b      ig_player_bullet_active(a3)
-  cmp.l      (a6),a3
+  cmp.l      (a1),a3
   bne.s      .not_in_first_slot
-  clr.l      (a6)
+  clr.l      (a1)
   bra.s      .bullet_removed
 .not_in_first_slot:
-  cmp.l      4(a6),a3
+  cmp.l      4(a1),a3
   bne.s      .not_in_second_slot
-  move.l     (a6),4(a6)
-  clr.l      (a6)
+  move.l     (a1),4(a1)
+  clr.l      (a1)
   bra.s      .bullet_removed
 .not_in_second_slot:
-  cmp.l      8(a6),a3
+  cmp.l      8(a1),a3
   bne.s      .not_in_third_slot
-  move.l     4(a6),8(a6)
-  move.l     (a6),4(a6)
-  clr.l      (a6)
+  move.l     4(a1),8(a1)
+  move.l     (a1),4(a1)
+  clr.l      (a1)
   bra.s      .bullet_removed
 .not_in_third_slot:
-  cmp.l      12(a6),a3
+  cmp.l      12(a1),a3
   bne.s      .not_in_fourth_slot
-  move.l     8(a6),12(a6)
-  move.l     4(a6),8(a6)
-  move.l     (a6),4(a6)
-  clr.l      (a6)
+  move.l     8(a1),12(a1)
+  move.l     4(a1),8(a1)
+  move.l     (a1),4(a1)
+  clr.l      (a1)
   ; end of list, no bra necessary
 .not_in_fourth_slot:
 .bullet_removed:
 
+  ; reduce hitpoints of enemy and check if enemy is destroyed or not
+  move.w     ig_player_bullet_damagepoints(a3),d0
+  sub.w      d0,enemy_hitpoints(a0)
+  tst.w      enemy_hitpoints(a0)
+  ble.s      .enemy_destroyed
+
+  ; enemy still alive
+  ; play sfx
+  move.l     a0,-(sp)
+  move.l     ig_om_coll_sfx_enemy_being_hit(a4),a0
+  bsr        _mt_playfx
+  move.l     (sp)+,a0
+
+  ; trigger use of hit gfx for some frames
+  move.b     #5,bob_show_hit_gfx(a0)
+
+.exit_enemy_hit_by_bullet:
+  rts
+
+.enemy_destroyed:
   ; remove enemy
   move.w     #BobStatusRestoreOnly,bob_status(a0)
 
