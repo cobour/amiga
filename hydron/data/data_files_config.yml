@@ -155,6 +155,7 @@ targetFiles:
         id: ET00
         bobtypeId: BT00
         hitpoints: 3
+        score: 10
         boundingBox:
           - 4
           - 4

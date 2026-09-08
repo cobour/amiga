@@ -18,6 +18,7 @@ class EnemyTypeSource extends AbstractSource {
 	private String bobtypeId;
 	private List<Integer> boundingBox;
 	private int hitpoints;
+	private int score;
 
 	private byte[] rawdata;
 
@@ -55,6 +56,12 @@ class EnemyTypeSource extends AbstractSource {
 		} else {
 			throw new IllegalArgumentException("hitpoints not defined!");
 		}
+		//
+		if (parameter.containsKey("score")) {
+			this.score = (int) parameter.get("score");
+		} else {
+			throw new IllegalArgumentException("score not defined!");
+		}
 	}
 
 	@Override
@@ -71,6 +78,7 @@ class EnemyTypeSource extends AbstractSource {
 			BINARY_VALUE_CONVERTER.writeWord(i, outputStream); // enemytype_bounding_box
 		});
 		BINARY_VALUE_CONVERTER.writeWord(this.hitpoints, outputStream); // enemytype_hitpoints
+		BINARY_VALUE_CONVERTER.writeWordBCD(this.score, outputStream); // enemytype_score
 		//
 		this.rawdata = outputStream.toByteArray(); // length = enemytype_sizeof
 	}

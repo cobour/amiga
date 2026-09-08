@@ -18,8 +18,8 @@ ig_start:
 
   ; REMOVE ME - test values
   move.b     #$03,c_om_lives(a4)
-  move.l     #$012345,c_om_score(a4)
-  move.l     #$123456,c_om_hiscore(a4)
+  move.l     #$000000,c_om_score(a4)
+  move.l     #$000100,c_om_hiscore(a4)
   ; REMOVE ME - test values
 
   clr.b      ig_om_end_mainloop(a4)

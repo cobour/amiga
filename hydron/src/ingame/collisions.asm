@@ -271,6 +271,15 @@ coll_check_one_enemy:
   ; remove enemy
   move.w     #BobStatusRestoreOnly,bob_status(a0)
 
+  ; add score
+  move.l     enemy_enemytype_pointer(a0),a3
+  move.l     c_om_score(a4),d0
+  moveq.l    #0,d1
+  move.w     enemytype_score(a3),d1
+  bsr        bcd_add
+  move.l     d0,c_om_score(a4)
+  move.b     #2,ig_om_panel_redraw_score(a4)
+
   ; trigger explosion
   bra        explosions_new_for_enemy                                   ; implicit rts
 

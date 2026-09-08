@@ -150,17 +150,25 @@ panel_update:
 
 .check_score:
   tst.b      ig_om_panel_redraw_score(a4)
-  beq.s      .exit
+  beq.s      .check_hiscore
   sub.b      #1,ig_om_panel_redraw_score(a4)
-  move.l     ig_buffers_copperlist_pointer(a0),a1
+  move.l     ig_om_buffers_backbuffer(a4),a1
+  move.l     ig_buffers_copperlist_pointer(a1),a1
   bsr        panel_draw_score
   move.l     c_om_hiscore(a4),d0
   cmp.l      c_om_score(a4),d0
   bge.s      .no_hiscore_update
   move.l     c_om_score(a4),c_om_hiscore(a4)
-  move.l     ig_buffers_copperlist_pointer(a0),a1
-  bsr        panel_draw_hiscore
+  move.b     #2,ig_om_panel_redraw_hiscore(a4)
 .no_hiscore_update:
+
+.check_hiscore:
+  tst.b      ig_om_panel_redraw_hiscore(a4)
+  beq.s      .exit
+  move.l     ig_om_buffers_backbuffer(a4),a1
+  move.l     ig_buffers_copperlist_pointer(a1),a1
+  bsr        panel_draw_hiscore
+  sub.b      #1,ig_om_panel_redraw_hiscore(a4)
 
 .exit:
   movem.l    (sp)+,d0-d2/a0-a3

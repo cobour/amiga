@@ -11,7 +11,7 @@ enemytype_bobtype_id:       rs.l       1                            ; ID of corr
 enemytype_bobtype_pointer:  rs.l       1                            ; pointer to corresponding bobtype
 enemytype_bounding_box:     rs.b       coll_bounding_box_sizeof     ; bounding box of enemy (relative to screen position)
 enemytype_hitpoints:        rs.w       1                            ; initial hitpoints
-; later: enemytype_initial_hitpoints, enemytype_score_when_killed ...
+enemytype_score:            rs.w       1                            ; score that is earned when enemy of this type is destroyed
 enemytype_sizeof:           rs.b       0
 
                             rsreset

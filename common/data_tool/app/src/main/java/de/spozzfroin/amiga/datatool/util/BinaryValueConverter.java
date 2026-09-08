@@ -94,6 +94,21 @@ public class BinaryValueConverter {
 		}
 	}
 
+	// BigEndian
+	public void writeWordBCD(int value, OutputStream data) {
+		if (value < 0 || value > 9999) {
+			throw new IllegalArgumentException("value out of bounds");
+		}
+		int bcdResult = 0;
+		int shift = 0;
+		while (value > 0) {
+			bcdResult |= ((value % 10) << shift);
+			value /= 10;
+			shift += 4;
+		}
+		this.writeWord(bcdResult, data);
+	}
+
 	public void writeByte(int value, OutputStream data) {
 		try {
 			var byteBufferX = ByteBuffer.allocate(4);
