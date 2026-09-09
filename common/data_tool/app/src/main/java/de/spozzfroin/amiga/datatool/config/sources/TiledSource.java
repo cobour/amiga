@@ -220,12 +220,21 @@ class TiledSource extends AbstractSource {
 			var properties = this.getProperties(item);
 			var spawnAddToLevelYpos = Integer.parseInt(properties.get("spawn_add_to_level_ypos") != null ? //
 					properties.get("spawn_add_to_level_ypos") : "0"); // property is optional
-			levelYpos += spawnAddToLevelYpos;
 			var ypos = Integer.parseInt(properties.get("spawn_screen_ypos")); // property is obligatory
 			var movement = properties.get("movement"); // property is optional, but null is handled correctly
-			// if (Integer.parseInt(attributes.getNamedItem("id").getNodeValue()) == 16) {
-			spawnInfo.add(new EnemySpawnInfo(enemyType, xpos, ypos, levelYpos, movement));
-			// }
+			//
+			var spawnMultiCount = Integer.parseInt(properties.get("spawn_multi_count") != null ? //
+					properties.get("spawn_multi_count") : "0"); // property is optional
+			var spawnMultiDelay = Integer.parseInt(properties.get("spawn_multi_delay") != null ? //
+					properties.get("spawn_multi_delay") : "0"); // property is optional
+			//
+			spawnInfo.add(new EnemySpawnInfo(enemyType, xpos, ypos, levelYpos + spawnAddToLevelYpos, movement));
+			if (spawnMultiCount > 1) {
+				IntStream.range(1, spawnMultiCount).forEach(c -> {
+					spawnInfo.add(new EnemySpawnInfo(enemyType, xpos, ypos,
+							levelYpos + spawnAddToLevelYpos - (c * spawnMultiDelay), movement));
+				});
+			}
 		});
 		//
 		spawnInfo.sort(Comparator.comparing(EnemySpawnInfo::levelYpos));

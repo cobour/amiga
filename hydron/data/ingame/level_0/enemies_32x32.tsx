@@ -5,6 +5,8 @@
   <properties>
    <property name="movement" value="EMxx"/>
    <property name="spawn_add_to_level_ypos" type="int" value="0"/>
+   <property name="spawn_multi_count" type="int" value="0"/>
+   <property name="spawn_multi_delay" type="int" value="0"/>
    <property name="spawn_screen_ypos" type="int" value="0"/>
   </properties>
  </tile>
