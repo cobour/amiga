@@ -56,11 +56,11 @@ targetFiles:
     sources:      
       - filename: ingame/level_0/vision.mod
         id: MODS # MUST be the same in all levels
-      - filename: ingame/level_0/Moon_Enemy32xrotate_02b.png
+      - filename: ingame/level_0/Moon_Enemy32xrotate_02b_FIX.png
         id: E01N
         flattenedTileFormat: 32x32
         colorsLimit: 64
-      - filename: ingame/level_0/Moon_Enemy32xrotate_02b_hit.png
+      - filename: ingame/level_0/Moon_Enemy32xrotate_02b_hit_FIX.png
         id: E01H
         flattenedTileFormat: 32x32
         colorsLimit: 64
