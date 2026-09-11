@@ -249,7 +249,8 @@ coll_check_one_enemy:
 .bullet_removed:
 
   ; reduce hitpoints of enemy and check if enemy is destroyed or not
-  move.w     ig_player_bullet_damagepoints(a3),d0
+  move.l     ig_player_bullet_bullettype_pointer(a3),a3
+  move.w     ig_player_bullettype_damagepoints(a3),d0
   sub.w      d0,enemy_hitpoints(a0)
   tst.w      enemy_hitpoints(a0)
   ble.s      .enemy_destroyed

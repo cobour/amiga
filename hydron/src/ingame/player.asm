@@ -15,13 +15,13 @@ player_init:
   move.l     #"PLYR",d0
   bsr        datafiles_get_pointer
   move.l     df_idx_ptr_rawdata(a0),ig_om_player_gfx_ptr(a4)
-  clr.l      ig_om_player_anim_offset(a4)                                         ; clear once, after this move.b is sufficient
+  clr.l      ig_om_player_anim_offset(a4)                                                     ; clear once, after this move.b is sufficient
   move.b     #PlayerShipAnimCentered,ig_om_player_anim_offset+3(a4)
   lea.l      df_idx_metadata(a0),a0
   move.w     df_iff_width(a0),d0
   lsr.w      #3,d0
   move.w     d0,ig_om_player_gfx_width_bytes(a4)
-  move.l     #$00010000,ig_om_player_speed(a4)                                    ; alternatively move 1 and a half pixel per frame with #$00018000
+  move.l     #$00010000,ig_om_player_speed(a4)                                                ; alternatively move 1 and a half pixel per frame with #$00018000
   clr.l      ig_om_player_xpos(a4)
   clr.l      ig_om_player_ypos(a4)
   clr.l      ig_om_player_min_xpos(a4)
@@ -105,7 +105,7 @@ player_init:
 
   ; init bullet/firing values
   move.w     #PlayerFireDelay,ig_om_player_bullets_fire_delay(a4)
-  move.w     #PlayerFireDelay,ig_om_player_bullets_fire_delay_count(a4)           ; so bullet can be fired immediately
+  move.w     #PlayerFireDelay,ig_om_player_bullets_fire_delay_count(a4)                       ; so bullet can be fired immediately
 
   ; set sprite pointers in copperlist
   move.l     ig_om_buffer_one+ig_buffers_copperlist_pointer(a4),a0
@@ -121,19 +121,19 @@ player_init:
   lea.l      ig_cm_cl_reuse_sprites(a0),a1
   move.l     a3,d0
   add.l      #ig_player_sprite0,d0
-  move.w     d0,6(a1)                                                             ; SPR0PTL
+  move.w     d0,6(a1)                                                                         ; SPR0PTL
   swap       d0
-  move.w     d0,2(a1)                                                             ; SPR0PTH
+  move.w     d0,2(a1)                                                                         ; SPR0PTH
   move.l     a3,d0
   add.l      #ig_player_sprite1,d0
-  move.w     d0,22(a1)                                                            ; SPR1PTL
+  move.w     d0,22(a1)                                                                        ; SPR1PTL
   swap       d0
-  move.w     d0,18(a1)                                                            ; SPR1PTH
+  move.w     d0,18(a1)                                                                        ; SPR1PTH
   moveq.l    #0,d0
-  move.w     d0,10(a1)                                                            ; SPR0POS
-  move.w     d0,14(a1)                                                            ; SPR0CTL
-  move.w     d0,26(a1)                                                            ; SPR1POS
-  move.w     d0,30(a1)                                                            ; SPR1CTL
+  move.w     d0,10(a1)                                                                        ; SPR0POS
+  move.w     d0,14(a1)                                                                        ; SPR0CTL
+  move.w     d0,26(a1)                                                                        ; SPR1POS
+  move.w     d0,30(a1)                                                                        ; SPR1CTL
 
   ; external guns / satellites (playershots first when visible)
   ; sprites 2-3
@@ -248,7 +248,7 @@ player_update:
 .test_fire:
   move.l     d4,ig_om_player_xpos(a4)
   move.l     d5,ig_om_player_ypos(a4)
-  add.w      #1,ig_om_player_bullets_fire_delay_count(a4)                         ; increment fire delay counter
+  add.w      #1,ig_om_player_bullets_fire_delay_count(a4)                                     ; increment fire delay counter
   btst       #JsFire,d0
   beq.s      .test_end
   bsr        player_weapon_fire
@@ -265,7 +265,7 @@ player_update:
   add.w      #1,ig_om_player_centered_for_frames(a4)
   cmp.w      #PlayerShipAnimSwitchDelay/2,ig_om_player_centered_for_frames(a4)
   ble.s      .centered_soft_back
-  move.b     #PlayerShipAnimCentered,ig_om_player_anim_offset+3(a4)               ; default
+  move.b     #PlayerShipAnimCentered,ig_om_player_anim_offset+3(a4)                           ; default
   bra.s      .anim_chosen
 .centered_soft_back:
   cmp.b      #PlayerShipAnimHardLeft,ig_om_player_anim_offset+3(a4)
@@ -357,7 +357,7 @@ player_and_weapon_draw:
   ; TODO: draw satellites / side guns TO SPR0+SPR1 and SPR2+SPR3
   btst       #0,ig_om_player_no_hit_countdown(a4)
   bne.s      .do_not_draw_player_addons
-  nop                                                                             ; draw here
+  nop                                                                                         ; draw here
 .do_not_draw_player_addons:
 
   ; end of sprite data SPR0-SPR3    
@@ -374,8 +374,8 @@ player_and_weapon_draw:
   move.b     ig_om_player_no_hit_countdown(a4),d4
   btst       #0,d4
   bne.s      .do_not_draw_player_ship
-  move.w     ig_om_player_xpos(a4),d4                                             ; no fraction needed
-  move.w     ig_om_player_ypos(a4),d5                                             ; no fraction needed
+  move.w     ig_om_player_xpos(a4),d4                                                         ; no fraction needed
+  move.w     ig_om_player_ypos(a4),d5                                                         ; no fraction needed
   move.w     #PlayerShipHeight,d6
   bsr        .calc_pos_ctl
 
@@ -390,8 +390,8 @@ player_and_weapon_draw:
   move.l     a2,ig_om_player_sprite_4_work_pointer(a4)
   move.l     a3,ig_om_player_sprite_5_work_pointer(a4)
 
-  addq.w     #8,d1                                                                ; 6+7 are placed exactly to the right of 4+5
-  moveq.l    #2,d3                                                                ; 6+7 are placed exactly to the right of 4+5
+  addq.w     #8,d1                                                                            ; 6+7 are placed exactly to the right of 4+5
+  moveq.l    #2,d3                                                                            ; 6+7 are placed exactly to the right of 4+5
   add.l      ig_om_player_anim_offset(a4),d3
   move.l     ig_om_player_gfx_ptr(a4),a1
   move.l     ig_om_player_sprite_6_work_pointer(a4),a2
@@ -427,10 +427,10 @@ player_and_weapon_draw:
   ; control words
   move.w     d1,(a2)+
   move.w     d2,(a2)+
-  bset       #7,d2                                                                ; set attach bit
+  bset       #7,d2                                                                            ; set attach bit
   move.w     d1,(a3)+
   move.w     d2,(a3)+
-  bclr       #7,d2                                                                ; clear attach bit
+  bclr       #7,d2                                                                            ; clear attach bit
 
   ; bitmap data
   lea.l      (a1,d3.w),a1
@@ -466,24 +466,24 @@ player_and_weapon_draw:
   lsl.w      #8,d1
   move.w     d4,d0
   lsr.w      #1,d0
-  add.w      d0,d1                                                                ; SPRxPOS
+  add.w      d0,d1                                                                            ; SPRxPOS
   move.w     d5,d0
-  add.w      d6,d0                                                                ; vstop
+  add.w      d6,d0                                                                            ; vstop
   move.w     d0,d2
   and.w      #$00ff,d2
-  lsl.w      #8,d2                                                                ; SPRxCTL
+  lsl.w      #8,d2                                                                            ; SPRxCTL
 
   cmp.w      #$0100,d5
   blt.s      .no_v8_v_start
-  bset       #2,d2                                                                ; SPRxCTL
+  bset       #2,d2                                                                            ; SPRxCTL
 .no_v8_v_start: 
   cmp.w      #$0100,d0
   blt.s      .no_v8_v_stop
-  bset       #1,d2                                                                ; SPRxCTL
+  bset       #1,d2                                                                            ; SPRxCTL
 .no_v8_v_stop:
   btst       #0,d4
   beq.s      .no_h0_h_start
-  bset       #0,d2                                                                ; SPRxCTL
+  bset       #0,d2                                                                            ; SPRxCTL
 .no_h0_h_start:
   rts
 
@@ -501,13 +501,14 @@ player_and_weapon_draw:
   beq.s      .draw_bullets_stack_loop_next
   ; actually active bullet
   movem.l    d7/a0-a1,-(sp)
-  move.w     ig_player_bullet_xpos(a0),d4                                         ; no fraction needed
-  move.w     ig_player_bullet_ypos(a0),d5                                         ; no fraction needed
-  move.w     ig_player_bullet_height(a0),d6
+  move.l     ig_player_bullet_bullettype_pointer(a0),a1
+  move.w     ig_player_bullet_xpos(a0),d4                                                     ; no fraction needed
+  move.w     ig_player_bullet_ypos(a0),d5                                                     ; no fraction needed
+  move.w     ig_player_bullettype_height(a1),d6
   bsr        .calc_pos_ctl
-  move.l     ig_player_bullet_gfx_width_bytes(a0),d0
+  move.l     ig_player_bullettype_gfx_width_bytes(a1),d0
   move.w     ig_player_bullet_anim_offset(a0),d3
-  move.l     ig_player_bullet_gfx_pointer(a0),a1
+  move.l     ig_player_bullettype_gfx_pointer(a1),a1
   bsr        .write_control_words_and_gfx_to_sprite_data
   movem.l    (sp)+,d7/a0-a1
 .draw_bullets_stack_loop_next:
@@ -528,7 +529,7 @@ player_weapon_fire:
   bgt.s      .exit
 
   ; spawn new bullet
-  bsr        player_weapon_fire_simple                                            ; TODO: jsr to pointer when multiple weapons are available
+  bsr        player_weapon_fire_simple                                                        ; TODO: jsr to pointer when multiple weapons are available
 
   ; reset fire delay counter
   clr.w      ig_om_player_bullets_fire_delay_count(a4)
@@ -539,8 +540,8 @@ player_weapon_fire:
 
 player_weapon_update:
 
-  moveq.l    #-1,d5                                                               ; d5 = ig_om_coll_bullet_loop_counter
-  lea.l      ig_om_coll_bullet_lines(a4),a3                                       ; a3 = ig_om_coll_bullet_lines
+  moveq.l    #-1,d5                                                                           ; d5 = ig_om_coll_bullet_loop_counter
+  lea.l      ig_om_coll_bullet_lines(a4),a3                                                   ; a3 = ig_om_coll_bullet_lines
 
   ; update all bullet positions
   lea.l      ig_om_player_bullets_stack_0(a4),a0
@@ -572,43 +573,44 @@ player_weapon_update:
   tst.b      ig_player_bullet_active(a0)
   beq.s      .position_update_per_stack_loop_next
 
+  move.l     ig_player_bullet_bullettype_pointer(a0),a1
   ; move bullet
-  move.w     ig_player_bullet_xpos(a0),d2                                         ; d2 = old xpos
-  move.w     ig_player_bullet_ypos(a0),d3                                         ; d3 = old ypos
-  move.l     ig_player_bullet_speed_x(a0),d0
+  move.w     ig_player_bullet_xpos(a0),d2                                                     ; d2 = old xpos
+  move.w     ig_player_bullet_ypos(a0),d3                                                     ; d3 = old ypos
+  move.l     ig_player_bullettype_speed_x(a1),d0
   add.l      d0,ig_player_bullet_xpos(a0)
-  move.l     ig_player_bullet_speed_y(a0),d0
+  move.l     ig_player_bullettype_speed_y(a1),d0
   add.l      d0,ig_player_bullet_ypos(a0)
 
   ; add collision lines for bullet
-  move.w     ig_player_bullet_xpos(a0),d0                                         ; d0 = new xpos
-  move.w     ig_player_bullet_ypos(a0),d1                                         ; d1 = new ypos
-  add.w      ig_player_bullet_height(a0),d3
+  move.w     ig_player_bullet_xpos(a0),d0                                                     ; d0 = new xpos
+  move.w     ig_player_bullet_ypos(a0),d1                                                     ; d1 = new ypos
+  add.w      ig_player_bullettype_height(a1),d3
 
   ;    left line
-  move.w     d0,d4                                                                ; copy x1 (needed again for right line)
-  add.w      ig_player_bullet_line_left_xadd(a0),d4
-  move.w     d4,(a3)+                                                             ; coll_line_x1
-  move.w     d1,(a3)+                                                             ; coll_line_y1
-  move.w     d2,d4                                                                ; copy x2 (needed again for right line)
-  add.w      ig_player_bullet_line_left_xadd(a0),d4
-  move.w     d4,(a3)+                                                             ; coll_line_x2
-  move.w     d3,(a3)+                                                             ; coll_line_y2
-  move.l     a0,(a3)+                                                             ; coll_line_bullet_pointer
-  move.l     a2,(a3)+                                                             ; coll_line_bullet_stack_pointer
+  move.w     d0,d4                                                                            ; copy x1 (needed again for right line)
+  add.w      ig_player_bullettype_line_left_xadd(a1),d4
+  move.w     d4,(a3)+                                                                         ; coll_line_x1
+  move.w     d1,(a3)+                                                                         ; coll_line_y1
+  move.w     d2,d4                                                                            ; copy x2 (needed again for right line)
+  add.w      ig_player_bullettype_line_left_xadd(a1),d4
+  move.w     d4,(a3)+                                                                         ; coll_line_x2
+  move.w     d3,(a3)+                                                                         ; coll_line_y2
+  move.l     a0,(a3)+                                                                         ; coll_line_bullet_pointer
+  move.l     a2,(a3)+                                                                         ; coll_line_bullet_stack_pointer
 
   ;    right line
-  add.w      ig_player_bullet_line_right_xadd(a0),d0
-  move.w     d0,(a3)+                                                             ; coll_line_x1
-  move.w     d1,(a3)+                                                             ; coll_line_y1
-  add.w      ig_player_bullet_line_right_xadd(a0),d2
-  move.w     d2,(a3)+                                                             ; coll_line_x2
-  move.w     d3,(a3)+                                                             ; coll_line_y2
-  move.l     a0,(a3)+                                                             ; coll_line_bullet_pointer
-  move.l     a2,(a3)+                                                             ; coll_line_bullet_stack_pointer
+  add.w      ig_player_bullettype_line_right_xadd(a1),d0
+  move.w     d0,(a3)+                                                                         ; coll_line_x1
+  move.w     d1,(a3)+                                                                         ; coll_line_y1
+  add.w      ig_player_bullettype_line_right_xadd(a1),d2
+  move.w     d2,(a3)+                                                                         ; coll_line_x2
+  move.w     d3,(a3)+                                                                         ; coll_line_y2
+  move.l     a0,(a3)+                                                                         ; coll_line_bullet_pointer
+  move.l     a2,(a3)+                                                                         ; coll_line_bullet_stack_pointer
 
   ;    inc counter
-  addq.w     #2,d5                                                                ; ig_om_coll_bullet_loop_counter
+  addq.w     #2,d5                                                                            ; ig_om_coll_bullet_loop_counter
 
 .position_update_per_stack_loop_next:
   add.l      d6,a0
@@ -622,15 +624,16 @@ player_weapon_update:
   tst.l      d0
   beq.s      .bullet_still_visible_check_per_stack_loop_next
   move.l     d0,a1
+  move.l     ig_player_bullet_bullettype_pointer(a1),a2
   move.w     ig_player_bullet_xpos(a1),d0
-  cmp.w      ig_player_bullet_min_xpos(a1),d0
+  cmp.w      ig_player_bullettype_min_xpos(a2),d0
   blt.s      .bullet_still_visible_check_per_stack_loop_remove_bullet
-  cmp.w      ig_player_bullet_max_xpos(a1),d0
+  cmp.w      ig_player_bullettype_max_xpos(a2),d0
   bgt.s      .bullet_still_visible_check_per_stack_loop_remove_bullet
   move.w     ig_player_bullet_ypos(a1),d0
-  cmp.w      ig_player_bullet_min_ypos(a1),d0
+  cmp.w      ig_player_bullettype_min_ypos(a2),d0
   blt.s      .bullet_still_visible_check_per_stack_loop_remove_bullet
-  cmp.w      ig_player_bullet_max_ypos(a1),d0
+  cmp.w      ig_player_bullettype_max_ypos(a2),d0
   bgt.s      .bullet_still_visible_check_per_stack_loop_remove_bullet
   bra.s      .bullet_still_visible_check_per_stack_loop_next
 .bullet_still_visible_check_per_stack_loop_remove_bullet:
@@ -684,7 +687,7 @@ player_bullet_add_to_stack:
   rts
 
 .found_empty_slot:
-  move.l     a1,d6                                                                ; save a1 parameter
+  move.l     a1,d6                                                                            ; save a1 parameter
   ; move pointers up in sorted list
   moveq.l    #PlayerBulletsMaxCountStacked-2,d7
   move.l     a3,a1
@@ -695,79 +698,69 @@ player_bullet_add_to_stack:
   ; add pointer to sorted list
   move.l     a0,(a1)
 
-  ; init struct ig_player_bullet - MUST be changed accordingly when struct is changed
-  move.l     d6,a1                                                                ; restore a1 parameter
-  move.w     #$0100,(a0)+                                                         ; ig_player_bullet_active and ig_player_bullet_dummy
+  ; init struct ig_player_bullet
+  move.l     d6,a1                                                                            ; restore a1 parameter
+  move.w     #$0100,(a0)                                                                      ; ig_player_bullet_active and ig_player_bullet_dummy
+  move.l     a1,ig_player_bullet_bullettype_pointer(a0)
   move.l     ig_om_player_xpos(a4),d0
-  add.l      (a1)+,d0
-  move.l     d0,(a0)+                                                             ; ig_player_bullet_xpos
+  add.l      ig_player_bullettype_rel_xpos(a1),d0
+  move.l     d0,ig_player_bullet_xpos(a0)
   move.l     ig_om_player_ypos(a4),d0
-  add.l      (a1)+,d0
-  move.l     d0,(a0)+                                                             ; ig_player_bullet_ypos
-  move.w     (a1)+,(a0)+                                                          ; ig_player_bullet_damagepoints
-  move.l     (a1)+,(a0)+                                                          ; ig_player_bullet_speed_x
-  move.l     (a1)+,(a0)+                                                          ; ig_player_bullet_speed_y
-  move.w     (a1)+,(a0)+                                                          ; ig_player_bullet_line_left_xadd
-  move.w     (a1)+,(a0)+                                                          ; ig_player_bullet_line_right_xadd
-  move.w     (a1)+,(a0)+                                                          ; ig_player_bullet_min_xpos
-  move.w     (a1)+,(a0)+                                                          ; ig_player_bullet_max_xpos
-  move.w     (a1)+,(a0)+                                                          ; ig_player_bullet_min_ypos
-  move.w     (a1)+,(a0)+                                                          ; ig_player_bullet_max_ypos
-  move.w     (a1)+,(a0)+                                                          ; ig_player_bullet_height
-  move.l     (a1)+,(a0)+                                                          ; ig_player_bullet_gfx_pointer
-  move.l     (a1)+,(a0)+                                                          ; ig_player_bullet_gfx_width_bytes
-  move.w     (a1),(a0)                                                            ; ig_player_bullet_anim_offset
+  add.l      ig_player_bullettype_rel_ypos(a1),d0
+  move.l     d0,ig_player_bullet_ypos(a0)
+  move.w     ig_player_bullettype_initial_anim_offset(a1),ig_player_bullet_anim_offset(a0)
+
   rts
 
 ; must match struct ig_player_bullettype
 player_bullettype_simple_for_stack_0:
-  dc.w       0,0                                                                  ; xpos in screen coordinates as fixed-point 16/16 value relative to player position
-  dc.w       -10,0                                                                ; ypos in screen coordinates as fixed-point 16/16 value relative to player position
-  dc.w       1                                                                    ; damagepoints
-  dc.w       -4,0                                                                 ; xpos-add in screen coordinates as fixed-point 16/16 value
-  dc.w       -16,0                                                                ; ypos-add in screen coordinates as fixed-point 16/16 value
-  dc.w       5,8                                                                  ; xpos add for left/right collision detection line
-  dc.w       -15                                                                  ; minimum valid xpos of bullet as int value (no fraction), delete bullet when current xpos is lower than this value
-  dc.w       IgScreenWidth+1                                                      ; maximum valid xpos of bullet as int value (no fraction), delete bullet when current xpos is greater than this value
-  dc.w       -15                                                                  ; minimum valid ypos of bullet as int value (no fraction), delete bullet when current ypos is lower than this value
-  dc.w       IgScreenHeight+1                                                     ; maximum valid ypos of bullet as int value (no fraction), delete bullet when current ypos is greater than this value
-  dc.w       16                                                                   ; height of bullet in pixels
-  dc.l       0                                                                    ; pointer to raw gfx data
-  dc.l       0                                                                    ; width of source gfx in bytes
-  dc.w       12                                                                   ; initial anim step offset in raw gfx data in bytes
+  dc.w       0,0                                                                              ; xpos in screen coordinates as fixed-point 16/16 value relative to player position
+  dc.w       -10,0                                                                            ; ypos in screen coordinates as fixed-point 16/16 value relative to player position
+  dc.w       1                                                                                ; damagepoints
+  dc.w       -4,0                                                                             ; xpos-add in screen coordinates as fixed-point 16/16 value
+  dc.w       -16,0                                                                            ; ypos-add in screen coordinates as fixed-point 16/16 value
+  dc.w       5,8                                                                              ; xpos add for left/right collision detection line
+  dc.w       -15                                                                              ; minimum valid xpos of bullet as int value (no fraction), delete bullet when current xpos is lower than this value
+  dc.w       IgScreenWidth+1                                                                  ; maximum valid xpos of bullet as int value (no fraction), delete bullet when current xpos is greater than this value
+  dc.w       -15                                                                              ; minimum valid ypos of bullet as int value (no fraction), delete bullet when current ypos is lower than this value
+  dc.w       IgScreenHeight+1                                                                 ; maximum valid ypos of bullet as int value (no fraction), delete bullet when current ypos is greater than this value
+  dc.w       16                                                                               ; height of bullet in pixels
+  dc.l       0                                                                                ; pointer to raw gfx data
+  dc.l       0                                                                                ; width of source gfx in bytes
+  dc.w       12                                                                               ; initial anim step offset in raw gfx data in bytes
 
 ; must match struct ig_player_bullettype
 player_bullettype_simple_for_stack_1:
-  dc.w       8,0                                                                  ; xpos in screen coordinates as fixed-point 16/16 value relative to player position
-  dc.w       -10,0                                                                ; ypos in screen coordinates as fixed-point 16/16 value relative to player position
-  dc.w       1                                                                    ; damagepoints
-  dc.w       0,0                                                                  ; xpos-add in screen coordinates as fixed-point 16/16 value
-  dc.w       -16,0                                                                ; ypos-add in screen coordinates as fixed-point 16/16 value
-  dc.w       6,9                                                                  ; xpos add for left/right collision detection line
-  dc.w       -15                                                                  ; minimum valid xpos of bullet as int value (no fraction), delete bullet when current xpos is lower than this value
-  dc.w       IgScreenWidth+1                                                      ; maximum valid xpos of bullet as int value (no fraction), delete bullet when current xpos is greater than this value
-  dc.w       -15                                                                  ; minimum valid ypos of bullet as int value (no fraction), delete bullet when current ypos is lower than this value
-  dc.w       IgScreenHeight+1                                                     ; maximum valid ypos of bullet as int value (no fraction), delete bullet when current ypos is greater than this value
-  dc.w       16                                                                   ; height of bullet in pixels
-  dc.l       0                                                                    ; pointer to raw gfx data
-  dc.l       0                                                                    ; width of source gfx in bytes
-  dc.w       0                                                                    ; initial anim step offset in raw gfx data in bytes
+  dc.w       8,0                                                                              ; xpos in screen coordinates as fixed-point 16/16 value relative to player position
+  dc.w       -10,0                                                                            ; ypos in screen coordinates as fixed-point 16/16 value relative to player position
+  dc.w       1                                                                                ; damagepoints
+  dc.w       0,0                                                                              ; xpos-add in screen coordinates as fixed-point 16/16 value
+  dc.w       -16,0                                                                            ; ypos-add in screen coordinates as fixed-point 16/16 value
+  dc.w       6,9                                                                              ; xpos add for left/right collision detection line
+  dc.w       -15                                                                              ; minimum valid xpos of bullet as int value (no fraction), delete bullet when current xpos is lower than this value
+  dc.w       IgScreenWidth+1                                                                  ; maximum valid xpos of bullet as int value (no fraction), delete bullet when current xpos is greater than this value
+  dc.w       -15                                                                              ; minimum valid ypos of bullet as int value (no fraction), delete bullet when current ypos is lower than this value
+  dc.w       IgScreenHeight+1                                                                 ; maximum valid ypos of bullet as int value (no fraction), delete bullet when current ypos is greater than this value
+  dc.w       16                                                                               ; height of bullet in pixels
+  dc.l       0                                                                                ; pointer to raw gfx data
+  dc.l       0                                                                                ; width of source gfx in bytes
+  dc.w       0                                                                                ; initial anim step offset in raw gfx data in bytes
 
 ; must match struct ig_player_bullettype
 player_bullettype_simple_for_stack_2:
-  dc.w       16,0                                                                 ; xpos in screen coordinates as fixed-point 16/16 value relative to player position
-  dc.w       -10,0                                                                ; ypos in screen coordinates as fixed-point 16/16 value relative to player position
-  dc.w       1                                                                    ; damagepoints
-  dc.w       4,0                                                                  ; xpos-add in screen coordinates as fixed-point 16/16 value
-  dc.w       -16,0                                                                ; ypos-add in screen coordinates as fixed-point 16/16 value
-  dc.w       7,10                                                                 ; xpos add for left/right collision detection line
-  dc.w       -15                                                                  ; minimum valid xpos of bullet as int value (no fraction), delete bullet when current xpos is lower than this value
-  dc.w       IgScreenWidth+1                                                      ; maximum valid xpos of bullet as int value (no fraction), delete bullet when current xpos is greater than this value
-  dc.w       -15                                                                  ; minimum valid ypos of bullet as int value (no fraction), delete bullet when current ypos is lower than this value
-  dc.w       IgScreenHeight+1                                                     ; maximum valid ypos of bullet as int value (no fraction), delete bullet when current ypos is greater than this value
-  dc.w       16                                                                   ; height of bullet in pixels
-  dc.l       0                                                                    ; pointer to raw gfx data
-  dc.l       0                                                                    ; width of source gfx in bytes
-  dc.w       6                                                                    ; initial anim step offset in raw gfx data in bytes
+  dc.w       16,0                                                                             ; xpos in screen coordinates as fixed-point 16/16 value relative to player position
+  dc.w       -10,0                                                                            ; ypos in screen coordinates as fixed-point 16/16 value relative to player position
+  dc.w       1                                                                                ; damagepoints
+  dc.w       4,0                                                                              ; xpos-add in screen coordinates as fixed-point 16/16 value
+  dc.w       -16,0                                                                            ; ypos-add in screen coordinates as fixed-point 16/16 value
+  dc.w       7,10                                                                             ; xpos add for left/right collision detection line
+  dc.w       -15                                                                              ; minimum valid xpos of bullet as int value (no fraction), delete bullet when current xpos is lower than this value
+  dc.w       IgScreenWidth+1                                                                  ; maximum valid xpos of bullet as int value (no fraction), delete bullet when current xpos is greater than this value
+  dc.w       -15                                                                              ; minimum valid ypos of bullet as int value (no fraction), delete bullet when current ypos is lower than this value
+  dc.w       IgScreenHeight+1                                                                 ; maximum valid ypos of bullet as int value (no fraction), delete bullet when current ypos is greater than this value
+  dc.w       16                                                                               ; height of bullet in pixels
+  dc.l       0                                                                                ; pointer to raw gfx data
+  dc.l       0                                                                                ; width of source gfx in bytes
+  dc.w       6                                                                                ; initial anim step offset in raw gfx data in bytes
 
-  endif                                                                           ; ifnd INGAME_PLAYER_ASM
+  endif                                                                                       ; ifnd INGAME_PLAYER_ASM

@@ -41,7 +41,7 @@ ig_player_sprite6:                         rs.l       ((1+PlayerBulletsMaxHeight
 ig_player_sprite7:                         rs.l       ((1+PlayerBulletsMaxHeight)*PlayerBulletsMaxCountStacked)+1+PlayerShipHeight+1    ; player ship / player bullets
 ig_player_sprite_sizeof:                   rs.b       0
 
-; struct holding metadata for bullets of a specific weapon type - each change MUST be reflected in descriptors in player.asm AND player_bullet_add_to_stack
+; struct holding metadata for bullets of a specific weapon type - each change MUST be reflected in descriptors in player.asm
                                            rsreset
 ig_player_bullettype_rel_xpos:             rs.l       1                                                                                 ; xpos in screen coordinates as fixed-point 16/16 value relative to player position
 ig_player_bullettype_rel_ypos:             rs.l       1                                                                                 ; ypos in screen coordinates as fixed-point 16/16 value relative to player position
@@ -64,23 +64,10 @@ ig_player_bullettype_sizeof:               rs.b       0
                                            rsreset
 ig_player_bullet_active:                   rs.b       1                                                                                 ; boolean
 ig_player_bullet_dummy:                    rs.b       1
+ig_player_bullet_bullettype_pointer:       rs.l       1                                                                                 ; pointer to bullettype struct
 ig_player_bullet_xpos:                     rs.l       1                                                                                 ; xpos in screen coordinates as fixed-point 16/16 value
 ig_player_bullet_ypos:                     rs.l       1                                                                                 ; ypos in screen coordinates as fixed-point 16/16 value
-; values must match ig_player_bullettype_xxx - begin
-ig_player_bullet_damagepoints:             rs.w       1                                                                                 ; number of points enemy hitpoints are reduced when being hit by this bullettype
-ig_player_bullet_speed_x:                  rs.l       1                                                                                 ; xpos-add in screen coordinates as fixed-point 16/16 value
-ig_player_bullet_speed_y:                  rs.l       1                                                                                 ; ypos-add in screen coordinates as fixed-point 16/16 value
-ig_player_bullet_line_left_xadd:           rs.w       1                                                                                 ; value that is added to the xpos for the left collision detection line
-ig_player_bullet_line_right_xadd:          rs.w       1                                                                                 ; value that is added to the xpos for the right collision detection line
-ig_player_bullet_min_xpos:                 rs.w       1                                                                                 ; minimum valid xpos of bullet as int value (no fraction), delete bullet when current xpos is lower than this value
-ig_player_bullet_max_xpos:                 rs.w       1                                                                                 ; maximum valid xpos of bullet as int value (no fraction), delete bullet when current xpos is greater than this value
-ig_player_bullet_min_ypos:                 rs.w       1                                                                                 ; minimum valid ypos of bullet as int value (no fraction), delete bullet when current ypos is lower than this value
-ig_player_bullet_max_ypos:                 rs.w       1                                                                                 ; maximum valid ypos of bullet as int value (no fraction), delete bullet when current ypos is greater than this value
-ig_player_bullet_height:                   rs.w       1                                                                                 ; height of bullet in pixels
-ig_player_bullet_gfx_pointer:              rs.l       1                                                                                 ; pointer to raw gfx data
-ig_player_bullet_gfx_width_bytes:          rs.l       1                                                                                 ; width of source gfx in bytes
 ig_player_bullet_anim_offset:              rs.w       1                                                                                 ; initial anim step offset in raw gfx data in bytes
-; values must match ig_player_bullettype_xxx - end
 ig_player_bullet_sizeof:                   rs.b       0
 
 
