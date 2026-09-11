@@ -7,14 +7,21 @@ profile = "A500"
 model = "68000"
 
 [chipset]
-revision = "OCS"
+revision = "ECS"
 
 [memory]
-chip = "512K"
-slow = "512K"
+chip = "2M"
 
-[floppy.df0]
+[floppy]
+drives = 2
+
+[floppy.df1]
 path = "/Users/frank/Development/projects/amiga/hydron/dist/Hydron.adf"
 
 [input]
 joystick = "keyboard"
+
+[[filesys]]
+path = "/Users/frank/Development/projects/amiga/hydron/uae/dh0"
+volume = "dh0"
+bootpri = -128

@@ -5,6 +5,26 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "type": "copperline",
+            "request": "launch",
+            "name": "Run WHDLoad Debug Copperline",
+            "program": "${workspaceFolder}/uae/dh0/Hydron",
+            "entryPoint": "main_code_start",
+            "stopOnEntry": false,
+            "config": "${workspaceFolder}/copperline/Hydron-A500-debug.toml",
+            "preLaunchTask": "Build WHDLoad Debug"
+        },
+        {
+            "type": "copperline",
+            "request": "launch",
+            "name": "Run Floppy Debug Copperline",
+            "program": "${workspaceFolder}/uae/dh0/Hydron",
+            "entryPoint": "main_code_start",
+            "stopOnEntry": false,
+            "config": "${workspaceFolder}/copperline/Hydron-A500-debug.toml",
+            "preLaunchTask": "Build Floppy Debug"
+        },
+        {
             "type": "amiga-assembly",
             "request": "launch",
             "name": "Run WHDLoad Debug",
