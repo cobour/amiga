@@ -8,6 +8,7 @@ import java.util.List;
 
 import de.spozzfroin.amiga.datatool.config.Config;
 import de.spozzfroin.amiga.datatool.config.IndexEntry;
+import de.spozzfroin.amiga.datatool.config.TargetFile;
 
 public interface Source {
 
@@ -39,6 +40,10 @@ public interface Source {
 			return this.id.equals(otherId);
 		}
 	}
+
+	TargetFile getParent();
+
+	String getFilename();
 
 	ID getId();
 

@@ -64,6 +64,34 @@ class TargetFileFactory {
 			targetFile.setRelatedFiles(null);
 		}
 		//
+		if (parameter.containsKey("memoryUsageLabel")) {
+			var memoryUsageLabel = (String) parameter.get("memoryUsageLabel");
+			targetFile.setMemoryUsageLabel(memoryUsageLabel);
+		} else {
+			targetFile.setMemoryUsageLabel(null);
+		}
+		//
+		if (parameter.containsKey("memoryUsageCmStruct")) {
+			var memoryUsageCmStruct = (String) parameter.get("memoryUsageCmStruct");
+			targetFile.setMemoryUsageCmStruct(memoryUsageCmStruct);
+		} else {
+			targetFile.setMemoryUsageCmStruct(null);
+		}
+		//
+		if (parameter.containsKey("memoryUsageOmStruct")) {
+			var memoryUsageOmStruct = (String) parameter.get("memoryUsageOmStruct");
+			targetFile.setMemoryUsageOmStruct(memoryUsageOmStruct);
+		} else {
+			targetFile.setMemoryUsageOmStruct(null);
+		}
+		//
+		if (parameter.containsKey("memoryUsageCodeFile")) {
+			var memoryUsageCodeFile = (String) parameter.get("memoryUsageCodeFile");
+			targetFile.setMemoryUsageCodeFile(memoryUsageCodeFile);
+		} else {
+			targetFile.setMemoryUsageCodeFile(null);
+		}
+		//
 		var sourceParameters = (List<LinkedHashMap<String, Object>>) parameter.get("sources");
 		var sources = sourceParameters.stream().map(sfp -> this.sourceFactory.create(targetFile, sfp)).toList();
 		targetFile.setSources(sources);

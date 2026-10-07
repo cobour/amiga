@@ -2,9 +2,10 @@
 rm -rf dist/*.adf
 rm -rf build/*.o
 rm -rf build/*.bb
-rm -rf data/converted/*.o
-rm -rf data/converted/*.dat
-rm -rf data/converted/*.dat.tmp
+rm -rf data/_converted/*.asm
+rm -rf data/_converted/*.o
+rm -rf data/_converted/*.dat
+rm -rf data/_converted/*.dat.tmp
 rm -rf uae/dh0/Hydron
 rm -rf uae/dh0/*.dat
 rm -rf uae/dh0/*.uaem

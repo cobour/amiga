@@ -69,6 +69,10 @@ public class Config {
 		this.baseFolder = theBaseFolder.endsWith("/") ? theBaseFolder : theBaseFolder + "/";
 	}
 
+	public String getBasefolder() {
+		return this.baseFolder;
+	}
+
 	public List<DiskimageFile> getDiskimageFiles() {
 		return this.diskimageFiles;
 	}

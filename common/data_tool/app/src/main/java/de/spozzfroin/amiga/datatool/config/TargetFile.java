@@ -33,6 +33,12 @@ public class TargetFile {
 	private long sizeRawDataFile = -1;
 	private long sizeGzippedDataFile = -1;
 
+	private long indexSize = 0;
+	private String memoryUsageLabel;
+	private String memoryUsageCmStruct;
+	private String memoryUsageOmStruct;
+	private String memoryUsageCodeFile;
+
 	public void readAllSourceData(Config config) throws Exception {
 		LOG.divider();
 		LOG.print(String.format("reading and converting all source data from target file \"%s\"", this.filename));
@@ -55,7 +61,7 @@ public class TargetFile {
 		try (FileOutputStream data = new FileOutputStream(this.getDataFile(config, true).toFile())) {
 			if (this.hasIndex()) {
 				var index = new TargetFileIndex(this);
-				index.write(data);
+				index.write(config, data);
 			}
 			for (var sf : this.sources) {
 				sf.writeRawData(config, data);
@@ -85,11 +91,11 @@ public class TargetFile {
 	}
 
 	long calcSize(TargetFileIndex index) {
-		long indexSize = 0;
+		this.indexSize = 0;
 		if (this.hasIndex()) {
-			indexSize = index.calcIndexSize();
+			this.indexSize = index.calcIndexSize();
 		}
-		AtomicLong size = new AtomicLong(indexSize);
+		AtomicLong size = new AtomicLong(this.indexSize);
 		this.sources.stream().forEach(s -> size.addAndGet(s.length()));
 		return size.get();
 	}
@@ -222,5 +228,41 @@ public class TargetFile {
 
 	void setRelatedParent(TargetFile theRelatedParent) {
 		this.relatedParent = theRelatedParent;
+	}
+
+	long getIndexSize() {
+		return this.indexSize;
+	}
+
+	String getMemoryUsageLabel() {
+		return this.memoryUsageLabel;
+	}
+
+	void setMemoryUsageLabel(String theMemoryUsageLabel) {
+		this.memoryUsageLabel = theMemoryUsageLabel;
+	}
+
+	String getMemoryUsageCmStruct() {
+		return this.memoryUsageCmStruct;
+	}
+
+	void setMemoryUsageCmStruct(String theMemoryUsageCmStruct) {
+		this.memoryUsageCmStruct = theMemoryUsageCmStruct;
+	}
+
+	String getMemoryUsageOmStruct() {
+		return this.memoryUsageOmStruct;
+	}
+
+	void setMemoryUsageOmStruct(String theMemoryUsageOmStruct) {
+		this.memoryUsageOmStruct = theMemoryUsageOmStruct;
+	}
+
+	String getMemoryUsageCodeFile() {
+		return this.memoryUsageCodeFile;
+	}
+
+	void setMemoryUsageCodeFile(String theMemoryUsageCodeFile) {
+		this.memoryUsageCodeFile = theMemoryUsageCodeFile;
 	}
 }

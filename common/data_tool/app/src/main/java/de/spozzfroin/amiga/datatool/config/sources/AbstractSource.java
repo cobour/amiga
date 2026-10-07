@@ -17,11 +17,13 @@ abstract class AbstractSource implements Source {
 		this.parent = theParent;
 	}
 
-	protected TargetFile getParent() {
+	@Override
+	public TargetFile getParent() {
 		return this.parent;
 	}
 
-	protected String getFilename() {
+	@Override
+	public String getFilename() {
 		return this.filename;
 	}
 
@@ -29,6 +31,7 @@ abstract class AbstractSource implements Source {
 		this.filename = theFilename;
 	}
 
+	@Override
 	public ID getId() {
 		return this.id;
 	}

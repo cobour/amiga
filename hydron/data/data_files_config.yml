@@ -114,6 +114,10 @@ targetFiles:
       - F100
       - F001
       - F000
+    memoryUsageLabel: level.01
+    memoryUsageCmStruct: ig_cm_sizeof
+    memoryUsageOmStruct: ig_om_sizeof
+    memoryUsageCodeFile: C000
     sources:
       - filename: ingame/level_0/vision.mod
         id: MODP # MUST be the same in all levels

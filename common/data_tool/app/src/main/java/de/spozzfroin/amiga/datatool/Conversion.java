@@ -14,14 +14,14 @@ class Conversion {
 		LOG.print("*******************************");
 		LOG.print("***** starting conversion *****");
 		LOG.print("*******************************");
-		// normal data-files
-		this.readAllSourceData(config, false);
-		this.calcAllAdditionalData(config, false);
-		this.writeAllRawData(config, false);
 		// code-files
 		this.readAllSourceData(config, true);
 		this.calcAllAdditionalData(config, true);
 		this.writeAllRawData(config, true);
+		// normal data-files
+		this.readAllSourceData(config, false);
+		this.calcAllAdditionalData(config, false);
+		this.writeAllRawData(config, false);
 		//
 		this.writeAllDiskimageFiles(config);
 	}
