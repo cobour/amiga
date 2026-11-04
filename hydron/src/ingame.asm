@@ -9,33 +9,22 @@ INGAME_ASM equ 1
 ; a5 - chip mem pointer
 ig_start:
 
-; load and inflate files
+; load and inflate files (MUST be first to do here)
   bsr        .load_datafiles
   tst.l      d0
   bne        .error
 
   SETPTRS
 
+  moveq.l    #0,d0
   ; REMOVE ME - test values
   move.b     #$03,c_om_lives(a4)
   move.l     #$000000,c_om_score(a4)
   move.l     #$000100,c_om_hiscore(a4)
+  ;move.l     #1024,d0                                   ; 12800 is max for first level
   ; REMOVE ME - test values
-
-  clr.b      ig_om_end_mainloop(a4)
-  clr.b      ig_om_trigger_fade_out_countdown(a4)
-
-  bsr        buffers_init                               ; MUST be called FIRST, because sets vars needed by other inits
-  bsr        panel_init
-  bsr        player_init
-  bsr        background_init
-  bsr        fade_ingame_init
-  bsr        bob_init
-  bsr        enemies_init
-  bsr        explosions_init
-  bsr        coll_init
-  bsr        ctrl_take_system
-  bsr        .init_music
+  clr.b      ig_om_initial_init_done(a4)
+  bsr        ig_init
 
 .main_loop:
   tst.b      ig_om_end_mainloop(a4)
@@ -91,6 +80,61 @@ ig_start:
 .error:
   rts
 
+.load_datafiles:
+  move.l     #"F101",d1                                 ; TODO: table with level number -> file id
+  move.l     chip_mem_ptr(pc),d6
+  add.l      #ig_cm_framebuffer_one+15000,d6
+  move.l     other_mem_ptr(pc),a0
+  add.l      #ig_om_datfile,a0
+  move.l     chip_mem_ptr(pc),d7
+  add.l      #ig_cm_framebuffer_one,d7
+  move.l     chip_mem_ptr(pc),a1
+  add.l      #ig_cm_datfile,a1
+  bra        datafiles_load_and_unzip                   ; implicit rts
+
+; in:
+;   d0 - value for ig_om_background_level_ypos or zero for beginning of level
+ig_init:
+  clr.b      ig_om_end_mainloop(a4)
+  clr.b      ig_om_trigger_fade_out_countdown(a4)
+
+  ; first init or not?
+  tst.b      ig_om_initial_init_done(a4)
+  bne.s      .reset_levelpos
+
+  move.l     d0,-(sp)
+  bsr        buffers_init                               ; MUST be called FIRST, because sets vars needed by other inits
+  bsr        panel_init
+  bsr        player_init
+  move.l     (sp)+,d0
+  bsr        background_init
+  bsr        fade_ingame_init
+  bsr        bob_init
+  bsr        enemies_init
+  bsr        enemies_fast_forward
+  bsr        enemies_spawn                              ; first spawn check, maybe enemies are there at the very beginning
+  bsr        explosions_init
+  bsr        coll_init
+  bsr        ctrl_take_system
+  bsr        .init_music
+
+  move.b     #1,ig_om_initial_init_done(a4)
+  rts
+
+.reset_levelpos:
+  move.l     d0,-(sp)
+  bsr        buffers_init                               ; MUST be called FIRST, because sets vars needed by other inits
+  bsr        panel_init
+  bsr        player_init
+  move.l     (sp)+,d0
+  bsr        background_reset
+  bsr        fade_ingame_init
+  bsr        bob_init
+  bsr        enemies_fast_forward
+  bsr        enemies_spawn                              ; first spawn check, maybe enemies are there at the very beginning
+  bsr        explosions_init
+  bra        coll_init                                  ; implicit rts
+
 .init_music:
   move.l     #"MODS",d0
   bsr        datafiles_get_pointer
@@ -103,17 +147,5 @@ ig_start:
   lea.l      _mt_Enable(pc),a0
   move.b     #1,(a0)
   rts
-
-.load_datafiles:
-  move.l     #"F101",d1                                 ; TODO: table with level number -> file id
-  move.l     chip_mem_ptr(pc),d6
-  add.l      #ig_cm_framebuffer_one+15000,d6
-  move.l     other_mem_ptr(pc),a0
-  add.l      #ig_om_datfile,a0
-  move.l     chip_mem_ptr(pc),d7
-  add.l      #ig_cm_framebuffer_one,d7
-  move.l     chip_mem_ptr(pc),a1
-  add.l      #ig_cm_datfile,a1
-  bra        datafiles_load_and_unzip                   ; implicit rts
 
   endif                                                 ; ifnd INGAME_ASM

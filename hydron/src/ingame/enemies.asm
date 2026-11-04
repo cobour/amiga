@@ -34,6 +34,7 @@ enemies_init:
   move.l     df_tld_enm_rawsize(a0),d1
   add.l      d0,a1
   move.l     a1,ig_om_enemies_spawn_data_pointer(a4)
+  move.l     a1,ig_om_enemies_spawn_data_pointer_initial(a4)
   add.l      d1,a1
   move.l     a1,ig_om_enemies_spawn_data_end_pointer(a4)
 
@@ -81,10 +82,7 @@ enemies_init:
   lea.l      df_tld_enm_sizeof(a1),a1
   bra.s      .init_types_loop
 .init_types_loop_end:
-
-  ; first spawn check, maybe enemies are there at the very beginning
-  bsr.s      enemies_spawn
-
+ 
   ; init finished
   rts
 
@@ -231,6 +229,24 @@ enemies_draw:
   dbf        d7,.draw_loop
 
   move.l     chip_mem_ptr(pc),a5
+  rts
+
+; skip spawn info structs that are not needed according to ig_om_background_level_ypos
+enemies_fast_forward:
+  move.l     ig_om_background_level_ypos(a4),d1
+  move.l     ig_om_enemies_spawn_data_pointer_initial(a4),a1
+  move.l     ig_om_enemies_spawn_data_end_pointer(a4),d7
+.skip_spawn_info_loop:
+  cmp.l      a1,d7
+  beq.s      .exit
+  move.l     df_tld_enm_level_ypos(a1),d0
+  cmp.l      d0,d1
+  bge.s      .exit
+  lea.l      df_tld_enm_sizeof(a1),a1
+  bra.s      .skip_spawn_info_loop
+
+.exit:
+  move.l     a1,ig_om_enemies_spawn_data_pointer(a4)
   rts
 
   endif                                                               ; ifnd ENEMIES_ASM

@@ -49,11 +49,11 @@
 | description | size in bytes |
 | --- | --- |
 | stack | 16384 |
-| code | 26384 |
-| om struct | 7622 |
+| code | 26550 |
+| om struct | 7636 |
 | datafiles | 130934 |
-| total | 181324 |
-| free | 342964 |
+| total | 181504 |
+| free | 342784 |
 
 # info
-generated at 2026-10-07T17:11:37.120Z UTC
+generated at 2026-11-04T12:54:11.296Z UTC

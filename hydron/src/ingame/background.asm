@@ -3,7 +3,11 @@ INGAME_BACKGROUND_ASM equ 1
 
   include    "src/ingame.i"
 
+; in:
+;   d0 - value for ig_om_background_level_ypos or zero for beginning of level
 background_init:
+  move.l     d0,-(sp)
+
   ; init ranges
   clr.w      ig_om_background_range_1_row_start(a4)
   move.w     #IgScreenHeight-1,ig_om_background_range_1_row_end(a4)
@@ -28,14 +32,57 @@ background_init:
   move.l     #"MAPT",d0
   bsr        datafiles_get_pointer
   move.l     df_idx_ptr_rawdata(a0),ig_om_background_level_data_pointer(a4)
+  move.l     df_idx_ptr_rawdata(a0),ig_om_background_level_data_pointer_initial(a4)
   lea.l      df_idx_metadata(a0),a0
   move.w     df_tld_plf_height(a0),d0
   mulu       df_tld_plf_tile_height(a0),d0
   move.l     d0,ig_om_background_level_ypos(a4)
+  move.l     d0,ig_om_background_level_ypos_initial(a4)
   move.l     df_tld_plf_rawsize(a0),d0
   add.l      ig_om_background_level_data_pointer(a4),d0
   move.l     d0,ig_om_background_level_data_end_pointer(a4)
 
+  ; if other starting position needs to be selected, call background_reset, normal init otherwise
+  move.l     (sp)+,d0
+  tst.l      d0
+  beq.s      .beginning_of_level
+  bsr.s      background_reset
+  bra.s      .set_metadata
+
+.beginning_of_level:
+  bsr.s      background_init_buffers
+
+.set_metadata:
+  ; set starting values and exit
+  move.w     #32,ig_om_background_first_visible_line(a4)
+  move.w     #32*IgScreenWidthBytes*IgScreenBitPlanes,ig_om_background_first_visible_offset(a4)
+  move.b     #1,ig_om_background_do_scroll(a4)
+  clr.b      ig_om_background_stop_scroll_count(a4)
+  clr.w      ig_om_background_fill_row_offset(a4)
+  clr.w      ig_om_background_fill_column_offset(a4)
+  clr.l      ig_om_background_copperwait_split(a4)
+  clr.b      ig_om_background_last_row_countdown(a4)
+  rts
+
+; in:
+;   d0 - value for ig_om_background_level_ypos
+background_reset:
+  ; set ig_om_background_level_ypos
+  and.l      #$fffffff0,d0                                                                         ; so result is divisible by 16 (each row of tiles is 16 pixels high)
+  move.l     d0,ig_om_background_level_ypos(a4)
+
+  ; set ig_om_background_level_data_pointer
+  move.l     ig_om_background_level_ypos_initial(a4),d1
+  sub.l      d0,d1                                                                                 ; d1 = number of pixel-rows to skip
+  lsl.l      #1,d1                                                                                 ; d1 = number of bytes of level data to skip (16 pixels are one row of tiles and one row of tiles has 32 byte of data, which is 2 bytes per tile)
+  add.l      d1,ig_om_background_level_data_pointer(a4)
+
+  ; fall-through to background_init_buffers
+
+; INTERNAL
+; ig_om_background_level_data_pointer MUST   be set before
+; ig_om_background_level_ypos         SHOULD be set before (for consistency)
+background_init_buffers:
   ; draw to third buffer
   move.l     ig_om_background_level_data_pointer(a4),a0
   move.l     ig_om_buffer_three(a4),d1
@@ -109,15 +156,6 @@ background_init:
   move.l     (a0)+,(a1)+
   dbf        d7,.bi_copy_two_loop
 
-  ; set starting values and exit
-  move.w     #32,ig_om_background_first_visible_line(a4)
-  move.w     #32*IgScreenWidthBytes*IgScreenBitPlanes,ig_om_background_first_visible_offset(a4)
-  move.b     #1,ig_om_background_do_scroll(a4)
-  clr.b      ig_om_background_stop_scroll_count(a4)
-  clr.w      ig_om_background_fill_row_offset(a4)
-  clr.w      ig_om_background_fill_column_offset(a4)
-  clr.l      ig_om_background_copperwait_split(a4)
-  clr.b      ig_om_background_last_row_countdown(a4)
   rts
 
 background_pause_scroll:
