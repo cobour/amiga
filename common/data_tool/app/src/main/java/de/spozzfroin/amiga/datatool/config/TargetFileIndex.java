@@ -8,8 +8,6 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.time.Instant;
-import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -250,10 +248,6 @@ class TargetFileIndex {
 			mu.newLine();
 			mu.append(String.format("| free | %d |", omFree));
 			mu.newLine();
-			mu.newLine();
-			mu.append("# info");
-			mu.newLine();
-			mu.append(String.format("generated at %s UTC", Instant.now().truncatedTo(ChronoUnit.MILLIS)));
 		}
 	}
 }
