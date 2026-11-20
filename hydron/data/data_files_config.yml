@@ -65,6 +65,15 @@ targetFiles:
         flattenedTileFormat: 32x32
         colorsLimit: 64
         withMask: false
+      - filename: ingame/level_0/Moon_Enemy_16x_rotate_PLACEHOLDER.png
+        id: E02N
+        flattenedTileFormat: 16x16
+        colorsLimit: 64
+      - filename: ingame/level_0/Moon_Enemy_16x_rotate_hit_PLACEHOLDER.png
+        id: E02H
+        flattenedTileFormat: 16x16
+        colorsLimit: 64
+        withMask: false
 
   - filename: F100
     description: ingame_other_common
@@ -165,6 +174,22 @@ targetFiles:
           - 4
           - 28
           - 28
+      - filename: .bobtype
+        id: BT01
+        gfxId: E02N
+        gfxHitId: E02H
+        width: 16
+        height: 16
+      - filename: .enemytype
+        id: ET01
+        bobtypeId: BT01
+        hitpoints: 2
+        score: 5
+        boundingBox:
+          - 2
+          - 2
+          - 14
+          - 14
 
 diskimageFiles:
   - filename: Hydron.adf

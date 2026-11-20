@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.12.2" orientation="orthogonal" renderorder="right-down" width="16" height="800" tilewidth="16" tileheight="16" infinite="0" nextlayerid="3" nextobjectid="4">
+<map version="1.10" tiledversion="1.12.2" orientation="orthogonal" renderorder="right-down" width="16" height="800" tilewidth="16" tileheight="16" infinite="0" nextlayerid="3" nextobjectid="5">
  <tileset firstgid="1" source="Hydron_Tiles_01.tsx"/>
  <tileset firstgid="449" source="enemies_32x32.tsx"/>
+ <tileset firstgid="513" source="enemies_16x16.tsx"/>
  <layer id="1" name="tiles layer" width="16" height="800">
   <data encoding="csv">
 102,103,78,107,108,439,106,132,78,75,150,107,108,331,65,75,
@@ -831,6 +832,15 @@
     <property name="spawn_multi_count" type="int" value="12"/>
     <property name="spawn_multi_delay" type="int" value="70"/>
     <property name="spawn_screen_ypos" type="int" value="256"/>
+   </properties>
+  </object>
+  <object id="4" type="ET01" gid="513" x="-19" y="10400" width="16" height="16">
+   <properties>
+    <property name="movement" value="EM01"/>
+    <property name="spawn_add_to_level_ypos" type="int" value="200"/>
+    <property name="spawn_multi_count" type="int" value="12"/>
+    <property name="spawn_multi_delay" type="int" value="18"/>
+    <property name="spawn_screen_ypos" type="int" value="0"/>
    </properties>
   </object>
  </objectgroup>
